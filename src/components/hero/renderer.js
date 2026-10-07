@@ -249,20 +249,20 @@ export class PaintHeroRenderer {
       }
 
       // Specular highlight on upper ridge, shadow undercut on lower
-      const ridgeHighlight = b.offsetNorm < -0.2 ? 0.35 : (b.offsetNorm > 0.4 ? -0.25 : 0.0)
+      const ridgeHighlight = b.offsetNorm < -0.2 ? 0.45 : (b.offsetNorm > 0.35 ? -0.2 : 0.05)
       
       // Dynamic lighting distance factor
       const mid = this.evaluateCurve(s, actualProg * 0.5)
       const distToLight = Math.hypot(mid.x / this.width - lx, mid.y / this.height - ly)
-      const lightBoost = Math.max(0, 1 - distToLight * 1.5) * 0.4
+      const lightBoost = Math.max(0, 1 - distToLight * 1.5) * 0.45
 
-      const r = Math.min(255, Math.max(0, Math.round(colorRgb.r + (ridgeHighlight + lightBoost) * 120)))
-      const g = Math.min(255, Math.max(0, Math.round(colorRgb.g + (ridgeHighlight + lightBoost) * 105)))
-      const bColor = Math.min(255, Math.max(0, Math.round(colorRgb.b + (ridgeHighlight + lightBoost) * 85)))
-      const alpha = Math.min(0.9, Math.max(0.15, b.alphaVary * (0.6 + lightBoost * 0.4)))
+      const r = Math.min(255, Math.max(0, Math.round(colorRgb.r * 1.05 + (ridgeHighlight + lightBoost) * 135)))
+      const g = Math.min(255, Math.max(0, Math.round(colorRgb.g * 1.05 + (ridgeHighlight + lightBoost) * 120)))
+      const bColor = Math.min(255, Math.max(0, Math.round(colorRgb.b * 1.05 + (ridgeHighlight + lightBoost) * 95)))
+      const alpha = Math.min(0.95, Math.max(0.28, b.alphaVary * (0.8 + lightBoost * 0.4)))
 
       targetCtx.strokeStyle = `rgba(${r}, ${g}, ${bColor}, ${alpha})`
-      targetCtx.lineWidth = Math.max(1, (s.strokeWidth / s.bristles.length) * b.widthVary * 1.8)
+      targetCtx.lineWidth = Math.max(1.2, (s.strokeWidth / s.bristles.length) * b.widthVary * 2.2)
       targetCtx.lineCap = 'round'
       targetCtx.stroke()
     }

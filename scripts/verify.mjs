@@ -164,22 +164,64 @@ console.log('\n--- 2. Testing M1.2 Hero Canvas, States & Timeline ---')
   assert('Tagline contains "Art lives here"', canvasProps.taglineText === 'Art lives here')
   assert('Canvas DPR scaling is non-blurry (buffered at >= 1.5x)', canvasProps.bufWidth >= canvasProps.cssWidth * 1.5)
 
-  // Timeline Progress Screenshots at 1440
-  console.log('Capturing timeline progression at 1440px...')
-  await page.screenshot({ path: path.join(SHOTS_DIR, 'd1440_hero_0.5s.png') })
+  // Verify tagline script font has letter-spacing 0
+  const taglineLetterSpacing = await page.evaluate(() => {
+    const s = getComputedStyle(document.querySelector('.hero__tagline')).letterSpacing
+    return s === '0px' || s === '0' || s === 'normal'
+  })
+  assert('Tagline "Art lives here" letter-spacing is 0', taglineLetterSpacing)
+
+  // Timeline Progress Screenshots at 1440 (1.0s, 2.0s, final)
+  console.log('Capturing timeline progression at 1440px (1.0s, 2.0s, final)...')
   await sleep(1000)
-  await page.screenshot({ path: path.join(SHOTS_DIR, 'd1440_hero_1.5s.png') })
+  await page.screenshot({ path: path.join(SHOTS_DIR, 'd1440_hero_1.0s.png') })
+  
+  // Assert canvas is not blank at 1.0s
+  const diffAt1s = await page.evaluate(() => {
+    const c = document.querySelector('.hero__canvas')
+    const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data
+    let diff = 0
+    for (let i = 0; i < d.length; i += 4) {
+      if (Math.abs(d[i]-21)>20 || Math.abs(d[i+1]-20)>20 || Math.abs(d[i+2]-16)>20) diff++
+    }
+    return diff / (c.width * c.height)
+  })
+  assert('Canvas has strokes rendering at 1.0s (> 5% pixels active)', diffAt1s > 0.05, `(${((diffAt1s)*100).toFixed(1)}%)`)
+
   await sleep(1000)
-  await page.screenshot({ path: path.join(SHOTS_DIR, 'd1440_hero_2.5s.png') })
-  await sleep(1000)
-  await page.screenshot({ path: path.join(SHOTS_DIR, 'd1440_hero_3.5s.png') })
-  await sleep(1000)
+  await page.screenshot({ path: path.join(SHOTS_DIR, 'd1440_hero_2.0s.png') })
+  
+  // Assert canvas is not blank at 2.0s
+  const diffAt2s = await page.evaluate(() => {
+    const c = document.querySelector('.hero__canvas')
+    const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data
+    let diff = 0
+    for (let i = 0; i < d.length; i += 4) {
+      if (Math.abs(d[i]-21)>20 || Math.abs(d[i+1]-20)>20 || Math.abs(d[i+2]-16)>20) diff++
+    }
+    return diff / (c.width * c.height)
+  })
+  assert('Canvas has strokes rendering at 2.0s (> 5% pixels active)', diffAt2s > 0.05, `(${((diffAt2s)*100).toFixed(1)}%)`)
+
+  await sleep(1500)
   await page.screenshot({ path: path.join(SHOTS_DIR, 'd1440_hero_final.png') })
 
   // Check state transitioned to ambient
   await page.waitForFunction(() => document.querySelector('.hero')?.getAttribute('data-hero-state') === 'ambient', { timeout: 4000 })
   const endState = await page.evaluate(() => document.querySelector('.hero').getAttribute('data-hero-state'))
   assert('Hero state transitions to "ambient" after intro completes', endState === 'ambient')
+
+  // Check final canvas pixel difference from background >= 8%
+  const finalDiff = await page.evaluate(() => {
+    const c = document.querySelector('.hero__canvas')
+    const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data
+    let diff = 0
+    for (let i = 0; i < d.length; i += 4) {
+      if (Math.abs(d[i]-21)>20 || Math.abs(d[i+1]-20)>20 || Math.abs(d[i+2]-16)>20) diff++
+    }
+    return diff / (c.width * c.height)
+  })
+  assert('Canvas strokes rendered noticeably (>= 8% pixels differ from background)', finalDiff >= 0.08, `(${((finalDiff)*100).toFixed(1)}%)`)
 
   // Check Offscreen / Scroll paused state
   console.log('Testing IntersectionObserver off-screen pause...')
@@ -194,12 +236,11 @@ console.log('\n--- 2. Testing M1.2 Hero Canvas, States & Timeline ---')
   const restoredState = await page.evaluate(() => document.querySelector('.hero').getAttribute('data-hero-state'))
   assert('Hero state restores to "ambient" when scrolled back into view', restoredState === 'ambient')
 
-
   await ctx.close()
 }
 
 // Mobile 390px timeline screenshots
-console.log('\n--- Capturing Timeline at 390px Mobile Viewport ---')
+console.log('\n--- Capturing Timeline at 390px Mobile Viewport (1.0s, 2.0s, final) ---')
 {
   const mCtx = await browser.newContext({
     viewport: { width: 390, height: 844 },
@@ -210,18 +251,26 @@ console.log('\n--- Capturing Timeline at 390px Mobile Viewport ---')
   const mPage = await mCtx.newPage()
   await mPage.goto(BASE + '/?quality=lite', { waitUntil: 'networkidle' })
 
-  await mPage.screenshot({ path: path.join(SHOTS_DIR, 'm390_hero_0.5s.png') })
   await sleep(1000)
-  await mPage.screenshot({ path: path.join(SHOTS_DIR, 'm390_hero_1.5s.png') })
+  await mPage.screenshot({ path: path.join(SHOTS_DIR, 'm390_hero_1.0s.png') })
   await sleep(1000)
-  await mPage.screenshot({ path: path.join(SHOTS_DIR, 'm390_hero_2.5s.png') })
-  await sleep(1000)
-  await mPage.screenshot({ path: path.join(SHOTS_DIR, 'm390_hero_3.5s.png') })
-  await sleep(500)
+  await mPage.screenshot({ path: path.join(SHOTS_DIR, 'm390_hero_2.0s.png') })
+  await sleep(1500)
   await mPage.screenshot({ path: path.join(SHOTS_DIR, 'm390_hero_final.png') })
 
   const mobileState = await mPage.evaluate(() => document.querySelector('.hero').getAttribute('data-hero-state'))
   assert('Mobile hero initializes and settles in "lite" mode', mobileState === 'lite')
+
+  const mobileDiff = await mPage.evaluate(() => {
+    const c = document.querySelector('.hero__canvas')
+    const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data
+    let diff = 0
+    for (let i = 0; i < d.length; i += 4) {
+      if (Math.abs(d[i]-21)>20 || Math.abs(d[i+1]-20)>20 || Math.abs(d[i+2]-16)>20) diff++
+    }
+    return diff / (c.width * c.height)
+  })
+  assert('Mobile canvas strokes rendered noticeably (>= 8% pixels)', mobileDiff >= 0.08, `(${((mobileDiff)*100).toFixed(1)}%)`)
 
   await mCtx.close()
 }

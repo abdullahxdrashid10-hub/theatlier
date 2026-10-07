@@ -30,11 +30,10 @@
   z-index: 2;
   pointer-events: none;
   background: radial-gradient(
-    circle at 50% 50%,
-    rgba(21, 20, 16, 0.82) 0%,
-    rgba(21, 20, 16, 0.45) 45%,
-    rgba(21, 20, 16, 0.1) 80%,
-    transparent 100%
+    ellipse 65% 55% at 50% 50%,
+    rgba(21, 20, 16, 0.72) 0%,
+    rgba(21, 20, 16, 0.35) 45%,
+    transparent 85%
   );
 }
 
@@ -146,6 +145,7 @@
   font-size: clamp(1.8rem, 1.2rem + 2.5vw, 3.6rem);
   color: var(--gold);
   line-height: 1.1;
+  letter-spacing: 0 !important;
   margin: 0;
   opacity: 0;
   transform: translateY(8px);
@@ -217,11 +217,15 @@
 @media (prefers-reduced-motion: reduce) {
   .hero__word-the,
   .hero__word-atelier,
-  .hero__by-sk-wrapper,
-  .hero__tagline {
+  .hero__by-sk-wrapper {
     opacity: 1 !important;
     transform: none !important;
     letter-spacing: var(--tracking-wordmark) !important;
+  }
+  .hero__tagline {
+    opacity: 1 !important;
+    transform: none !important;
+    letter-spacing: 0 !important;
   }
   .hero__rule {
     transform: scaleX(1) !important;

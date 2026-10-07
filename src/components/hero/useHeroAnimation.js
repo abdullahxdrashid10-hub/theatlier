@@ -201,6 +201,7 @@ export function useHeroAnimation({
       masterTl.to(taglineRef.current, {
         opacity: 1,
         y: 0,
+        letterSpacing: '0px',
         duration: 0.8,
         ease: 'power2.out',
       }, 2.5)
@@ -226,7 +227,7 @@ export function useHeroAnimation({
       gsap.set(atelierRef.current, { opacity: 1, y: 0, letterSpacing: '0.32em' })
       gsap.set(bySkWrapperRef.current, { opacity: 1, y: 0 })
       gsap.set([ruleLeftRef.current, ruleRightRef.current], { scaleX: 1 })
-      gsap.set(taglineRef.current, { opacity: 1, y: 0 })
+      gsap.set(taglineRef.current, { opacity: 1, y: 0, letterSpacing: '0px' })
       gsap.set(taglineLineRef.current, { scaleX: 1 })
       gsap.set(scrollCueRef.current, { opacity: 0.85 })
       setHeroState(renderer.lite ? 'lite' : 'ambient')
