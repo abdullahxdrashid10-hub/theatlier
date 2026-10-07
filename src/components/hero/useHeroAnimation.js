@@ -78,14 +78,26 @@ export function useHeroAnimation({
       return
     }
 
-    if (isReducedMotion) {
-      renderer.drawReducedMotion()
-      return
-    }
-
     // 2. Initial sizing
     const rect = container.getBoundingClientRect()
     renderer.resize(rect.width, rect.height, true)
+
+    if (isReducedMotion) {
+      renderer.drawReducedMotion()
+      const ro = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          const { width, height } = entry.contentRect
+          if (width > 0 && height > 0) {
+            renderer.resize(width, height)
+            renderer.drawReducedMotion()
+          }
+        }
+      })
+      ro.observe(container)
+      return () => {
+        ro.disconnect()
+      }
+    }
 
     // ResizeObserver
     let resizeTimer = null
