@@ -1,8 +1,10 @@
 # The Atelier by SK — Frontend
 
-Luxury painting-studio storefront (Gallery Noir theme). This repo currently covers
-**Milestone M1.1**: project setup, design tokens, routing, layout shell, smooth scroll and the
-mock data layer. See `docs/` for the Build Plan and Design Brief (source of truth).
+Luxury painting-studio storefront (Gallery Noir theme). This repo currently covers:
+- **Milestone M1.1**: project setup, design tokens, routing, layout shell, smooth scroll and the mock data layer.
+- **Milestone M1.2**: animated paint hero (palette-knife impasto Canvas 2D, GSAP timeline, ambient shimmer, light tracking, reduced-motion & lite fallbacks).
+
+See `docs/` for the Build Plan, Design Brief, and Logo reference.
 
 ## Run it
 
@@ -14,6 +16,7 @@ npm run dev        # http://localhost:5173
 npm run build      # production build to /dist
 npm run preview    # serve the production build
 npm run lint       # ESLint
+npm run verify     # Automated test & screenshot verification suite (Edge/Chrome headless)
 npm run placeholders  # regenerate /public/placeholders SVGs from src/data/paintings.js
 ```
 
