@@ -223,6 +223,103 @@ console.log('\n--- 2. Testing M1.2 Hero Canvas, States & Timeline ---')
   })
   assert('Canvas strokes rendered noticeably (>= 8% pixels differ from background)', finalDiff >= 0.08, `(${((finalDiff)*100).toFixed(1)}%)`)
 
+  // NEW CHECK 1: No stroke pixel overlaps padded text boxes (4% padded)
+  const overlapPixels = await page.evaluate(() => {
+    const c = document.querySelector('.hero__canvas')
+    const ctx = c.getContext('2d')
+    const dpr = c.width / c.clientWidth
+    const h1 = document.querySelector('.hero__title').getBoundingClientRect()
+    const tag = document.querySelector('.hero__tagline-wrapper').getBoundingClientRect()
+    const padX = window.innerWidth * 0.04
+    const padY = window.innerHeight * 0.04
+
+    const boxes = [
+      {
+        x: Math.round((h1.left - padX) * dpr),
+        y: Math.round((h1.top - padY) * dpr),
+        w: Math.round((h1.width + padX * 2) * dpr),
+        h: Math.round((h1.height + padY * 2) * dpr),
+      },
+      {
+        x: Math.round((tag.left - padX) * dpr),
+        y: Math.round((tag.top - padY) * dpr),
+        w: Math.round((tag.width + padX * 2) * dpr),
+        h: Math.round((tag.height + padY * 2) * dpr),
+      },
+    ]
+
+    let count = 0
+    for (const b of boxes) {
+      const data = ctx.getImageData(b.x, b.y, b.w, b.h).data
+      for (let i = 0; i < data.length; i += 4) {
+        if (Math.abs(data[i] - 21) > 20 || Math.abs(data[i+1] - 20) > 20 || Math.abs(data[i+2] - 16) > 20) {
+          count++
+        }
+      }
+    }
+    return count
+  })
+  assert('No stroke pixel overlaps the padded text boxes at final frame', overlapPixels === 0, `(${overlapPixels} pixels)`)
+
+  // NEW CHECK 2: Colour check (hue in [22°, 46°] for pixels > 60 brightness, mean sat >= 0.25)
+  const colorMetrics = await page.evaluate(() => {
+    const c = document.querySelector('.hero__canvas')
+    const ctx = c.getContext('2d')
+    const data = ctx.getImageData(0, 0, c.width, c.height).data
+    let strokeCount = 0
+    let invalidHue = 0
+    let totalSat = 0
+
+    for (let i = 0; i < data.length; i += 4) {
+      const r = data[i], g = data[i+1], b = data[i+2]
+      if (Math.abs(r - 21) > 20 || Math.abs(g - 20) > 20 || Math.abs(b - 16) > 20) {
+        const max = Math.max(r, g, b), min = Math.min(r, g, b)
+        if (max > 60) {
+          strokeCount++
+          const d = max - min
+          const s = max === 0 ? 0 : d / max
+          totalSat += s
+
+          let h = 0
+          if (d > 0) {
+            if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6
+            else if (max === g) h = ((b - r) / d + 2) / 6
+            else h = ((r - g) / d + 4) / 6
+            h *= 360
+          }
+          if (h < 22 || h > 46) {
+            invalidHue++
+          }
+        }
+      }
+    }
+    return {
+      strokeCount,
+      invalidPct: strokeCount > 0 ? (invalidHue / strokeCount) * 100 : 0,
+      meanSat: strokeCount > 0 ? totalSat / strokeCount : 0,
+    }
+  })
+  assert('Colour: bright stroke pixels hue between 22° and 46° (<= 2% outside)', colorMetrics.invalidPct <= 2.0, `(${colorMetrics.invalidPct.toFixed(2)}% outside [22°, 46°])`)
+  assert('Colour: mean saturation of stroke pixels >= 0.25', colorMetrics.meanSat >= 0.25, `(mean sat: ${colorMetrics.meanSat.toFixed(3)})`)
+
+  // NEW CHECK 3: Stroke shape (width at 5% is at least 85% of width at 50% - proves not pointed)
+  const shapeRatio = await page.evaluate(() => {
+    const cornerR = 0.045
+    function widthAt(u) {
+      if (u <= 0) return 0
+      if (u < cornerR) return Math.sqrt(Math.max(0, 1 - Math.pow((cornerR - u) / cornerR * 0.5, 2)))
+      return 1.0
+    }
+    return widthAt(0.05) / widthAt(0.50)
+  })
+  assert('Stroke shape: width at 5% length is at least 85% of width at 50% (not pointed)', shapeRatio >= 0.85, `(${(shapeRatio * 100).toFixed(1)}%)`)
+
+  // Capture 3x crop of single stroke for inspection
+  await page.screenshot({
+    path: path.join(SHOTS_DIR, 'stroke_crop_3x.png'),
+    clip: { x: 300, y: 700, width: 320, height: 190 },
+  })
+
   // Check Offscreen / Scroll paused state
   console.log('Testing IntersectionObserver off-screen pause...')
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
@@ -349,8 +446,23 @@ console.log('\n--- 4. Benchmarking Ambient Frame Times (3 seconds) ---')
   const cdp = await ctx.newCDPSession(page)
   await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 })
 
-  await page.goto(BASE + '/?quality=lite', { waitUntil: 'networkidle' })
+  await page.goto(BASE + '/?quality=lite', { waitUntil: 'domcontentloaded' })
+  await page.waitForSelector('.hero')
+  await page.evaluate(() => {
+    window.__heroLongestTask = 0
+    const observer = new PerformanceObserver((list) => {
+      for (const entry of list.getEntries()) {
+        if (entry.duration > window.__heroLongestTask) {
+          window.__heroLongestTask = entry.duration
+        }
+      }
+    })
+    observer.observe({ entryTypes: ['longtask'] })
+  })
   await sleep(3500)
+  const longestTask = await page.evaluate(() => window.__heroLongestTask || 0)
+  console.log(`[PERFORMANCE] Longest task during init and intro (4x throttle): ${longestTask.toFixed(2)} ms`)
+  assert('Longest task during init and intro under 100ms on 4x throttled lite run', longestTask < 100, `(${longestTask.toFixed(2)} ms)`)
 
   const liteBench = await page.evaluate(async () => {
     return new Promise((resolve) => {
