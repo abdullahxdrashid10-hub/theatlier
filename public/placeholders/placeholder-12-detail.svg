@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 640" width="880" height="640" role="img" aria-label="PLACEHOLDER · DETAIL 12">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1E1C17"/><stop offset="1" stop-color="#151410"/></linearGradient>
+<filter id="grain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="12"/><feColorMatrix values="0 0 0 0 0.9  0 0 0 0 0.75  0 0 0 0 0.5  0 0 0 0.09 0"/></filter>
+<filter id="blur"><feGaussianBlur stdDeviation="4"/></filter>
+<linearGradient id="g0" gradientUnits="userSpaceOnUse" x1="837" y1="492" x2="179" y2="218"><stop offset="0" stop-color="#876D4F"/><stop offset="1" stop-color="#B4A187"/></linearGradient><linearGradient id="g1" gradientUnits="userSpaceOnUse" x1="-12" y1="283" x2="498" y2="392"><stop offset="0" stop-color="#4B3D2C"/><stop offset="1" stop-color="#B4A187"/></linearGradient><linearGradient id="g2" gradientUnits="userSpaceOnUse" x1="820" y1="159" x2="321" y2="565"><stop offset="0" stop-color="#4B3D2C"/><stop offset="1" stop-color="#876D4F"/></linearGradient><linearGradient id="g3" gradientUnits="userSpaceOnUse" x1="621" y1="90" x2="377" y2="303"><stop offset="0" stop-color="#F2DEBF"/><stop offset="1" stop-color="#F2DEBF"/></linearGradient><linearGradient id="g4" gradientUnits="userSpaceOnUse" x1="43" y1="305" x2="654" y2="357"><stop offset="0" stop-color="#F2DEBF"/><stop offset="1" stop-color="#876D4F"/></linearGradient>
+</defs>
+<rect width="880" height="640" fill="url(#bg)"/>
+<g filter="url(#blur)"><path d="M837 492 Q537 261 179 218" stroke="url(#g0)" stroke-width="143" stroke-linecap="round" fill="none" opacity="0.42"/><path d="M-12 283 Q267 483 498 392" stroke="url(#g1)" stroke-width="170" stroke-linecap="round" fill="none" opacity="0.61"/><path d="M820 159 Q779 229 321 565" stroke="url(#g2)" stroke-width="124" stroke-linecap="round" fill="none" opacity="0.37"/><path d="M621 90 Q425 200 377 303" stroke="url(#g3)" stroke-width="170" stroke-linecap="round" fill="none" opacity="0.71"/><path d="M43 305 Q219 205 654 357" stroke="url(#g4)" stroke-width="93" stroke-linecap="round" fill="none" opacity="0.61"/></g>
+<rect width="880" height="640" filter="url(#grain)"/>
+<rect x="20" y="20" width="840" height="600" fill="none" stroke="#876D4F" stroke-width="1" opacity="0.6"/>
+<text x="440" y="596" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="20" letter-spacing="6.0" fill="#F2DEBF" opacity="0.9">PLACEHOLDER · DETAIL 12</text>
+</svg>
