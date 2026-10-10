@@ -58,7 +58,8 @@ export default function Nav() {
       <header className="nav" data-scrolled={scrolled} data-menu-open={open}>
         <div className="nav__inner">
           <Link to="/" className="nav__brand wordmark" aria-label="The Atelier by SK — home">
-            THE ATELIER BY SK
+            <img src="/logo.png" alt="" className="nav__logo" width="34" height="34" />
+            <span className="nav__brand-text">THE ATELIER BY SK</span>
           </Link>
 
           <div className="nav__right">

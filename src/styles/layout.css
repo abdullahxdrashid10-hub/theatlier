@@ -87,8 +87,31 @@
 }
 
 .nav__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
   flex: 0 1 auto;
   min-width: 0;
+}
+
+.nav__logo {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid rgba(208, 169, 113, 0.45);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  flex-shrink: 0;
+  transition:
+    transform var(--duration) var(--ease),
+    border-color var(--duration) var(--ease),
+    box-shadow var(--duration) var(--ease);
+}
+
+.nav__brand:hover .nav__logo {
+  transform: scale(1.06);
+  border-color: var(--gold);
+  box-shadow: 0 0 14px rgba(208, 169, 113, 0.35);
 }
 
 .nav__right {
