@@ -5,7 +5,7 @@ import { PaintHeroRenderer } from './renderer'
 
 gsap.registerPlugin(ScrollTrigger)
 
-// Module-level flag: if true, subsequent visits skip the intro
+// Module-level flag: if true, subsequent page visits skip the intro reveal
 let hasPlayedHeroIntro = false
 
 export function resetHeroPlayedFlag() {
@@ -15,13 +15,11 @@ export function resetHeroPlayedFlag() {
 export function useHeroAnimation({
   containerRef,
   canvasRef,
-  theRef,
-  atelierRef,
-  bySkWrapperRef,
-  ruleLeftRef,
-  ruleRightRef,
-  taglineRef,
-  taglineLineRef,
+  artImgRef,
+  eyebrowRef,
+  titleRef,
+  subheadingRef,
+  ctaRef,
   scrollCueRef,
 }) {
   const [heroState, setHeroState] = useState(() => {
@@ -37,6 +35,7 @@ export function useHeroAnimation({
     }
     return 'intro'
   })
+
   const rendererRef = useRef(null)
   const isPausedRef = useRef(false)
   const stateRef = useRef(heroState)
@@ -50,7 +49,7 @@ export function useHeroAnimation({
     const container = containerRef.current
     if (!canvas || !container) return
 
-    // 1. Quality detection
+    // 1. Quality & reduced motion detection
     const searchParams = new URLSearchParams(window.location.search)
     const qualityOverride = searchParams.get('quality')
     const isReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -76,21 +75,23 @@ export function useHeroAnimation({
         window.__heroRenderer = renderer
       }
     } catch (e) {
-      console.warn('Canvas 2D failed to initialize, relying on CSS fallback:', e)
+      console.warn('Canvas 2D failed to initialize, relying on fallback:', e)
       return
     }
 
-    // 2. Initial sizing
+    // 2. Initial canvas sizing
     const rect = container.getBoundingClientRect()
     renderer.resize(rect.width, rect.height, true)
 
     if (isReducedMotion) {
-      const t0 = performance.now()
       renderer.drawReducedMotion()
-      const cost = performance.now() - t0
-      if (typeof window !== 'undefined') {
-        window.__heroReducedMotionCostMs = cost
-      }
+      if (artImgRef.current) gsap.set(artImgRef.current, { opacity: 1, scale: 1 })
+      if (eyebrowRef.current) gsap.set(eyebrowRef.current, { opacity: 1, y: 0 })
+      if (titleRef.current) gsap.set(titleRef.current, { opacity: 1, y: 0 })
+      if (subheadingRef.current) gsap.set(subheadingRef.current, { opacity: 1, y: 0 })
+      if (ctaRef.current) gsap.set(ctaRef.current, { opacity: 1, y: 0 })
+      if (scrollCueRef.current) gsap.set(scrollCueRef.current, { opacity: 0.85, y: 0 })
+
       const ro = new ResizeObserver((entries) => {
         for (const entry of entries) {
           const { width, height } = entry.contentRect
@@ -106,7 +107,7 @@ export function useHeroAnimation({
       }
     }
 
-    // ResizeObserver
+    // 3. Responsive ResizeObserver
     let resizeTimer = null
     const ro = new ResizeObserver((entries) => {
       clearTimeout(resizeTimer)
@@ -116,7 +117,7 @@ export function useHeroAnimation({
           if (width > 0 && height > 0) {
             renderer.resize(width, height)
             if (stateRef.current === 'ambient') {
-              renderer.render(1.0, true)
+              renderer.render(1.0, true, 0)
             }
           }
         }
@@ -124,8 +125,10 @@ export function useHeroAnimation({
     })
     ro.observe(container)
 
-    // Pointer events (interactive lighting)
+    // 4. Subtle mouse-guided spotlight tracking (desktop fine pointer only)
+    const isFinePointer = window.matchMedia('(pointer: fine)').matches
     const handlePointerMove = (e) => {
+      if (!isFinePointer) return
       const cRect = container.getBoundingClientRect()
       const nx = (e.clientX - cRect.left) / cRect.width
       const ny = (e.clientY - cRect.top) / cRect.height
@@ -133,11 +136,10 @@ export function useHeroAnimation({
     }
     window.addEventListener('pointermove', handlePointerMove, { passive: true })
 
-    // IntersectionObserver & Document visibility
+    // 5. Visibility and intersection handling
     const checkPauseState = () => {
       const isHidden = document.hidden
       const isOffscreen = isPausedRef.current
-
       if (isHidden || isOffscreen) {
         setHeroState('paused')
       } else {
@@ -159,15 +161,10 @@ export function useHeroAnimation({
     }
     document.addEventListener('visibilitychange', handleVisibilityChange)
 
-    // Frame-time monitor for auto-downgrade
-    let frameTimes = []
-    let lastTime = performance.now()
-    let autoDowngraded = false
-
-    const strokeAnim = { progress: hasPlayedHeroIntro ? 1.0 : 0.0 }
+    // 6. GSAP Timeline Reveal
+    const animState = { progress: hasPlayedHeroIntro ? 1.0 : 0.0 }
     let isAmbient = hasPlayedHeroIntro
 
-    // GSAP Timeline setup
     const masterTl = gsap.timeline({
       paused: true,
       onComplete: () => {
@@ -178,81 +175,84 @@ export function useHeroAnimation({
     })
 
     if (!hasPlayedHeroIntro) {
-      // Timeline (about 3.2 - 3.5s total)
-      // 0.0s to 2.4s: strokes draw in
-      masterTl.to(strokeAnim, {
-        progress: 1.0,
-        duration: 2.4,
-        ease: 'power2.out',
-      }, 0.1)
+      // Artwork & Museum Spotlight fade-up
+      masterTl.to(
+        animState,
+        {
+          progress: 1.0,
+          duration: 1.8,
+          ease: 'power2.out',
+        },
+        0.05
+      )
 
-      // 1.8s: wordmark fades in with letter-spacing settling to --tracking-wordmark (0.32em)
-      masterTl.to(theRef.current, {
-        opacity: 1,
-        y: 0,
-        letterSpacing: 'clamp(0.25em, 0.2em + 0.3vw, 0.4em)',
-        duration: 0.8,
-        ease: 'power2.out',
-      }, 1.7)
+      if (artImgRef.current) {
+        masterTl.fromTo(
+          artImgRef.current,
+          { opacity: 0, scale: 1.05 },
+          { opacity: 1, scale: 1, duration: 1.8, ease: 'power2.out' },
+          0.05
+        )
+      }
 
-      masterTl.to(atelierRef.current, {
-        opacity: 1,
-        y: 0,
-        letterSpacing: '0.32em',
-        duration: 0.9,
-        ease: 'power2.out',
-      }, 1.8)
+      // Staggered luxury editorial text entrance
+      if (eyebrowRef.current) {
+        masterTl.fromTo(
+          eyebrowRef.current,
+          { opacity: 0, y: -8 },
+          { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out' },
+          0.35
+        )
+      }
 
-      masterTl.to(bySkWrapperRef.current, {
-        opacity: 1,
-        y: 0,
-        duration: 0.8,
-        ease: 'power2.out',
-      }, 2.0)
+      if (titleRef.current) {
+        masterTl.fromTo(
+          titleRef.current,
+          { opacity: 0, y: 18 },
+          { opacity: 1, y: 0, duration: 0.85, ease: 'power3.out' },
+          0.60
+        )
+      }
 
-      masterTl.to([ruleLeftRef.current, ruleRightRef.current], {
-        scaleX: 1,
-        duration: 0.7,
-        ease: 'power2.out',
-      }, 2.1)
+      if (subheadingRef.current) {
+        masterTl.fromTo(
+          subheadingRef.current,
+          { opacity: 0, y: 12 },
+          { opacity: 1, y: 0, duration: 0.75, ease: 'power2.out' },
+          0.90
+        )
+      }
 
-      // 2.6s: script tagline "Art lives here" reveals with hairline drawing beneath
-      masterTl.to(taglineRef.current, {
-        opacity: 1,
-        y: 0,
-        letterSpacing: '0px',
-        duration: 0.8,
-        ease: 'power2.out',
-      }, 2.5)
+      if (ctaRef.current) {
+        masterTl.fromTo(
+          ctaRef.current,
+          { opacity: 0, y: 10 },
+          { opacity: 1, y: 0, duration: 0.75, ease: 'power2.out' },
+          1.20
+        )
+      }
 
-      masterTl.to(taglineLineRef.current, {
-        scaleX: 1,
-        duration: 0.6,
-        ease: 'power2.out',
-      }, 2.7)
-
-      // 3.2s: quiet "Scroll" cue fades in
-      masterTl.to(scrollCueRef.current, {
-        opacity: 0.85,
-        duration: 0.5,
-        ease: 'power2.out',
-      }, 3.1)
+      if (scrollCueRef.current) {
+        masterTl.fromTo(
+          scrollCueRef.current,
+          { opacity: 0 },
+          { opacity: 0.85, duration: 0.6, ease: 'power2.out' },
+          1.55
+        )
+      }
 
       masterTl.play()
     } else {
-      // Skip intro on returning
-      strokeAnim.progress = 1.0
-      gsap.set(theRef.current, { opacity: 1, y: 0, letterSpacing: 'clamp(0.25em, 0.2em + 0.3vw, 0.4em)' })
-      gsap.set(atelierRef.current, { opacity: 1, y: 0, letterSpacing: '0.32em' })
-      gsap.set(bySkWrapperRef.current, { opacity: 1, y: 0 })
-      gsap.set([ruleLeftRef.current, ruleRightRef.current], { scaleX: 1 })
-      gsap.set(taglineRef.current, { opacity: 1, y: 0, letterSpacing: '0px' })
-      gsap.set(taglineLineRef.current, { scaleX: 1 })
-      gsap.set(scrollCueRef.current, { opacity: 0.85 })
-      setHeroState(renderer.lite ? 'lite' : 'ambient')
+      animState.progress = 1.0
+      if (artImgRef.current) gsap.set(artImgRef.current, { opacity: 1, scale: 1 })
+      if (eyebrowRef.current) gsap.set(eyebrowRef.current, { opacity: 1, y: 0 })
+      if (titleRef.current) gsap.set(titleRef.current, { opacity: 1, y: 0 })
+      if (subheadingRef.current) gsap.set(subheadingRef.current, { opacity: 1, y: 0 })
+      if (ctaRef.current) gsap.set(ctaRef.current, { opacity: 1, y: 0 })
+      if (scrollCueRef.current) gsap.set(scrollCueRef.current, { opacity: 0.85, y: 0 })
     }
 
-    // ScrollTrigger: parallax upward and dim toward next section
+    // 7. Scroll parallax & cue fading
     const scrollTrigger = ScrollTrigger.create({
       trigger: container,
       start: 'top top',
@@ -260,50 +260,33 @@ export function useHeroAnimation({
       scrub: true,
       onUpdate: (self) => {
         const p = self.progress
-        // Hide scroll cue on any scroll
         if (scrollCueRef.current) {
-          scrollCueRef.current.dataset.hidden = p > 0.05 ? 'true' : 'false'
+          scrollCueRef.current.dataset.hidden = p > 0.04 ? 'true' : 'false'
         }
-        // Parallax canvas upward slower than page
+        if (artImgRef.current) {
+          gsap.set(artImgRef.current, { y: p * 80 })
+        }
         if (canvas) {
-          gsap.set(canvas, { y: p * 150 })
+          gsap.set(canvas, { y: p * 80 })
         }
-        // Fade dim
         if (container) {
           gsap.set(container, { opacity: Math.max(0, 1 - p * 0.95) })
         }
       },
     })
 
-    // GSAP Ticker render loop
+    // 8. Animation Ticker Render Loop
+    let lastTime = performance.now()
     const onTick = () => {
       const now = performance.now()
       const dt = Math.min(0.1, (now - lastTime) / 1000)
-      const frameDuration = now - lastTime
       lastTime = now
 
-      // Check pause
       if (document.hidden || isPausedRef.current) {
         return
       }
 
-      // Auto-downgrade monitor
-      if (!isLite && qualityOverride !== 'full' && !autoDowngraded && isAmbient) {
-        frameTimes.push(frameDuration)
-        if (frameTimes.length > 120) {
-          // ~2 seconds
-          const avg = frameTimes.reduce((a, b) => a + b, 0) / frameTimes.length
-          if (avg > 24) {
-            autoDowngraded = true
-            isLite = true
-            renderer.setLite(true)
-            setHeroState('lite')
-          }
-          frameTimes = []
-        }
-      }
-
-      renderer.render(strokeAnim.progress, isAmbient, dt)
+      renderer.render(animState.progress, isAmbient, dt)
     }
 
     gsap.ticker.add(onTick)
@@ -319,18 +302,18 @@ export function useHeroAnimation({
       io.disconnect()
       window.removeEventListener('pointermove', handlePointerMove)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
-      clearTimeout(resizeTimer)
+      if (renderer && typeof renderer.destroy === 'function') {
+        renderer.destroy()
+      }
     }
   }, [
     containerRef,
     canvasRef,
-    theRef,
-    atelierRef,
-    bySkWrapperRef,
-    ruleLeftRef,
-    ruleRightRef,
-    taglineRef,
-    taglineLineRef,
+    artImgRef,
+    eyebrowRef,
+    titleRef,
+    subheadingRef,
+    ctaRef,
     scrollCueRef,
   ])
 

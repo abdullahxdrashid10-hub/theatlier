@@ -1,74 +1,106 @@
 import { useRef } from 'react'
+import { Link } from 'react-router-dom'
 import { useHeroAnimation } from './useHeroAnimation'
 import '../../styles/hero.css'
 
 export default function Hero() {
   const containerRef = useRef(null)
   const canvasRef = useRef(null)
-  const theRef = useRef(null)
-  const atelierRef = useRef(null)
-  const bySkWrapperRef = useRef(null)
-  const ruleLeftRef = useRef(null)
-  const ruleRightRef = useRef(null)
-  const taglineRef = useRef(null)
-  const taglineLineRef = useRef(null)
+  const artImgRef = useRef(null)
+  const eyebrowRef = useRef(null)
+  const titleRef = useRef(null)
+  const subheadingRef = useRef(null)
+  const ctaRef = useRef(null)
   const scrollCueRef = useRef(null)
 
   const { heroState } = useHeroAnimation({
     containerRef,
     canvasRef,
-    theRef,
-    atelierRef,
-    bySkWrapperRef,
-    ruleLeftRef,
-    ruleRightRef,
-    taglineRef,
-    taglineLineRef,
+    artImgRef,
+    eyebrowRef,
+    titleRef,
+    subheadingRef,
+    ctaRef,
     scrollCueRef,
   })
+
+  const handleScrollToDiscover = () => {
+    const nextSection = document.querySelector('.featured-works') || document.querySelector('#featured-works')
+    if (nextSection) {
+      nextSection.scrollIntoView({ behavior: 'smooth' })
+    } else {
+      window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })
+    }
+  }
 
   return (
     <section
       ref={containerRef}
       className="hero"
       data-hero-state={heroState}
-      aria-label="Welcome to The Atelier by SK"
+      aria-label="The Atelier by SK — Art lives here"
     >
+      {/* Background artwork: Authentic impasto palette-knife oil painting */}
+      <div className="hero__art-container" aria-hidden="true">
+        <img
+          ref={artImgRef}
+          src="/hero-impasto.jpg"
+          alt=""
+          className="hero__art-img"
+          fetchPriority="high"
+        />
+      </div>
+
+      {/* Interactive Cinematic Museum Lighting & Specular Sheen Canvas */}
       <canvas
         ref={canvasRef}
         className="hero__canvas"
         aria-hidden="true"
       />
 
+      {/* Dark warm radial scrim for pristine text contrast */}
       <div className="hero__scrim" aria-hidden="true" />
 
+      {/* Luxury Editorial Typography Lockup */}
       <div className="hero__content">
-        <h1 className="hero__title">
-          <span ref={theRef} className="hero__word-the">
-            THE
-          </span>
-          <span ref={atelierRef} className="hero__word-atelier">
-            ATELIER
-          </span>
-          <div ref={bySkWrapperRef} className="hero__by-sk-wrapper">
-            <span ref={ruleLeftRef} className="hero__rule hero__rule--left" />
-            <span className="hero__word-by-sk">BY SK</span>
-            <span ref={ruleRightRef} className="hero__rule hero__rule--right" />
-          </div>
+        <div ref={eyebrowRef} className="hero__eyebrow">
+          EXHIBITION I — 2026 COLLECTION
+        </div>
+
+        <h1 ref={titleRef} className="hero__title">
+          <span className="sr-only">The Atelier by SK — </span>
+          <span className="hero__heading">Art lives here.</span>
         </h1>
 
-        <div className="hero__tagline-wrapper">
-          <p ref={taglineRef} className="hero__tagline">
-            Art lives here
-          </p>
-          <div ref={taglineLineRef} className="hero__tagline-line" aria-hidden="true" />
+        <p ref={subheadingRef} className="hero__subheading">
+          Original works. Unrepeatable expressions.
+        </p>
+
+        <div ref={ctaRef} className="hero__cta-wrapper">
+          <Link
+            to="/shop"
+            className="hero__cta btn btn--framed"
+            aria-label="Explore the collection"
+          >
+            <span>EXPLORE THE COLLECTION</span>
+            <span className="btn__arrow" aria-hidden="true">→</span>
+          </Link>
         </div>
       </div>
 
-      <div ref={scrollCueRef} className="hero__scroll-cue" aria-hidden="true">
-        <span>Scroll</span>
-        <div className="hero__scroll-indicator" />
-      </div>
+      {/* Minimal Refined Scroll Indicator */}
+      <button
+        ref={scrollCueRef}
+        type="button"
+        className="hero__scroll-cue"
+        onClick={handleScrollToDiscover}
+        aria-label="Scroll to discover collection"
+      >
+        <span className="hero__scroll-label">SCROLL TO DISCOVER</span>
+        <div className="hero__scroll-indicator" aria-hidden="true">
+          <span className="hero__scroll-line" />
+        </div>
+      </button>
     </section>
   )
 }
