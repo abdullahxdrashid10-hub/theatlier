@@ -51,6 +51,9 @@ export default function Shop() {
     }
   }, [])
 
+  const isSwitching = useRef(false)
+  const isInitialMount = useRef(true)
+
   // Filter & sort: Available first, then sold
   const displayedPaintings = useMemo(() => {
     let list = [...paintings]
@@ -65,9 +68,72 @@ export default function Shop() {
     return list
   }, [paintings, filter])
 
-  // ScrollTrigger reveal animation
+  // Soothing transparent tab switch handler (on click)
+  const handleFilterChange = (newFilter) => {
+    if (newFilter === filter || isSwitching.current) return
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (prefersReducedMotion) {
+      setFilter(newFilter)
+      return
+    }
+
+    isSwitching.current = true
+
+    // Soothing fade-out of current paintings down to transparent
+    if (gridRef.current) {
+      gsap.to(gridRef.current, {
+        opacity: 0.1,
+        y: -8,
+        duration: 0.22,
+        ease: 'power2.in',
+        onComplete: () => {
+          setFilter(newFilter)
+        },
+      })
+    } else {
+      setFilter(newFilter)
+    }
+  }
+
+  // Fade-in after category switch
   useEffect(() => {
-    if (loading || displayedPaintings.length === 0) return
+    if (!isSwitching.current) return
+    isSwitching.current = false
+
+    if (gridRef.current) {
+      gsap.fromTo(
+        gridRef.current,
+        { opacity: 0.1, y: 12 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.48,
+          ease: 'power2.out',
+        },
+      )
+
+      const items = itemsRef.current.filter(Boolean)
+      if (items.length > 0) {
+        gsap.fromTo(
+          items,
+          { opacity: 0, y: 16 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.45,
+            stagger: 0.035,
+            ease: 'power2.out',
+          },
+        )
+      }
+    }
+  }, [displayedPaintings])
+
+  // Initial load ScrollTrigger reveal animation
+  useEffect(() => {
+    if (loading || displayedPaintings.length === 0 || !isInitialMount.current) return
+    isInitialMount.current = false
 
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (prefersReducedMotion) return
@@ -121,7 +187,7 @@ export default function Shop() {
             role="tab"
             aria-selected={filter === 'all'}
             className={`gallery-toggle-btn ${filter === 'all' ? 'gallery-toggle-btn--active' : ''}`}
-            onClick={() => setFilter('all')}
+            onClick={() => handleFilterChange('all')}
           >
             All
           </button>
@@ -130,7 +196,7 @@ export default function Shop() {
             role="tab"
             aria-selected={filter === 'available'}
             className={`gallery-toggle-btn ${filter === 'available' ? 'gallery-toggle-btn--active' : ''}`}
-            onClick={() => setFilter('available')}
+            onClick={() => handleFilterChange('available')}
           >
             Available
           </button>
@@ -139,7 +205,7 @@ export default function Shop() {
             role="tab"
             aria-selected={filter === 'sold'}
             className={`gallery-toggle-btn ${filter === 'sold' ? 'gallery-toggle-btn--active' : ''}`}
-            onClick={() => setFilter('sold')}
+            onClick={() => handleFilterChange('sold')}
           >
             Sold
           </button>
