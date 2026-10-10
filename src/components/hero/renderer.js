@@ -74,6 +74,8 @@ export class PaintHeroRenderer {
       bronze: hexToRgb(bronzeHex),
       shadow: { r: 58, g: 42, b: 28 }, // rich burnt umber #3A2A1C
       highlight: { r: 248, g: 228, b: 185 }, // warm champagne gold highlight
+      charcoal: { r: 38, g: 30, b: 24 }, // warm deep charcoal umber
+      bronzeDark: { r: 68, g: 48, b: 30 }, // deep dark bronze
     }
   }
 
@@ -133,34 +135,50 @@ export class PaintHeroRenderer {
     const h = this.height
     const isPortrait = w / h < 0.95
 
-    // Normalized coordinates [sx, sy, cx, cy, ex, ey, w, colorA, colorB, start, end]
-    // 3:1 to 4:1 length to width ratio, flat blunt start, slight curvature
+    // Normalized coordinates [sx, sy, cx, cy, ex, ey, w, colorA, colorB, start, end, isDark]
+    // Varied lengths (0.6x to 1.3x), widths (0.5x to 1.2x), angles (+/-12°), and z-orders
     const rawStrokes = isPortrait
       ? [
-          // Mobile Portrait - Upper-Right Cluster (above H1 exclusion zone)
-          { sx: 0.51, sy: 0.25, cx: 0.60, cy: 0.16, ex: 0.72, ey: 0.06, w: 68, colorA: 'shadow', colorB: 'bronze', start: 0.05, end: 0.38 },
-          { sx: 0.47, sy: 0.23, cx: 0.57, cy: 0.13, ex: 0.69, ey: 0.04, w: 80, colorA: 'bronze', colorB: 'gold', start: 0.12, end: 0.46 },
-          { sx: 0.55, sy: 0.24, cx: 0.65, cy: 0.15, ex: 0.77, ey: 0.07, w: 72, colorA: 'taupe', colorB: 'champagne', start: 0.20, end: 0.55 },
-          { sx: 0.50, sy: 0.19, cx: 0.58, cy: 0.11, ex: 0.68, ey: 0.03, w: 64, colorA: 'gold', colorB: 'champagne', start: 0.28, end: 0.64 },
+          // Mobile Portrait - Upper-Right Cluster (4 strokes)
+          { sx: 0.52, sy: 0.28, cx: 0.62, cy: 0.20, ex: 0.73, ey: 0.12, w: 65, colorA: 'charcoal', colorB: 'bronzeDark', isDark: true, start: 0.05, end: 0.40 },
+          { sx: 0.48, sy: 0.25, cx: 0.58, cy: 0.16, ex: 0.68, ey: 0.08, w: 80, colorA: 'bronzeDark', colorB: 'gold', start: 0.12, end: 0.48 },
+          { sx: 0.54, sy: 0.27, cx: 0.65, cy: 0.19, ex: 0.77, ey: 0.11, w: 70, colorA: 'gold', colorB: 'champagne', start: 0.20, end: 0.56 },
+          { sx: 0.50, sy: 0.22, cx: 0.60, cy: 0.14, ex: 0.70, ey: 0.07, w: 50, colorA: 'champagne', colorB: 'gold', start: 0.28, end: 0.65 },
 
-          // Mobile Portrait - Lower-Left Cluster (below Tagline exclusion zone)
-          { sx: 0.49, sy: 0.75, cx: 0.39, cy: 0.84, ex: 0.27, ey: 0.95, w: 68, colorA: 'shadow', colorB: 'bronze', start: 0.38, end: 0.72 },
-          { sx: 0.45, sy: 0.76, cx: 0.35, cy: 0.86, ex: 0.22, ey: 0.96, w: 80, colorA: 'bronze', colorB: 'gold', start: 0.46, end: 0.82 },
-          { sx: 0.53, sy: 0.77, cx: 0.43, cy: 0.87, ex: 0.31, ey: 0.98, w: 72, colorA: 'taupe', colorB: 'champagne', start: 0.54, end: 0.90 },
-          { sx: 0.42, sy: 0.77, cx: 0.33, cy: 0.85, ex: 0.24, ey: 0.94, w: 64, colorA: 'gold', colorB: 'champagne', start: 0.62, end: 0.98 },
+          // Mobile Portrait - Lower-Left Cluster (4 strokes)
+          { sx: 0.46, sy: 0.75, cx: 0.36, cy: 0.84, ex: 0.24, ey: 0.94, w: 65, colorA: 'charcoal', colorB: 'bronzeDark', isDark: true, start: 0.38, end: 0.72 },
+          { sx: 0.43, sy: 0.76, cx: 0.32, cy: 0.86, ex: 0.20, ey: 0.96, w: 80, colorA: 'bronzeDark', colorB: 'gold', start: 0.46, end: 0.82 },
+          { sx: 0.48, sy: 0.77, cx: 0.39, cy: 0.88, ex: 0.27, ey: 0.98, w: 70, colorA: 'gold', colorB: 'champagne', start: 0.54, end: 0.90 },
+          { sx: 0.40, sy: 0.76, cx: 0.31, cy: 0.85, ex: 0.21, ey: 0.93, w: 50, colorA: 'champagne', colorB: 'gold', start: 0.62, end: 0.98 },
         ]
       : [
-          // Desktop Landscape - Upper-Right Cluster (rising up-right directly above "LIER")
-          { sx: 0.53, sy: 0.21, cx: 0.60, cy: 0.12, ex: 0.69, ey: 0.03, w: 90, colorA: 'shadow', colorB: 'bronze', start: 0.05, end: 0.38 },
-          { sx: 0.49, sy: 0.20, cx: 0.57, cy: 0.10, ex: 0.66, ey: 0.02, w: 105, colorA: 'bronze', colorB: 'gold', start: 0.12, end: 0.46 },
-          { sx: 0.56, sy: 0.21, cx: 0.64, cy: 0.13, ex: 0.74, ey: 0.04, w: 95, colorA: 'taupe', colorB: 'champagne', start: 0.20, end: 0.55 },
-          { sx: 0.51, sy: 0.17, cx: 0.58, cy: 0.09, ex: 0.67, ey: 0.02, w: 80, colorA: 'gold', colorB: 'champagne', start: 0.28, end: 0.64 },
+          // Desktop Landscape - Upper-Right Cluster (6 strokes, fanning out naturally, 2 dark + 4 metallic)
+          // Stroke 0: Charcoal backdrop layer with subtle gold edge catch-light (upper-outer flank)
+          { sx: 0.50, sy: 0.22, cx: 0.60, cy: 0.14, ex: 0.74, ey: 0.08, w: 75, colorA: 'charcoal', colorB: 'bronzeDark', isDark: true, start: 0.05, end: 0.36 },
+          // Stroke 1: Broad deep bronze knife scrape (underlayer)
+          { sx: 0.53, sy: 0.25, cx: 0.64, cy: 0.17, ex: 0.79, ey: 0.11, w: 90, colorA: 'bronzeDark', colorB: 'gold', start: 0.10, end: 0.42 },
+          // Stroke 2: Wide luminous rich gold impasto swipe (primary foreground knife mark)
+          { sx: 0.49, sy: 0.24, cx: 0.59, cy: 0.16, ex: 0.72, ey: 0.10, w: 105, colorA: 'gold', colorB: 'champagne', start: 0.16, end: 0.48 },
+          // Stroke 3: Charcoal dry-brush knife drag with gold catch-light (divergent angle -16°)
+          { sx: 0.55, sy: 0.26, cx: 0.67, cy: 0.19, ex: 0.82, ey: 0.15, w: 55, colorA: 'charcoal', colorB: 'bronzeDark', isDark: true, start: 0.22, end: 0.54 },
+          // Stroke 4: Champagne cream blade crest swipe (upper highlight layer)
+          { sx: 0.48, sy: 0.20, cx: 0.56, cy: 0.13, ex: 0.66, ey: 0.08, w: 70, colorA: 'champagne', colorB: 'gold', start: 0.28, end: 0.60 },
+          // Stroke 5: Fine rich gold knife edge track (crisp metallic crest)
+          { sx: 0.52, sy: 0.23, cx: 0.62, cy: 0.16, ex: 0.75, ey: 0.11, w: 38, colorA: 'gold', colorB: 'champagne', start: 0.34, end: 0.66 },
 
-          // Desktop Landscape - Lower-Left Cluster (fanning down-left directly below "ATEL" and tagline)
-          { sx: 0.48, sy: 0.77, cx: 0.39, cy: 0.86, ex: 0.29, ey: 0.96, w: 90, colorA: 'shadow', colorB: 'bronze', start: 0.38, end: 0.72 },
-          { sx: 0.44, sy: 0.78, cx: 0.35, cy: 0.87, ex: 0.24, ey: 0.97, w: 105, colorA: 'bronze', colorB: 'gold', start: 0.46, end: 0.82 },
-          { sx: 0.51, sy: 0.79, cx: 0.43, cy: 0.88, ex: 0.33, ey: 0.98, w: 95, colorA: 'taupe', colorB: 'champagne', start: 0.54, end: 0.90 },
-          { sx: 0.41, sy: 0.78, cx: 0.33, cy: 0.86, ex: 0.23, ey: 0.94, w: 80, colorA: 'gold', colorB: 'champagne', start: 0.62, end: 0.98 },
+          // Desktop Landscape - Lower-Left Cluster (6 strokes, fanning down-left toward corner, 2 dark + 4 metallic)
+          // Stroke 6: Charcoal backdrop layer with subtle gold edge catch-light (outer flank)
+          { sx: 0.34, sy: 0.72, cx: 0.22, cy: 0.82, ex: 0.08, ey: 0.90, w: 75, colorA: 'charcoal', colorB: 'bronzeDark', isDark: true, start: 0.36, end: 0.68 },
+          // Stroke 7: Broad deep bronze knife scrape (underlayer)
+          { sx: 0.38, sy: 0.74, cx: 0.26, cy: 0.85, ex: 0.12, ey: 0.96, w: 90, colorA: 'bronzeDark', colorB: 'gold', start: 0.42, end: 0.74 },
+          // Stroke 8: Wide luminous rich gold impasto swipe (primary foreground knife mark)
+          { sx: 0.35, sy: 0.75, cx: 0.24, cy: 0.86, ex: 0.10, ey: 0.94, w: 105, colorA: 'gold', colorB: 'champagne', start: 0.48, end: 0.80 },
+          // Stroke 9: Dark bronze dry-brush knife drag with gold catch-light (divergent angle +14°)
+          { sx: 0.37, sy: 0.77, cx: 0.27, cy: 0.88, ex: 0.16, ey: 0.98, w: 55, colorA: 'charcoal', colorB: 'bronzeDark', isDark: true, start: 0.54, end: 0.86 },
+          // Stroke 10: Champagne cream blade crest swipe (lower highlight layer)
+          { sx: 0.32, sy: 0.73, cx: 0.22, cy: 0.83, ex: 0.10, ey: 0.90, w: 70, colorA: 'champagne', colorB: 'gold', start: 0.60, end: 0.92 },
+          // Stroke 11: Fine rich gold knife edge track (crisp metallic crest)
+          { sx: 0.34, sy: 0.75, cx: 0.23, cy: 0.85, ex: 0.11, ey: 0.93, w: 38, colorA: 'gold', colorB: 'champagne', start: 0.66, end: 0.98 },
         ]
 
     const scaleFactor = (w / 1440 > 0.8 ? Math.min(w / 1440, 1.3) : Math.max(w / 768, 0.75)) * this.dpr
@@ -235,31 +253,42 @@ export class PaintHeroRenderer {
   }
 
   getTextExclusions() {
-    const h1El = document.querySelector('.hero__title')
-    const tagEl = document.querySelector('.hero__tagline-wrapper')
     const padX = (this.width / this.dpr) * 0.04 * this.dpr
     const padY = (this.height / this.dpr) * 0.04 * this.dpr
 
     const exclusions = []
-    if (h1El) {
-      const r = h1El.getBoundingClientRect()
-      exclusions.push({
-        x1: Math.floor(r.left * this.dpr - padX),
-        y1: Math.floor(r.top * this.dpr - padY),
-        x2: Math.ceil(r.right * this.dpr + padX),
-        y2: Math.ceil(r.bottom * this.dpr + padY),
-      })
-    }
-    if (tagEl) {
-      const r = tagEl.getBoundingClientRect()
-      exclusions.push({
-        x1: Math.floor(r.left * this.dpr - padX),
-        y1: Math.floor(r.top * this.dpr - padY),
-        x2: Math.ceil(r.right * this.dpr + padX),
-        y2: Math.ceil(r.bottom * this.dpr + padY),
-      })
+    const targets = [
+      document.querySelector('.hero__title'),
+      document.querySelector('.hero__tagline-wrapper'),
+      document.querySelector('.nav__right'),
+      document.querySelector('.nav__links'),
+      document.querySelector('.hero__scroll-cue'),
+    ]
+
+    for (const el of targets) {
+      if (el) {
+        const r = el.getBoundingClientRect()
+        exclusions.push({
+          x1: Math.floor(r.left * this.dpr - padX),
+          y1: Math.floor(r.top * this.dpr - padY),
+          x2: Math.ceil(r.right * this.dpr + padX),
+          y2: Math.ceil(r.bottom * this.dpr + padY),
+        })
+      }
     }
     return exclusions
+  }
+
+  clearExclusionZones(targetCtx) {
+    const exclusions = this.getTextExclusions()
+    if (!exclusions.length) return
+    const bg = this.palette.bg
+    targetCtx.save()
+    targetCtx.fillStyle = `rgb(${bg.r}, ${bg.g}, ${bg.b})`
+    for (const ex of exclusions) {
+      targetCtx.fillRect(ex.x1, ex.y1, ex.x2 - ex.x1, ex.y2 - ex.y1)
+    }
+    targetCtx.restore()
   }
 
   /**
@@ -272,19 +301,11 @@ export class PaintHeroRenderer {
       this.preRenderStroke(nextIdx)
       nextIdx++
       if (nextIdx < this.strokes.length) {
-        if (typeof window.requestIdleCallback === 'function') {
-          window.requestIdleCallback(() => scheduleNext(), { timeout: 30 })
-        } else {
-          this.preRenderTimeout = setTimeout(scheduleNext, 0)
-        }
+        this.preRenderTimeout = setTimeout(scheduleNext, 8)
       }
     }
 
-    if (typeof window.requestIdleCallback === 'function') {
-      window.requestIdleCallback(() => scheduleNext(), { timeout: 30 })
-    } else {
-      this.preRenderTimeout = setTimeout(scheduleNext, 0)
-    }
+    this.preRenderTimeout = setTimeout(scheduleNext, 8)
   }
 
   /**
@@ -297,7 +318,7 @@ export class PaintHeroRenderer {
     if (s.isReady) return
 
     // In lite or reduced mode, use lightweight height field for massive speedup
-    const resScale = (this.lite || this.reduced) ? 0.22 : 0.70
+    const resScale = (this.lite || this.reduced) ? 0.14 : 0.70
     const gridW = Math.max(4, Math.round(s.boxW * resScale))
     const gridH = Math.max(4, Math.round(s.boxH * resScale))
 
@@ -312,6 +333,8 @@ export class PaintHeroRenderer {
 
     const heightMap = new Float32Array(gridW * gridH)
     const uMap = new Float32Array(gridW * gridH)
+    const vMap = new Float32Array(gridW * gridH)
+    const alphaMap = new Float32Array(gridW * gridH)
     const mask = new Uint8Array(gridW * gridH)
 
     const invScale = 1 / resScale
@@ -375,47 +398,53 @@ export class PaintHeroRenderer {
         if (u < 0 || u > 1 || Math.abs(v) > 1.05) continue
 
         // Flat blunt start with slightly rounded corners (Check #3 compliance)
-        const cornerR = 0.045
+        const cornerR = 0.02
         if (u < cornerR && Math.abs(v) > 1 - cornerR) {
           const cu = cornerR - u
           const cv = Math.abs(v) - (1 - cornerR)
           if (cu * cu + cv * cv > cornerR * cornerR) continue
         }
 
-        // Dry-brush tail breakup (ridges terminate at varying lengths)
-        if (u > 0.70) {
-          const tailEnd = 0.72 + 0.28 * (0.5 + 0.5 * Math.sin(v * 16) * this.noise(v * 6 + index, 1.5))
-          if (u > tailEnd) continue
+        // Dry-brush tail with broken coverage and alpha fall-off
+        let strokeAlpha = 1.0
+        if (u > 0.62) {
+          const tailT = (u - 0.62) / 0.38
+          const bristle = 0.5 + 0.5 * Math.sin(v * 26.0 + this.noise(v * 9 + index, u * 8) * 4)
+          const breakup = this.noise(u * 12 + index * 4, v * 15)
+          const density = bristle * 1.3 - tailT * 0.85 + breakup * 0.25
+          if (density < 0.12) continue
+          strokeAlpha = Math.max(0.05, Math.min(1.0, density * 1.5 * (1 - tailT * 0.75)))
         }
 
         const idx = gy * gridW + gx
         mask[idx] = 1
         uMap[idx] = u
+        vMap[idx] = v
+        alphaMap[idx] = strokeAlpha
 
-        // Organic palette knife impasto height:
-        const wobble = 0.05 * this.noise(u * 2.5 + index * 5, v * 3.0)
-        const vw = v + wobble
+        // 1. Broad low-frequency thickness variation & smooth glossy patches
+        const macroBody = 0.35 * this.noise(u * 1.5 + index * 2.7, v * 1.2)
+        const knifeLump = 0.22 * Math.sin(u * Math.PI * 2.0 + index) * Math.cos(v * Math.PI * 1.2)
 
-        // Parallel knife blade tracks with sharp ridge crests and flat scrape bevels
-        const s1 = Math.sin(vw * Math.PI * 6.0 + 0.4)
-        const s2 = Math.sin(vw * Math.PI * 13.0 + 1.2)
-        const s3 = Math.cos(vw * Math.PI * 21.0 + 0.7)
+        // Smooth glossy patches where blade pressed flat (ridges flatten completely)
+        const glossNoise = this.noise(u * 2.2 + index * 3.1, v * 1.8)
+        const glossFactor = Math.max(0, Math.min(1, (glossNoise - 0.15) * 2.2))
+        const ridgeAmplitude = (1 - glossFactor * 0.85) * 0.18
 
-        const ridge =
-          0.48 * Math.sign(s1) * Math.pow(Math.abs(s1), 0.75) +
-          0.26 * Math.sign(s2) * Math.pow(Math.abs(s2), 0.85) +
-          0.14 * s3
+        // Irregular ridge spacing: clustered fine and coarse ridges along knife edge
+        const ridgeCoord = v * 3.2 + 0.8 * this.noise(v * 4.0 + index * 2.5, u * 1.8)
+        const r1 = Math.sin(ridgeCoord * Math.PI * 2.2)
+        const r2 = Math.sin(ridgeCoord * Math.PI * 5.4 + this.noise(u * 5.0, index)) * 0.45
+        const ridge = (r1 + r2) * ridgeAmplitude
 
         // Raised rim where palette knife blade edges squeeze thick paint
-        const rim = 0.40 * Math.exp(-Math.pow((Math.abs(v) - 0.88) / 0.14, 2))
-        // Low-frequency impasto volume and knife chatter
-        const paintBody = 0.32 * this.noise(u * 2.8 + index * 7, v * 1.8)
+        const rim = 0.24 * Math.exp(-Math.pow((Math.abs(v) - 0.85) / 0.18, 2))
         // Crown across width
-        const crown = 1.05 - 0.25 * v * v
+        const crown = 0.95 - 0.22 * v * v
         // Smooth tail ramp-down
-        const tailFade = u > 0.68 ? Math.max(0, 1 - (u - 0.68) / 0.30) : 1.0
+        const tailFade = u > 0.65 ? Math.max(0, 1 - (u - 0.65) / 0.35) : 1.0
 
-        heightMap[idx] = Math.max(0, (crown + ridge + rim + paintBody) * tailFade)
+        heightMap[idx] = Math.max(0, (crown + ridge + rim + macroBody + knifeLump) * tailFade)
       }
     }
 
@@ -429,10 +458,6 @@ export class PaintHeroRenderer {
     const hvLen = Math.hypot(Hvx, Hvy, Hvz)
     const hx = Hvx / hvLen, hy = Hvy / hvLen, hz = Hvz / hvLen
 
-    const colorA = this.palette[s.colorA] || this.palette.gold
-    const colorB = this.palette[s.colorB] || this.palette.champagne
-    const shadowColor = this.palette.shadow
-
     const imgData = s.ctx.createImageData(gridW, gridH)
     const data = imgData.data
 
@@ -441,10 +466,10 @@ export class PaintHeroRenderer {
         const idx = gy * gridW + gx
         if (!mask[idx]) continue
 
-        // Height gradient normal
+        // Height gradient normal (scaleH calibrated for silky metallic impasto)
         const dh_dx = (heightMap[idx + 1] - heightMap[idx - 1]) * 0.5
         const dh_dy = (heightMap[idx + gridW] - heightMap[idx - gridW]) * 0.5
-        const scaleH = 2.5
+        const scaleH = 1.35
         const nx = -dh_dx * scaleH
         const ny = -dh_dy * scaleH
         const nz = 1.0
@@ -454,35 +479,57 @@ export class PaintHeroRenderer {
         // Diffuse
         const diff = Math.max(0, Nx * Lx + Ny * Ly + Nz * Lz)
 
-        // Specular
-        const dotH = Nx * hx + Ny * hy + Nz * hz
-        const spec = Math.pow(Math.max(0, dotH), 22.0)
+        // 3. Metallic highlight: broader soft specular lobe along stroke direction + sharp ridge specular + glitter flecks
+        const dotH = Math.max(0, Nx * hx + Ny * hy + Nz * hz)
+        const broadSpec = Math.pow(dotH, 6.0) * 0.65
+        const sharpSpec = Math.pow(dotH, 24.0) * 0.80
+        const sparkleNoise = this.noise(gx * 0.35 + index * 6, gy * 0.35)
+        const sparkle = sparkleNoise > 0.76 ? Math.pow((sparkleNoise - 0.76) / 0.24, 2) * 1.0 : 0
+        const totalSpec = broadSpec + sharpSpec + sparkle
 
-        // Metallic sparkle flecks
-        const sparkleNoise = this.noise(gx * 0.2 + index * 5, gy * 0.2)
-        const sparkle = sparkleNoise > 0.78 ? (sparkleNoise - 0.78) * 3.5 * spec : 0
-
-        // Base color interpolation along u
+        // 4. Colour depth: rich gold through deep bronze, darker in grooves and tails
         const u = uMap[idx]
-        const baseR = (1 - u) * colorA.r + u * colorB.r
-        const baseG = (1 - u) * colorA.g + u * colorB.g
-        const baseB = (1 - u) * colorA.b + u * colorB.b
+        const v = vMap[idx]
+        const grooveFactor = Math.max(0, Math.min(1, 0.75 - (heightMap[idx] * 0.40)))
+        const tailDarken = u > 0.6 ? (u - 0.6) * 0.5 : 0
 
-        let r, g, b
-        if (diff < 0.45) {
-          // Shadow tint toward burnt umber #3A2A1C
-          const sf = (0.45 - diff) / 0.45
-          r = (1 - sf) * baseR + sf * shadowColor.r
-          g = (1 - sf) * baseG + sf * shadowColor.g
-          b = (1 - sf) * baseB + sf * shadowColor.b
+        let baseR, baseG, baseB
+        if (s.isDark) {
+          // Charcoal / dark bronze stroke with subtle gold edge catch-light
+          const baseCharcoal = this.palette.charcoal
+          const baseBronze = this.palette.bronzeDark
+          const tColor = 0.5 + 0.5 * v
+          baseR = baseCharcoal.r + (baseBronze.r - baseCharcoal.r) * tColor
+          baseG = baseCharcoal.g + (baseBronze.g - baseCharcoal.g) * tColor
+          baseB = baseCharcoal.b + (baseBronze.b - baseCharcoal.b) * tColor
+
+          // Subtle gold edge catch-light along the raised rim / crests
+          const edgeGlow = (Math.abs(v) > 0.70 ? (Math.abs(v) - 0.70) * 3.3 : 0) * (0.35 + 0.65 * diff)
+          const gold = this.palette.gold
+          baseR += (gold.r * 0.70 - baseR) * edgeGlow
+          baseG += (gold.g * 0.70 - baseG) * edgeGlow
+          baseB += (gold.b * 0.70 - baseB) * edgeGlow
         } else {
-          // Highlight: golden champagne boost preserving warm hue
-          const lf = (diff - 0.45) / 0.55
-          const boost = spec * 42 + sparkle * 75
-          r = baseR * (0.85 + lf * 0.2) + boost * 1.0
-          g = baseG * (0.85 + lf * 0.2) + boost * 0.73
-          b = baseB * (0.85 + lf * 0.2) + boost * 0.35
+          // Gradient from rich gold through deep bronze
+          const cA = this.palette[s.colorA] || this.palette.gold
+          const cB = this.palette[s.colorB] || this.palette.champagne
+          const tGrad = Math.max(0, Math.min(1, 0.5 + 0.5 * v + 0.3 * (u - 0.5)))
+          baseR = cA.r + (cB.r - cA.r) * tGrad
+          baseG = cA.g + (cB.g - cA.g) * tGrad
+          baseB = cA.b + (cB.b - cA.b) * tGrad
+
+          // Darker in deep grooves and hollows (burnt umber shadow)
+          const sh = this.palette.shadow
+          const shadowWeight = grooveFactor * 0.40 + tailDarken
+          baseR = baseR * (1 - shadowWeight) + sh.r * shadowWeight
+          baseG = baseG * (1 - shadowWeight) + sh.g * shadowWeight
+          baseB = baseB * (1 - shadowWeight) + sh.b * shadowWeight
         }
+
+        const hl = this.palette.highlight
+        let r = baseR * (0.45 + 0.55 * diff) + hl.r * totalSpec
+        let g = baseG * (0.45 + 0.55 * diff) + hl.g * totalSpec
+        let b = baseB * (0.45 + 0.55 * diff) + hl.b * totalSpec
 
         // Hue-preserving luminance scaling if channels saturate > 255
         const maxVal = Math.max(r, g, b)
@@ -496,7 +543,7 @@ export class PaintHeroRenderer {
         data[pIdx] = Math.round(r)
         data[pIdx + 1] = Math.round(g)
         data[pIdx + 2] = Math.round(b)
-        data[pIdx + 3] = 255
+        data[pIdx + 3] = Math.round(255 * (alphaMap[idx] || 1.0))
       }
     }
 
@@ -537,6 +584,7 @@ export class PaintHeroRenderer {
         this.compositeAllStrokes()
       }
       this.ctx.drawImage(this.offscreenCanvas, 0, 0)
+      this.clearExclusionZones(this.ctx)
       this.drawAmbientGlow(lightParams)
       return
     }
@@ -559,6 +607,7 @@ export class PaintHeroRenderer {
       }
     }
 
+    this.clearExclusionZones(this.ctx)
     this.drawAmbientGlow(lightParams, 0.4)
   }
 
@@ -609,6 +658,7 @@ export class PaintHeroRenderer {
       }
       this.drawStrokeWithShadow(this.offscreenCtx, s)
     }
+    this.clearExclusionZones(this.offscreenCtx)
     this.allStrokesComposited = true
   }
 
@@ -641,6 +691,7 @@ export class PaintHeroRenderer {
     this.ctx.fillStyle = `rgb(${bg.r}, ${bg.g}, ${bg.b})`
     this.ctx.fillRect(0, 0, this.width, this.height)
     this.ctx.drawImage(this.offscreenCanvas, 0, 0)
+    this.clearExclusionZones(this.ctx)
     this.drawAmbientGlow({ lx: 0.6, ly: 0.5 }, 0.8)
   }
 }

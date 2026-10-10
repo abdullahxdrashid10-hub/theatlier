@@ -50,8 +50,9 @@
   user-select: none;
 }
 
-/* Accessible H1 lockup */
+/* Accessible H1 lockup with feathered radial shadow */
 .hero__title {
+  position: relative;
   margin: 0;
   display: flex;
   flex-direction: column;
@@ -62,12 +63,23 @@
   line-height: 1;
 }
 
+.hero__title::before {
+  content: '';
+  position: absolute;
+  inset: -80px -120px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(ellipse closest-side, rgba(21, 20, 16, 0.55) 0%, rgba(21, 20, 16, 0.30) 60%, rgba(21, 20, 16, 0) 100%);
+  z-index: -1;
+}
+
 .hero__word-the {
   font-size: clamp(0.75rem, 0.6rem + 0.6vw, 1.1rem);
   font-weight: 400;
   letter-spacing: clamp(0.35em, 0.25em + 0.3vw, 0.55em);
   margin-bottom: clamp(0.35rem, 0.2rem + 0.4vw, 0.75rem);
   color: var(--taupe);
+  text-shadow: 0 0 18px rgba(21, 20, 16, 0.85);
   opacity: 0;
   transform: translateY(6px);
   will-change: opacity, transform, letter-spacing;
@@ -78,6 +90,7 @@
   font-weight: 300;
   letter-spacing: var(--tracking-wordmark);
   color: var(--text);
+  text-shadow: 0 0 18px rgba(21, 20, 16, 0.85);
   line-height: 0.95;
   margin-bottom: clamp(0.4rem, 0.2rem + 0.5vw, 0.9rem);
   opacity: 0;
@@ -128,6 +141,7 @@
   font-weight: 400;
   letter-spacing: clamp(0.35em, 0.25em + 0.3vw, 0.55em);
   color: var(--taupe);
+  text-shadow: 0 0 18px rgba(21, 20, 16, 0.85);
   white-space: nowrap;
 }
 
@@ -140,12 +154,23 @@
   position: relative;
 }
 
+.hero__tagline-wrapper::before {
+  content: '';
+  position: absolute;
+  inset: -60px -90px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(ellipse closest-side, rgba(21, 20, 16, 0.55) 0%, rgba(21, 20, 16, 0.25) 60%, rgba(21, 20, 16, 0) 100%);
+  z-index: -1;
+}
+
 .hero__tagline {
   font-family: var(--font-script);
   font-size: clamp(1.8rem, 1.2rem + 2.5vw, 3.6rem);
   color: var(--gold);
   line-height: 1.1;
   letter-spacing: 0 !important;
+  text-shadow: 0 0 18px rgba(21, 20, 16, 0.85);
   margin: 0;
   opacity: 0;
   transform: translateY(8px);
@@ -178,9 +203,20 @@
   font-size: var(--text-xs);
   letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
+  text-shadow: 0 0 18px rgba(21, 20, 16, 0.85);
   opacity: 0;
   pointer-events: none;
   transition: opacity var(--duration) var(--ease);
+}
+
+.hero__scroll-cue::before {
+  content: '';
+  position: absolute;
+  inset: -40px -60px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(ellipse closest-side, rgba(21, 20, 16, 0.55) 0%, rgba(21, 20, 16, 0) 100%);
+  z-index: -1;
 }
 
 .hero__scroll-cue[data-hidden="true"] {

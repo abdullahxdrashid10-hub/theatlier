@@ -32,7 +32,7 @@ export function useHeroAnimation({
     const qo = sp.get('quality')
     if (qo === 'lite') return 'lite'
     if (qo === 'full') return 'intro'
-    if ((navigator.hardwareConcurrency || 4) <= 4 || (navigator.deviceMemory || 4) <= 4 || window.innerWidth < 768) {
+    if ((navigator.hardwareConcurrency || 4) <= 2 || window.innerWidth < 768) {
       return 'lite'
     }
     return 'intro'
@@ -49,9 +49,6 @@ export function useHeroAnimation({
     const canvas = canvasRef.current
     const container = containerRef.current
     if (!canvas || !container) return
-    if (typeof window !== 'undefined' && !window.__heroMountedTime) {
-      window.__heroMountedTime = performance.now()
-    }
 
     // 1. Quality detection
     const searchParams = new URLSearchParams(window.location.search)
@@ -65,9 +62,8 @@ export function useHeroAnimation({
       isLite = false
     } else {
       const hwConc = navigator.hardwareConcurrency || 4
-      const devMem = navigator.deviceMemory || 4
       const isSmallScreen = window.innerWidth < 768
-      if (hwConc <= 4 || devMem <= 4 || isSmallScreen) {
+      if (hwConc <= 2 || isSmallScreen) {
         isLite = true
       }
     }
@@ -311,6 +307,9 @@ export function useHeroAnimation({
     }
 
     gsap.ticker.add(onTick)
+    if (typeof window !== 'undefined') {
+      window.__heroMountedTime = performance.now()
+    }
 
     return () => {
       gsap.ticker.remove(onTick)
