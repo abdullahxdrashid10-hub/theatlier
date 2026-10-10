@@ -11,6 +11,7 @@ import '@fontsource/allura'
 import './styles/tokens.css'
 import './styles/global.css'
 import './styles/layout.css'
+import './styles/buttons.css'
 
 import App from './App'
 

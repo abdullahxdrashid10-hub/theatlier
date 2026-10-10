@@ -145,9 +145,9 @@ export default function FeaturedWorks() {
         )}
 
         <div ref={footerRef} className="featured-works__footer">
-          <Link to="/shop" className="featured-works__cta">
+          <Link to="/shop" className="btn btn--framed">
             <span>View all works</span>
-            <span className="featured-works__cta-arrow" aria-hidden="true">
+            <span className="btn__arrow" aria-hidden="true">
               &rarr;
             </span>
           </Link>

@@ -1,0 +1,36 @@
+/* ==========================================================================
+   Page Transitions & Sequencing — Gallery Noir
+   ========================================================================== */
+
+/* Top Transition Progress Beam */
+.page-transition-beam {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: calc(var(--z-nav) + 20);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--gold) 50%,
+    var(--champagne) 80%,
+    transparent 100%
+  );
+  box-shadow: 0 0 10px rgba(208, 169, 113, 0.6);
+  pointer-events: none;
+  transform-origin: left;
+}
+
+/* Page entrance container */
+.page-transition-wrapper {
+  position: relative;
+  width: 100%;
+  min-height: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-transition-beam {
+    display: none !important;
+  }
+}

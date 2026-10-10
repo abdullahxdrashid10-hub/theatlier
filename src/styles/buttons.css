@@ -1,0 +1,273 @@
+/* ==========================================================================
+   Gallery Noir Button System — 3 Exquisite Mock Variations & Filter Toggles
+   ========================================================================== */
+
+/* Base button / link */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  border-radius: 2px;
+  border: 1px solid transparent;
+  transition:
+    transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.4s ease,
+    background-color 0.4s ease,
+    border-color 0.4s ease,
+    color 0.3s ease;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 4px;
+}
+
+.btn__arrow {
+  color: inherit;
+  display: inline-block;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), color 0.3s ease;
+}
+
+/* --------------------------------------------------------------------------
+   MOCK 1: The Gilded Shimmer (Solid Gold with Liquid Light Beam)
+   Used for high-priority primary actions (e.g. "Explore the Collection")
+   -------------------------------------------------------------------------- */
+.btn--gilded {
+  background: var(--gold);
+  color: var(--bg);
+  font-weight: 500;
+  padding: var(--space-3) var(--space-6);
+  border-color: rgba(228, 196, 143, 0.4);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.btn--gilded::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    115deg,
+    transparent 15%,
+    rgba(255, 255, 255, 0.42) 50%,
+    transparent 85%
+  );
+  transform: translateX(-100%);
+  transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn--gilded:hover {
+    background: var(--champagne);
+    transform: translateY(-3px);
+    box-shadow:
+      0 14px 32px -8px rgba(0, 0, 0, 0.75),
+      0 0 24px rgba(208, 169, 113, 0.3);
+  }
+
+  .btn--gilded:hover::before {
+    transform: translateX(100%);
+  }
+
+  .btn--gilded:hover .btn__arrow {
+    transform: translateX(4px);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   MOCK 2: The Framed Atelier (Matte Obsidian with Expanding Gold Hairline)
+   Used for secondary editorial actions (e.g. "View All Works", "Details")
+   -------------------------------------------------------------------------- */
+.btn--framed {
+  background: var(--surface);
+  color: var(--text);
+  padding: var(--space-3) var(--space-6);
+  border-color: var(--line);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.btn--framed::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1.5px;
+  background: var(--gold);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn--framed::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(208, 169, 113, 0.08) 0%,
+    transparent 65%
+  );
+  opacity: 0;
+  transition: opacity 0.45s ease;
+  pointer-events: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn--framed:hover {
+    border-color: rgba(208, 169, 113, 0.65);
+    color: var(--champagne);
+    transform: translateY(-3px);
+    box-shadow:
+      0 14px 34px -8px rgba(0, 0, 0, 0.8),
+      0 0 20px rgba(208, 169, 113, 0.15);
+  }
+
+  .btn--framed:hover::before {
+    transform: scaleX(1);
+  }
+
+  .btn--framed:hover::after {
+    opacity: 1;
+  }
+
+  .btn--framed:hover .btn__arrow {
+    transform: translateX(4px);
+    color: var(--gold);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   MOCK 3: The Whispering Line (Minimalist Gallery Link with Sliding Underline)
+   Used for quiet inline journeys (e.g. "The Artist's Journey ->")
+   -------------------------------------------------------------------------- */
+.btn--minimal {
+  background: transparent;
+  color: var(--text);
+  padding: var(--space-2) var(--space-4);
+  border-color: transparent;
+}
+
+.btn--minimal::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: var(--space-4);
+  right: var(--space-4);
+  height: 1px;
+  background: var(--gold);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn--minimal:hover {
+    color: var(--champagne);
+  }
+
+  .btn--minimal:hover::after {
+    transform: scaleX(1);
+  }
+
+  .btn--minimal:hover .btn__arrow {
+    transform: translateX(4px);
+    color: var(--gold);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   FILTER TOGGLES: Segmented Gallery Pill Switch
+   Used in Shop and Collection filters (All / Available / Sold)
+   -------------------------------------------------------------------------- */
+.gallery-toggles {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(30, 28, 23, 0.9);
+  border: 1px solid var(--line);
+  padding: 3px;
+  border-radius: 4px;
+  gap: 3px;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+.gallery-toggle-btn {
+  position: relative;
+  padding: var(--space-2) var(--space-5);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--taupe);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  cursor: pointer;
+  transition:
+    color 0.3s ease,
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+  white-space: nowrap;
+}
+
+.gallery-toggle-btn:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .gallery-toggle-btn:hover {
+    color: var(--champagne);
+  }
+}
+
+.gallery-toggle-btn--active {
+  color: var(--text);
+  font-weight: 500;
+  background: rgba(75, 61, 44, 0.5);
+  border-color: rgba(208, 169, 113, 0.4);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.gallery-toggle-btn--active::after {
+  content: '';
+  position: absolute;
+  bottom: 3px;
+  left: 25%;
+  right: 25%;
+  height: 1px;
+  background: var(--gold);
+  box-shadow: 0 0 6px rgba(208, 169, 113, 0.7);
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .btn:hover,
+  .btn__arrow,
+  .btn:hover .btn__arrow,
+  .gallery-toggle-btn {
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .btn--gilded::before,
+  .btn--framed::before,
+  .btn--framed::after,
+  .btn--minimal::after {
+    display: none !important;
+  }
+}

@@ -55,12 +55,13 @@ export default function StudioIntro() {
         </p>
 
         <div className="studio-intro__actions">
-          <Link to="/shop" className="studio-intro__link-primary">
+          <Link to="/shop" className="btn btn--gilded">
             <span>Explore the collection</span>
-            <span aria-hidden="true">&rarr;</span>
+            <span className="btn__arrow" aria-hidden="true">&rarr;</span>
           </Link>
-          <Link to="/about" className="studio-intro__link-secondary">
-            <span>The artist’s journey &rarr;</span>
+          <Link to="/about" className="btn btn--minimal">
+            <span>The artist’s journey</span>
+            <span className="btn__arrow" aria-hidden="true">&rarr;</span>
           </Link>
         </div>
       </div>

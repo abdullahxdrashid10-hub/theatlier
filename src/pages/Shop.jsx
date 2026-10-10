@@ -114,13 +114,13 @@ export default function Shop() {
         <h1 className="shop__title">Shop</h1>
         <p className="shop__subtitle">Original paintings, each one of one.</p>
 
-        {/* Filter Row: All / Available / Sold */}
-        <div className="shop__filters" role="tablist" aria-label="Filter collection by availability">
+        {/* Filter Row: Segmented Gallery Toggles */}
+        <div className="gallery-toggles" role="tablist" aria-label="Filter collection by availability">
           <button
             type="button"
             role="tab"
             aria-selected={filter === 'all'}
-            className={`shop__filter-btn ${filter === 'all' ? 'shop__filter-btn--active' : ''}`}
+            className={`gallery-toggle-btn ${filter === 'all' ? 'gallery-toggle-btn--active' : ''}`}
             onClick={() => setFilter('all')}
           >
             All
@@ -129,7 +129,7 @@ export default function Shop() {
             type="button"
             role="tab"
             aria-selected={filter === 'available'}
-            className={`shop__filter-btn ${filter === 'available' ? 'shop__filter-btn--active' : ''}`}
+            className={`gallery-toggle-btn ${filter === 'available' ? 'gallery-toggle-btn--active' : ''}`}
             onClick={() => setFilter('available')}
           >
             Available
@@ -138,7 +138,7 @@ export default function Shop() {
             type="button"
             role="tab"
             aria-selected={filter === 'sold'}
-            className={`shop__filter-btn ${filter === 'sold' ? 'shop__filter-btn--active' : ''}`}
+            className={`gallery-toggle-btn ${filter === 'sold' ? 'gallery-toggle-btn--active' : ''}`}
             onClick={() => setFilter('sold')}
           >
             Sold
