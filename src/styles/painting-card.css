@@ -1,0 +1,171 @@
+/* Painting Card — Gallery Noir Styling */
+.painting-card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  outline: none;
+  position: relative;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.painting-card:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 6px;
+  border-radius: 2px;
+}
+
+.painting-card__frame {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: 0 10px 30px -10px rgba(10, 8, 6, 0.55);
+  position: relative;
+  overflow: hidden;
+  border-radius: 2px;
+  transition:
+    border-color 0.4s ease,
+    box-shadow 0.4s ease;
+}
+
+.painting-card__image-wrap {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.painting-card__image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+/* Light sweep across image on desktop hover */
+.painting-card__image-wrap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 20%,
+    rgba(228, 196, 143, 0.14) 50%,
+    transparent 80%
+  );
+  transform: translateX(-100%);
+  transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .painting-card:not(.painting-card--sold):hover {
+    transform: translateY(-4px);
+  }
+
+  .painting-card:not(.painting-card--sold):hover .painting-card__frame {
+    border-color: rgba(208, 169, 113, 0.45);
+    box-shadow:
+      0 18px 40px -10px rgba(0, 0, 0, 0.75),
+      0 0 24px rgba(208, 169, 113, 0.08);
+  }
+
+  .painting-card:not(.painting-card--sold):hover .painting-card__image-wrap::after {
+    transform: translateX(100%);
+  }
+}
+
+/* Details below image */
+.painting-card__details {
+  padding-top: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.painting-card__title {
+  font-family: var(--font-heading);
+  font-weight: 300;
+  font-size: var(--text-lg);
+  color: var(--text);
+  line-height: var(--leading-snug);
+  letter-spacing: 0.01em;
+  margin: 0;
+  transition: color 0.25s ease;
+}
+
+.painting-card:not(.painting-card--sold):hover .painting-card__title {
+  color: var(--champagne);
+}
+
+.painting-card__meta {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  color: var(--taupe);
+  letter-spacing: 0.02em;
+  line-height: var(--leading-snug);
+  margin: 0;
+}
+
+.painting-card__price-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: var(--space-1);
+}
+
+.painting-card__price {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: var(--text-sm);
+  color: var(--gold);
+  letter-spacing: 0.04em;
+}
+
+/* Sold state */
+.painting-card--sold {
+  cursor: default;
+}
+
+.painting-card--sold .painting-card__image {
+  opacity: 0.52;
+  filter: grayscale(25%);
+}
+
+.painting-card__sold-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--taupe);
+  text-transform: uppercase;
+}
+
+.painting-card__sold-line {
+  display: inline-block;
+  width: 20px;
+  height: 1px;
+  background: var(--line);
+}
+
+/* Editorial / Featured variant */
+.painting-card--editorial .painting-card__title {
+  font-size: var(--text-xl);
+}
+
+.painting-card--editorial .painting-card__price {
+  font-size: var(--text-base);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .painting-card,
+  .painting-card:hover {
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .painting-card__image-wrap::after {
+    display: none !important;
+  }
+}
