@@ -2,6 +2,13 @@ import { Link } from 'react-router-dom'
 import { formatPKR } from '../utils/formatPKR'
 import '../styles/painting-card.css'
 
+// Exquisite high-resolution mockups for featured artworks
+const MOCK_PREVIEWS = {
+  'placeholder-ember-field': '/placeholders/mock-ember-field.jpg',
+  'placeholder-bronze-hour': '/placeholders/mock-bronze-hour.jpg',
+  'placeholder-gilded-wake': '/placeholders/mock-gilded-wake.jpg',
+}
+
 export default function PaintingCard({ painting, variant = 'default', className = '' }) {
   if (!painting) return null
 
@@ -10,10 +17,12 @@ export default function PaintingCard({ painting, variant = 'default', className 
     ? `${painting.widthCm} / ${painting.heightCm}`
     : '4 / 3'
 
-  const primaryImage = painting.images?.[0] || `/placeholders/placeholder-01.svg`
+  const primaryImage = MOCK_PREVIEWS[painting.slug] || painting.images?.[0] || '/placeholders/placeholder-01.svg'
 
   return (
-    <article className={`painting-card ${isSold ? 'painting-card--sold' : ''} ${variant === 'editorial' ? 'painting-card--editorial' : ''} ${className}`}>
+    <article
+      className={`painting-card ${isSold ? 'painting-card--sold' : ''} ${variant === 'editorial' ? 'painting-card--editorial' : ''} ${className}`}
+    >
       <Link
         to={`/painting/${painting.slug}`}
         className="painting-card__link"
@@ -37,9 +46,10 @@ export default function PaintingCard({ painting, variant = 'default', className 
         </div>
 
         <div className="painting-card__details">
+          <span className="painting-card__kicker">Original · One of one</span>
           <h3 className="painting-card__title">{painting.title}</h3>
           <p className="painting-card__meta">
-            {painting.medium}, {painting.widthCm} × {painting.heightCm} cm
+            {painting.medium} — {painting.widthCm} × {painting.heightCm} cm
           </p>
           <div className="painting-card__price-row">
             {isSold ? (
