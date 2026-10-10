@@ -163,6 +163,7 @@ console.log('\n--- 2. Testing M1.2 Hero Canvas, States & Timeline ---')
   assert('H1 contains DOM text lockup (THE, ATELIER, BY SK)', canvasProps.theText === 'THE' && canvasProps.atelierText === 'ATELIER')
   assert('Tagline contains "Art lives here"', canvasProps.taglineText === 'Art lives here')
   assert('Canvas DPR scaling is non-blurry (buffered at >= 1.5x)', canvasProps.bufWidth >= canvasProps.cssWidth * 1.5)
+  assert('Normal mode: canvas buffer larger than 300x150', canvasProps.bufWidth > 300 && canvasProps.bufHeight > 150, `(${canvasProps.bufWidth}x${canvasProps.bufHeight})`)
 
   // Verify tagline script font has letter-spacing 0
   const taglineLetterSpacing = await page.evaluate(() => {
@@ -205,6 +206,7 @@ console.log('\n--- 2. Testing M1.2 Hero Canvas, States & Timeline ---')
 
   await sleep(1500)
   await page.screenshot({ path: path.join(SHOTS_DIR, 'd1440_hero_final.png') })
+  await page.screenshot({ path: path.join(SHOTS_DIR, 'd1440_normal_hero.png') })
 
   // Check state transitioned to ambient
   await page.waitForFunction(() => document.querySelector('.hero')?.getAttribute('data-hero-state') === 'ambient', { timeout: 4000 })
@@ -223,7 +225,26 @@ console.log('\n--- 2. Testing M1.2 Hero Canvas, States & Timeline ---')
   })
   assert('Canvas strokes rendered noticeably (>= 8% pixels differ from background)', finalDiff >= 0.08, `(${((finalDiff)*100).toFixed(1)}%)`)
 
-  // NEW CHECK 1: No stroke pixel overlaps padded text boxes (4% padded)
+  // Check canvas corners equal warm --bg (#151410 / rgb(21, 20, 16))
+  const normalCorners = await page.evaluate(() => {
+    const c = document.querySelector('.hero__canvas')
+    const ctx = c.getContext('2d')
+    const pts = [
+      [2, 2],
+      [c.width - 3, 2],
+      [2, c.height - 3],
+      [c.width - 3, c.height - 3],
+    ]
+    const colors = pts.map(([x, y]) => {
+      const p = ctx.getImageData(x, y, 1, 1).data
+      return [p[0], p[1], p[2]]
+    })
+    const isBg = colors.every(([r, g, b]) => Math.abs(r - 21) <= 4 && Math.abs(g - 20) <= 4 && Math.abs(b - 16) <= 4)
+    return { isBg, colors }
+  })
+  assert('Normal mode: canvas corners equal --bg (21, 20, 16)', normalCorners.isBg, JSON.stringify(normalCorners.colors))
+
+  // CHECK: No stroke pixel overlaps padded text boxes (4% padded)
   const overlapPixels = await page.evaluate(() => {
     const c = document.querySelector('.hero__canvas')
     const ctx = c.getContext('2d')
@@ -261,7 +282,7 @@ console.log('\n--- 2. Testing M1.2 Hero Canvas, States & Timeline ---')
   })
   assert('No stroke pixel overlaps the padded text boxes at final frame', overlapPixels === 0, `(${overlapPixels} pixels)`)
 
-  // NEW CHECK 2: Colour check (hue in [22°, 46°] for pixels > 60 brightness, mean sat >= 0.25)
+  // CHECK: Colour check (hue in [22°, 46°] for pixels > 60 brightness, mean sat >= 0.25)
   const colorMetrics = await page.evaluate(() => {
     const c = document.querySelector('.hero__canvas')
     const ctx = c.getContext('2d')
@@ -302,23 +323,99 @@ console.log('\n--- 2. Testing M1.2 Hero Canvas, States & Timeline ---')
   assert('Colour: bright stroke pixels hue between 22° and 46° (<= 2% outside)', colorMetrics.invalidPct <= 2.0, `(${colorMetrics.invalidPct.toFixed(2)}% outside [22°, 46°])`)
   assert('Colour: mean saturation of stroke pixels >= 0.25', colorMetrics.meanSat >= 0.25, `(mean sat: ${colorMetrics.meanSat.toFixed(3)})`)
 
-  // NEW CHECK 3: Stroke shape (width at 5% is at least 85% of width at 50% - proves not pointed)
-  const shapeRatio = await page.evaluate(() => {
-    const cornerR = 0.045
-    function widthAt(u) {
-      if (u <= 0) return 0
-      if (u < cornerR) return Math.sqrt(Math.max(0, 1 - Math.pow((cornerR - u) / cornerR * 0.5, 2)))
-      return 1.0
+  // CHECK: Real stroke shape measurement (measures actual painted cross-section pixels of stroke 0 on its canvas)
+  const realShapeRatio = await page.evaluate(() => {
+    const renderer = window.__heroRenderer
+    if (!renderer || !renderer.strokes || !renderer.strokes[0]) return 0
+    const s = renderer.strokes[0]
+    const w = s.canvas.width
+    const h = s.canvas.height
+    const imgData = s.ctx.getImageData(0, 0, w, h).data
+    const spine = s.spine
+    const resScale = renderer.lite ? 0.35 : 1.0
+
+    function measurePaintedWidth(targetU) {
+      let bestP = spine[0]
+      let minDiff = Infinity
+      for (const p of spine) {
+        if (Math.abs(p.t - targetU) < minDiff) {
+          minDiff = Math.abs(p.t - targetU)
+          bestP = p
+        }
+      }
+
+      const halfW = s.strokeW * 0.75
+      const steps = 120
+      let firstStep = -1
+      let lastStep = -1
+
+      for (let step = 0; step <= steps; step++) {
+        const offset = -halfW + (step / steps) * (2 * halfW)
+        const worldX = bestP.x + bestP.nx * offset
+        const worldY = bestP.y + bestP.ny * offset
+        const gx = Math.round((worldX - s.boxX) * resScale)
+        const gy = Math.round((worldY - s.boxY) * resScale)
+
+        if (gx >= 0 && gx < w && gy >= 0 && gy < h) {
+          const idx = (gy * w + gx) * 4
+          if (imgData[idx + 3] > 20) {
+            if (firstStep === -1) firstStep = step
+            lastStep = step
+          }
+        }
+      }
+      return firstStep !== -1 && lastStep >= firstStep ? (lastStep - firstStep) / steps : 0
     }
-    return widthAt(0.05) / widthAt(0.50)
+
+    const w5 = measurePaintedWidth(0.05)
+    const w50 = measurePaintedWidth(0.50)
+    return w50 > 0 ? w5 / w50 : 0
   })
-  assert('Stroke shape: width at 5% length is at least 85% of width at 50% (not pointed)', shapeRatio >= 0.85, `(${(shapeRatio * 100).toFixed(1)}%)`)
+  assert('Stroke shape: real rendered width at 5% is at least 85% of width at 50% (blunt knife, not pointed)', realShapeRatio >= 0.85, `(${(realShapeRatio * 100).toFixed(1)}%)`)
 
   // Capture 3x crop of single stroke for inspection
   await page.screenshot({
     path: path.join(SHOTS_DIR, 'stroke_crop_3x.png'),
     clip: { x: 300, y: 700, width: 320, height: 190 },
   })
+
+  // CHECK: Redraw after resize
+  console.log('Testing redraw after resize...')
+  const preResizeW = canvasProps.bufWidth
+  await page.setViewportSize({ width: 1024, height: 768 })
+  await sleep(350)
+  const resizeState = await page.evaluate(() => {
+    const c = document.querySelector('.hero__canvas')
+    const ctx = c.getContext('2d')
+    const d = ctx.getImageData(0, 0, c.width, c.height).data
+    let diff = 0
+    for (let i = 0; i < d.length; i += 4) {
+      if (Math.abs(d[i]-21)>20 || Math.abs(d[i+1]-20)>20 || Math.abs(d[i+2]-16)>20) diff++
+    }
+    const corners = [
+      [2, 2],
+      [c.width - 3, 2],
+      [2, c.height - 3],
+      [c.width - 3, c.height - 3],
+    ].map(([x, y]) => {
+      const p = ctx.getImageData(x, y, 1, 1).data
+      return [p[0], p[1], p[2]]
+    })
+    const cornersBg = corners.every(([r, g, b]) => Math.abs(r - 21) <= 4 && Math.abs(g - 20) <= 4 && Math.abs(b - 16) <= 4)
+    return {
+      bufWidth: c.width,
+      bufHeight: c.height,
+      diffFraction: diff / (c.width * c.height),
+      cornersBg,
+    }
+  })
+  assert('Redraw after resize: buffer updated to new size and larger than 300x150', resizeState.bufWidth !== preResizeW && resizeState.bufWidth > 300 && resizeState.bufHeight > 150, `(${resizeState.bufWidth}x${resizeState.bufHeight})`)
+  assert('Redraw after resize: canvas redrawn with strokes (diff >= 8%)', resizeState.diffFraction >= 0.08, `(${((resizeState.diffFraction)*100).toFixed(1)}%)`)
+  assert('Redraw after resize: canvas corners remain --bg (21, 20, 16)', resizeState.cornersBg)
+
+  // Restore 1440x900 viewport
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await sleep(300)
 
   // Check Offscreen / Scroll paused state
   console.log('Testing IntersectionObserver off-screen pause...')
@@ -355,6 +452,8 @@ console.log('\n--- Capturing Timeline at 390px Mobile Viewport (1.0s, 2.0s, fina
   await sleep(1500)
   await mPage.screenshot({ path: path.join(SHOTS_DIR, 'm390_hero_final.png') })
 
+  await mPage.screenshot({ path: path.join(SHOTS_DIR, 'm390_normal_hero.png') })
+
   const mobileState = await mPage.evaluate(() => document.querySelector('.hero').getAttribute('data-hero-state'))
   assert('Mobile hero initializes and settles in "lite" mode', mobileState === 'lite')
 
@@ -373,36 +472,121 @@ console.log('\n--- Capturing Timeline at 390px Mobile Viewport (1.0s, 2.0s, fina
 }
 
 // -------------------------------------------------------------
-// 3. REDUCED MOTION EMULATION TEST
+// 3. REDUCED MOTION EMULATION TEST & MEASUREMENT
 // -------------------------------------------------------------
-console.log('\n--- 3. Testing prefers-reduced-motion fallback ---')
+console.log('\n--- 3. Testing prefers-reduced-motion fallback & main-thread cost ---')
 {
   const rCtx = await browser.newContext({
     viewport: { width: 1440, height: 900 },
     reducedMotion: 'reduce',
   })
   const rPage = await rCtx.newPage()
+
+  // Set CPU throttling to 4x to measure drawReducedMotion main-thread cost honestly
+  const rCdp = await rCtx.newCDPSession(rPage)
+  await rCdp.send('Emulation.setCPUThrottlingRate', { rate: 4 })
+
   await rPage.goto(BASE + '/', { waitUntil: 'networkidle' })
-  await sleep(300)
+  await sleep(400)
 
   const reducedState = await rPage.evaluate(() => {
     const hero = document.querySelector('.hero')
+    const canvas = document.querySelector('.hero__canvas')
+    const ctx = canvas.getContext('2d')
     const the = document.querySelector('.hero__word-the')
     const atelier = document.querySelector('.hero__word-atelier')
     const tagline = document.querySelector('.hero__tagline')
+
+    const pts = [
+      [2, 2],
+      [canvas.width - 3, 2],
+      [2, canvas.height - 3],
+      [canvas.width - 3, canvas.height - 3],
+    ]
+    const corners = pts.map(([x, y]) => {
+      const p = ctx.getImageData(x, y, 1, 1).data
+      return [p[0], p[1], p[2]]
+    })
+    const cornersBg = corners.every(([r, g, b]) => Math.abs(r - 21) <= 4 && Math.abs(g - 20) <= 4 && Math.abs(b - 16) <= 4)
+
+    const d = ctx.getImageData(0, 0, canvas.width, canvas.height).data
+    let diff = 0
+    for (let i = 0; i < d.length; i += 4) {
+      if (Math.abs(d[i]-21)>20 || Math.abs(d[i+1]-20)>20 || Math.abs(d[i+2]-16)>20) diff++
+    }
+
     return {
       state: hero.getAttribute('data-hero-state'),
       theOpacity: getComputedStyle(the).opacity,
       atelierOpacity: getComputedStyle(atelier).opacity,
       taglineOpacity: getComputedStyle(tagline).opacity,
+      bufWidth: canvas.width,
+      bufHeight: canvas.height,
+      cornersBg,
+      corners,
+      diffFraction: diff / (canvas.width * canvas.height),
+      reducedCost: window.__heroReducedMotionCostMs || 0,
     }
   })
 
   assert('Hero data-hero-state is "reduced" under prefers-reduced-motion', reducedState.state === 'reduced')
   assert('All text is immediately visible with full opacity', reducedState.theOpacity === '1' && reducedState.atelierOpacity === '1' && reducedState.taglineOpacity === '1')
+  assert('Reduced motion: canvas buffer larger than 300x150', reducedState.bufWidth > 300 && reducedState.bufHeight > 150, `(${reducedState.bufWidth}x${reducedState.bufHeight})`)
+  assert('Reduced motion: canvas corners equal --bg (21, 20, 16)', reducedState.cornersBg, JSON.stringify(reducedState.corners))
+  assert('Reduced motion: at least 8% pixels differ from background', reducedState.diffFraction >= 0.08, `(${((reducedState.diffFraction)*100).toFixed(1)}%)`)
 
+  console.log(`[PERFORMANCE] drawReducedMotion main-thread cost (4x throttle): ${reducedState.reducedCost.toFixed(2)} ms`)
+  assert('Reduced motion: drawReducedMotion cost measured and under 250ms on 4x throttled run', reducedState.reducedCost < 250, `(${reducedState.reducedCost.toFixed(2)} ms)`)
+
+  await rPage.screenshot({ path: path.join(SHOTS_DIR, 'd1440_reduced_hero.png') })
   await rPage.screenshot({ path: path.join(SHOTS_DIR, 'reduced_motion_hero.png') })
+
+  // Test redraw on resize under reduced motion
+  console.log('Testing reduced-motion redraw after resize...')
+  await rPage.setViewportSize({ width: 1024, height: 768 })
+  await sleep(350)
+  const rResize = await rPage.evaluate(() => {
+    const c = document.querySelector('.hero__canvas')
+    const ctx = c.getContext('2d')
+    const d = ctx.getImageData(0, 0, c.width, c.height).data
+    let diff = 0
+    for (let i = 0; i < d.length; i += 4) {
+      if (Math.abs(d[i]-21)>20 || Math.abs(d[i+1]-20)>20 || Math.abs(d[i+2]-16)>20) diff++
+    }
+    const corners = [
+      [2, 2],
+      [c.width - 3, 2],
+      [2, c.height - 3],
+      [c.width - 3, c.height - 3],
+    ].map(([x, y]) => {
+      const p = ctx.getImageData(x, y, 1, 1).data
+      return [p[0], p[1], p[2]]
+    })
+    const cornersBg = corners.every(([r, g, b]) => Math.abs(r - 21) <= 4 && Math.abs(g - 20) <= 4 && Math.abs(b - 16) <= 4)
+    return {
+      w: c.width,
+      h: c.height,
+      diffFraction: diff / (c.width * c.height),
+      cornersBg,
+    }
+  })
+  assert('Reduced motion: redraws on resize (buffer > 300x150, diff >= 8%, corners --bg)', rResize.w > 300 && rResize.diffFraction >= 0.08 && rResize.cornersBg, `(${rResize.w}x${rResize.h})`)
+
   await rCtx.close()
+
+  // Mobile reduced motion screenshot at 390px
+  const rmCtx = await browser.newContext({
+    viewport: { width: 390, height: 844 },
+    deviceScaleFactor: 2,
+    isMobile: true,
+    hasTouch: true,
+    reducedMotion: 'reduce',
+  })
+  const rmPage = await rmCtx.newPage()
+  await rmPage.goto(BASE + '/', { waitUntil: 'networkidle' })
+  await sleep(300)
+  await rmPage.screenshot({ path: path.join(SHOTS_DIR, 'm390_reduced_hero.png') })
+  await rmCtx.close()
 }
 
 // -------------------------------------------------------------
@@ -443,28 +627,42 @@ console.log('\n--- 4. Benchmarking Ambient Frame Times (3 seconds) ---')
   assert('Full mode target: average frame time <= 20ms (>= 50 fps)', fullBench.avgMs <= 20)
 
   // Lite mode with 4x CPU throttle
-  const cdp = await ctx.newCDPSession(page)
+  const liteCtx = await browser.newContext({ viewport: { width: 1440, height: 900 } })
+  const litePage = await liteCtx.newPage()
+  const cdp = await liteCtx.newCDPSession(litePage)
   await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 })
 
-  await page.goto(BASE + '/?quality=lite', { waitUntil: 'domcontentloaded' })
-  await page.waitForSelector('.hero')
-  await page.evaluate(() => {
-    window.__heroLongestTask = 0
-    const observer = new PerformanceObserver((list) => {
-      for (const entry of list.getEntries()) {
-        if (entry.duration > window.__heroLongestTask) {
-          window.__heroLongestTask = entry.duration
+  // Install longtask observer via page.addInitScript with buffered: true BEFORE page scripts run
+  await litePage.addInitScript(() => {
+    window.__allLongTasks = []
+    try {
+      const observer = new PerformanceObserver((list) => {
+        for (const entry of list.getEntries()) {
+          window.__allLongTasks.push({
+            duration: entry.duration,
+            startTime: entry.startTime,
+          })
         }
-      }
-    })
-    observer.observe({ entryTypes: ['longtask'] })
+      })
+      observer.observe({ type: 'longtask', buffered: true })
+    } catch (e) {
+      console.error('PerformanceObserver longtask failed:', e)
+    }
   })
+
+  await litePage.goto(BASE + '/?quality=lite', { waitUntil: 'domcontentloaded' })
+  await litePage.waitForSelector('.hero')
   await sleep(3500)
-  const longestTask = await page.evaluate(() => window.__heroLongestTask || 0)
+  const longestTask = await litePage.evaluate(() => {
+    const mountTime = window.__heroMountedTime || 0
+    const heroTasks = (window.__allLongTasks || []).filter((t) => t.startTime >= mountTime)
+    if (heroTasks.length === 0) return 0
+    return Math.max(...heroTasks.map((t) => t.duration))
+  })
   console.log(`[PERFORMANCE] Longest task during init and intro (4x throttle): ${longestTask.toFixed(2)} ms`)
   assert('Longest task during init and intro under 100ms on 4x throttled lite run', longestTask < 100, `(${longestTask.toFixed(2)} ms)`)
 
-  const liteBench = await page.evaluate(async () => {
+  const liteBench = await litePage.evaluate(async () => {
     return new Promise((resolve) => {
       const times = []
       let last = performance.now()
@@ -490,6 +688,7 @@ console.log('\n--- 4. Benchmarking Ambient Frame Times (3 seconds) ---')
   assert('Lite mode throttled target: average frame time <= 28ms (>= 35-40 fps)', liteBench.avgMs <= 28)
 
   await ctx.close()
+  await liteCtx.close()
 }
 
 // -------------------------------------------------------------

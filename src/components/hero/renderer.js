@@ -1,4 +1,4 @@
-import { createRng, createNoise2D } from './noise'
+import { createNoise2D } from './noise'
 
 /**
  * Procedural Paint Canvas Renderer (2D Impasto with Height Field + Directional Lighting)
@@ -29,7 +29,8 @@ export class PaintHeroRenderer {
     this.canvas = canvas
     this.ctx = canvas.getContext('2d', { alpha: false })
     this.lite = options.lite || false
-    this.dpr = Math.min(window.devicePixelRatio || 1, this.lite ? 1.25 : 1.5)
+    this.reduced = options.reduced || false
+    this.dpr = Math.min(window.devicePixelRatio || 1, (this.lite || this.reduced) ? 1.25 : 1.5)
 
     this.width = 0
     this.height = 0
@@ -295,8 +296,8 @@ export class PaintHeroRenderer {
     const s = this.strokes[index]
     if (s.isReady) return
 
-    // In lite mode, use half/third-resolution height field for massive speedup
-    const resScale = this.lite ? 0.35 : 1.0
+    // In lite or reduced mode, use lightweight height field for massive speedup
+    const resScale = (this.lite || this.reduced) ? 0.22 : 0.70
     const gridW = Math.max(4, Math.round(s.boxW * resScale))
     const gridH = Math.max(4, Math.round(s.boxH * resScale))
 
@@ -306,6 +307,7 @@ export class PaintHeroRenderer {
     const exclusions = this.getTextExclusions()
     const spine = s.spine
     const halfW = s.strokeW * 0.5
+    const maxDistSq = (halfW * 1.35) ** 2
     const totalLen = spine.totalLen
 
     const heightMap = new Float32Array(gridW * gridH)
@@ -314,11 +316,25 @@ export class PaintHeroRenderer {
 
     const invScale = 1 / resScale
 
+    // Chord vectors for fast rejection
+    const sDx = s.p1.x - s.p0.x
+    const sDy = s.p1.y - s.p0.y
+    const invSLenSq = 1 / (sDx * sDx + sDy * sDy || 1)
+
     // 1. Build Height Field
     for (let gy = 0; gy < gridH; gy++) {
       const worldY = s.boxY + gy * invScale
+      const vY = worldY - s.p0.y
+
       for (let gx = 0; gx < gridW; gx++) {
         const worldX = s.boxX + gx * invScale
+        const vX = worldX - s.p0.x
+
+        // Fast chord projection reject
+        const proj = (vX * sDx + vY * sDy) * invSLenSq
+        if (proj < -0.15 || proj > 1.15) continue
+        const perpDistSq = (vX - proj * sDx) ** 2 + (vY - proj * sDy) ** 2
+        if (perpDistSq > maxDistSq * 1.8) continue
 
         // Strict text exclusion check
         let isExcluded = false
@@ -331,10 +347,13 @@ export class PaintHeroRenderer {
         }
         if (isExcluded) continue
 
-        // Fast spine projection
+        // Fast localized spine projection
+        const approxIdx = Math.max(0, Math.min(spine.length - 1, Math.round(proj * (spine.length - 1))))
         let minDistSq = Infinity
-        let bestIdx = 0
-        for (let i = 0; i < spine.length; i++) {
+        let bestIdx = approxIdx
+        const startI = Math.max(0, approxIdx - 2)
+        const endI = Math.min(spine.length - 1, approxIdx + 2)
+        for (let i = startI; i <= endI; i++) {
           const dSq = (worldX - spine[i].x) ** 2 + (worldY - spine[i].y) ** 2
           if (dSq < minDistSq) {
             minDistSq = dSq
@@ -343,7 +362,7 @@ export class PaintHeroRenderer {
         }
 
         // Bounding reject if too far from spine
-        if (minDistSq > (halfW * 1.35) ** 2) continue
+        if (minDistSq > maxDistSq) continue
 
         const sp = spine[bestIdx]
         const vx = worldX - sp.x
@@ -546,7 +565,7 @@ export class PaintHeroRenderer {
   drawStrokeWithShadow(targetCtx, s) {
     targetCtx.save()
     targetCtx.shadowColor = 'rgba(10, 8, 6, 0.62)'
-    targetCtx.shadowBlur = 12 * this.dpr
+    targetCtx.shadowBlur = (this.lite || this.reduced) ? 4 * this.dpr : 12 * this.dpr
     targetCtx.shadowOffsetX = 6 * this.dpr
     targetCtx.shadowOffsetY = 8 * this.dpr
     targetCtx.drawImage(s.canvas, s.boxX, s.boxY, s.boxW, s.boxH)

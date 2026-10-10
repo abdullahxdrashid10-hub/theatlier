@@ -49,6 +49,9 @@ export function useHeroAnimation({
     const canvas = canvasRef.current
     const container = containerRef.current
     if (!canvas || !container) return
+    if (typeof window !== 'undefined' && !window.__heroMountedTime) {
+      window.__heroMountedTime = performance.now()
+    }
 
     // 1. Quality detection
     const searchParams = new URLSearchParams(window.location.search)
@@ -71,8 +74,11 @@ export function useHeroAnimation({
 
     let renderer
     try {
-      renderer = new PaintHeroRenderer(canvas, { lite: isLite })
+      renderer = new PaintHeroRenderer(canvas, { lite: isLite, reduced: isReducedMotion })
       rendererRef.current = renderer
+      if (typeof window !== 'undefined') {
+        window.__heroRenderer = renderer
+      }
     } catch (e) {
       console.warn('Canvas 2D failed to initialize, relying on CSS fallback:', e)
       return
@@ -83,7 +89,12 @@ export function useHeroAnimation({
     renderer.resize(rect.width, rect.height, true)
 
     if (isReducedMotion) {
+      const t0 = performance.now()
       renderer.drawReducedMotion()
+      const cost = performance.now() - t0
+      if (typeof window !== 'undefined') {
+        window.__heroReducedMotionCostMs = cost
+      }
       const ro = new ResizeObserver((entries) => {
         for (const entry of entries) {
           const { width, height } = entry.contentRect
