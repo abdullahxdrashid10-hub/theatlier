@@ -6,20 +6,18 @@ import '../../styles/hero.css'
 export default function Hero() {
   const containerRef = useRef(null)
   const canvasRef = useRef(null)
+  const overlayCanvasRef = useRef(null)
   const artImgRef = useRef(null)
-  const eyebrowRef = useRef(null)
   const titleRef = useRef(null)
-  const subheadingRef = useRef(null)
   const ctaRef = useRef(null)
   const scrollCueRef = useRef(null)
 
   const { heroState } = useHeroAnimation({
     containerRef,
     canvasRef,
+    overlayCanvasRef,
     artImgRef,
-    eyebrowRef,
     titleRef,
-    subheadingRef,
     ctaRef,
     scrollCueRef,
   })
@@ -40,7 +38,7 @@ export default function Hero() {
       data-hero-state={heroState}
       aria-label="The Atelier by SK — Art lives here"
     >
-      {/* Background artwork: Authentic impasto palette-knife oil painting */}
+      {/* Fallback image: stays visible until WebGL texture is ready */}
       <div className="hero__art-container" aria-hidden="true">
         <img
           ref={artImgRef}
@@ -51,38 +49,46 @@ export default function Hero() {
         />
       </div>
 
-      {/* Interactive Cinematic Museum Lighting & Specular Sheen Canvas */}
+      {/* Raw WebGL Museum Spotlight & Parallax Shader Canvas */}
       <canvas
         ref={canvasRef}
         className="hero__canvas"
         aria-hidden="true"
       />
 
+      {/* Lightweight 2D Overlay Canvas for Fine-Pointer Dust Trail & Loupe */}
+      <canvas
+        ref={overlayCanvasRef}
+        className="hero__overlay-canvas"
+        aria-hidden="true"
+      />
+
       {/* Dark warm radial scrim for pristine text contrast */}
       <div className="hero__scrim" aria-hidden="true" />
 
-      {/* Luxury Editorial Typography Lockup */}
+      {/* Luxury Editorial Typography: Only Headline, Button, and Scroll Cue */}
       <div className="hero__content">
-        <div ref={eyebrowRef} className="hero__eyebrow">
-          EXHIBITION I — 2026 COLLECTION
-        </div>
-
-        <h1 ref={titleRef} className="hero__title">
+        <h1
+          ref={titleRef}
+          className="hero__title"
+          data-no-loupe="true"
+        >
           <span className="sr-only">The Atelier by SK — </span>
           <span className="hero__heading">Art lives here.</span>
         </h1>
 
-        <p ref={subheadingRef} className="hero__subheading">
-          Original works. Unrepeatable expressions.
-        </p>
-
-        <div ref={ctaRef} className="hero__cta-wrapper">
+        <div
+          ref={ctaRef}
+          className="hero__cta-wrapper"
+          data-no-loupe="true"
+        >
           <Link
             to="/shop"
             className="hero__cta btn btn--framed"
             aria-label="Explore the collection"
+            data-no-loupe="true"
           >
-            <span>EXPLORE THE COLLECTION</span>
+            <span>Explore the collection</span>
             <span className="btn__arrow" aria-hidden="true">→</span>
           </Link>
         </div>
@@ -94,9 +100,10 @@ export default function Hero() {
         type="button"
         className="hero__scroll-cue"
         onClick={handleScrollToDiscover}
-        aria-label="Scroll to discover collection"
+        aria-label="Scroll to discover"
+        data-no-loupe="true"
       >
-        <span className="hero__scroll-label">SCROLL TO DISCOVER</span>
+        <span className="hero__scroll-label">Scroll to discover</span>
         <div className="hero__scroll-indicator" aria-hidden="true">
           <span className="hero__scroll-line" />
         </div>

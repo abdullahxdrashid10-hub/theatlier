@@ -38,13 +38,13 @@
   object-fit: cover;
   object-position: center center;
   display: block;
-  opacity: 0;
+  opacity: 1;
   transform: scale(1.05);
   filter: saturate(1.05) contrast(1.04);
   will-change: transform, opacity;
 }
 
-/* Interactive Museum Lighting & Specular Sheen Canvas */
+/* Interactive Raw WebGL Canvas */
 .hero__canvas {
   position: absolute;
   inset: 0;
@@ -52,6 +52,17 @@
   height: 100%;
   display: block;
   z-index: 2;
+  pointer-events: none;
+}
+
+/* Fine-Pointer Dust & Loupe 2D Overlay Canvas */
+.hero__overlay-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: 3;
   pointer-events: none;
 }
 

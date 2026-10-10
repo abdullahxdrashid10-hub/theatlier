@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { PaintHeroRenderer } from './renderer'
+import { WebGLHeroRenderer } from './webglRenderer'
+import { OverlayEffectsManager } from './overlayEffects'
+import { heroEffects } from '../../config/heroEffects'
 
 gsap.registerPlugin(ScrollTrigger)
 
-// Module-level flag: if true, subsequent page visits skip the intro reveal
 let hasPlayedHeroIntro = false
 
 export function resetHeroPlayedFlag() {
@@ -15,220 +16,163 @@ export function resetHeroPlayedFlag() {
 export function useHeroAnimation({
   containerRef,
   canvasRef,
+  overlayCanvasRef,
   artImgRef,
-  eyebrowRef,
   titleRef,
-  subheadingRef,
   ctaRef,
   scrollCueRef,
 }) {
   const [heroState, setHeroState] = useState(() => {
     if (typeof window === 'undefined') return 'intro'
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return 'reduced'
-    if (hasPlayedHeroIntro) return 'ambient'
     const sp = new URLSearchParams(window.location.search)
-    const qo = sp.get('quality')
-    if (qo === 'lite') return 'lite'
-    if (qo === 'full') return 'intro'
-    if ((navigator.hardwareConcurrency || 4) <= 2 || window.innerWidth < 768) {
-      return 'lite'
-    }
-    return 'intro'
+    const isMotionFull = sp.get('motion') === 'full'
+    if (isMotionFull) return 'intro'
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return 'fallback'
+    if (navigator.connection?.saveData === true) return 'fallback'
+    return hasPlayedHeroIntro ? 'live' : 'intro'
   })
-
-  const rendererRef = useRef(null)
+  const webglRef = useRef(null)
+  const overlayRef = useRef(null)
   const isPausedRef = useRef(false)
-  const stateRef = useRef(heroState)
 
   useEffect(() => {
-    stateRef.current = heroState
-  }, [heroState])
-
-  useEffect(() => {
-    const canvas = canvasRef.current
     const container = containerRef.current
-    if (!canvas || !container) return
+    const canvas = canvasRef.current
+    const overlayCanvas = overlayCanvasRef.current
+    if (!container || !canvas) return
 
-    // 1. Quality & reduced motion detection
-    const searchParams = new URLSearchParams(window.location.search)
-    const qualityOverride = searchParams.get('quality')
-    const isReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    // Dev override & fallback checks
+    const sp = new URLSearchParams(window.location.search)
+    const isMotionFull = sp.get('motion') === 'full'
+    const isReducedMotion = !isMotionFull && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const isSaveData = !isMotionFull && (navigator.connection?.saveData === true)
 
-    let isLite = false
-    if (qualityOverride === 'lite') {
-      isLite = true
-    } else if (qualityOverride === 'full') {
-      isLite = false
-    } else {
-      const hwConc = navigator.hardwareConcurrency || 4
-      const isSmallScreen = window.innerWidth < 768
-      if (hwConc <= 2 || isSmallScreen) {
-        isLite = true
-      }
-    }
-
-    let renderer
-    try {
-      renderer = new PaintHeroRenderer(canvas, { lite: isLite, reduced: isReducedMotion })
-      rendererRef.current = renderer
-      if (typeof window !== 'undefined') {
-        window.__heroRenderer = renderer
-      }
-    } catch (e) {
-      console.warn('Canvas 2D failed to initialize, relying on fallback:', e)
+    // Fallback directly to plain image if reduced-motion or save-data
+    if (isReducedMotion || isSaveData) {
+      if (artImgRef.current) gsap.set(artImgRef.current, { opacity: 1, scale: 1 })
+      if (titleRef.current) gsap.set(titleRef.current, { opacity: 1, y: 0 })
+      if (ctaRef.current) gsap.set(ctaRef.current, { opacity: 1, y: 0 })
+      if (scrollCueRef.current) gsap.set(scrollCueRef.current, { opacity: 0.85, y: 0 })
       return
     }
 
-    // 2. Initial canvas sizing
-    const rect = container.getBoundingClientRect()
-    renderer.resize(rect.width, rect.height, true)
-
-    if (isReducedMotion) {
-      renderer.drawReducedMotion()
+    // Initialize WebGL
+    let renderer
+    try {
+      renderer = new WebGLHeroRenderer(canvas)
+      if (!renderer.gl) throw new Error('WebGL not available')
+      webglRef.current = renderer
+    } catch {
+      // Fallback on WebGL failure
+      setHeroState('fallback')
       if (artImgRef.current) gsap.set(artImgRef.current, { opacity: 1, scale: 1 })
-      if (eyebrowRef.current) gsap.set(eyebrowRef.current, { opacity: 1, y: 0 })
       if (titleRef.current) gsap.set(titleRef.current, { opacity: 1, y: 0 })
-      if (subheadingRef.current) gsap.set(subheadingRef.current, { opacity: 1, y: 0 })
       if (ctaRef.current) gsap.set(ctaRef.current, { opacity: 1, y: 0 })
       if (scrollCueRef.current) gsap.set(scrollCueRef.current, { opacity: 0.85, y: 0 })
-
-      const ro = new ResizeObserver((entries) => {
-        for (const entry of entries) {
-          const { width, height } = entry.contentRect
-          if (width > 0 && height > 0) {
-            renderer.resize(width, height)
-            renderer.drawReducedMotion()
-          }
-        }
-      })
-      ro.observe(container)
-      return () => {
-        ro.disconnect()
-      }
+      return
     }
 
-    // 3. Responsive ResizeObserver
-    let resizeTimer = null
-    const ro = new ResizeObserver((entries) => {
-      clearTimeout(resizeTimer)
-      resizeTimer = setTimeout(() => {
-        for (const entry of entries) {
-          const { width, height } = entry.contentRect
-          if (width > 0 && height > 0) {
-            renderer.resize(width, height)
-            if (stateRef.current === 'ambient') {
-              renderer.render(1.0, true, 0)
-            }
-          }
-        }
-      }, 100)
-    })
+    // Context loss handler
+    const handleContextLost = (e) => {
+      e.preventDefault()
+      setHeroState('fallback')
+      if (artImgRef.current) gsap.set(artImgRef.current, { opacity: 1, scale: 1 })
+    }
+    canvas.addEventListener('webglcontextlost', handleContextLost, false)
+
+    // Initialize Overlay (dust & loupe)
+    let overlayManager = null
+    if (overlayCanvas) {
+      overlayManager = new OverlayEffectsManager(overlayCanvas, container)
+      overlayRef.current = overlayManager
+    }
+
+    // Resize handling
+    const updateSize = () => {
+      const rect = container.getBoundingClientRect()
+      renderer.resize(rect.width, rect.height)
+      if (overlayManager) overlayManager.resize(rect.width, rect.height)
+    }
+    updateSize()
+
+    const ro = new ResizeObserver(() => updateSize())
     ro.observe(container)
 
-    // 4. Subtle mouse-guided spotlight tracking (desktop fine pointer only)
-    const isFinePointer = window.matchMedia('(pointer: fine)').matches
+    // Pointer events
     const handlePointerMove = (e) => {
-      if (!isFinePointer) return
       const cRect = container.getBoundingClientRect()
-      const nx = (e.clientX - cRect.left) / cRect.width
-      const ny = (e.clientY - cRect.top) / cRect.height
-      renderer.setPointer(Math.min(1, Math.max(0, nx)), Math.min(1, Math.max(0, ny)))
+      const nx = Math.min(1, Math.max(0, (e.clientX - cRect.left) / cRect.width))
+      const ny = Math.min(1, Math.max(0, (e.clientY - cRect.top) / cRect.height))
+      renderer.setPointer(nx, ny)
+      if (overlayManager) {
+        overlayManager.onPointerMove(e.clientX, e.clientY)
+      }
     }
     window.addEventListener('pointermove', handlePointerMove, { passive: true })
 
-    // 5. Visibility and intersection handling
-    const checkPauseState = () => {
-      const isHidden = document.hidden
-      const isOffscreen = isPausedRef.current
-      if (isHidden || isOffscreen) {
-        setHeroState('paused')
-      } else {
-        setHeroState(hasPlayedHeroIntro ? (renderer.lite ? 'lite' : 'ambient') : 'intro')
+    const handleTouchStart = () => {
+      renderer.setTouch()
+    }
+    window.addEventListener('touchstart', handleTouchStart, { passive: true })
+
+    // DeviceOrientation Tilt (Android permission-less only; NO permission prompts on iOS)
+    let hasBoundTilt = false
+    if (
+      heroEffects.tilt &&
+      typeof window !== 'undefined' &&
+      window.DeviceOrientationEvent &&
+      typeof DeviceOrientationEvent.requestPermission !== 'function'
+    ) {
+      const handleOrientation = (e) => {
+        if (e.gamma !== null && e.beta !== null) {
+          const tiltX = Math.max(-1, Math.min(1, e.gamma / 45))
+          const tiltY = Math.max(-1, Math.min(1, (e.beta - 30) / 30))
+          renderer.setTilt(tiltX, tiltY)
+        }
       }
+      window.addEventListener('deviceorientation', handleOrientation, { passive: true })
+      hasBoundTilt = true
     }
 
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        isPausedRef.current = !entry.isIntersecting
-        checkPauseState()
-      },
-      { threshold: 0.05 }
-    )
+    // Visibility & Pause
+    const handleVisibility = () => {
+      isPausedRef.current = document.hidden
+    }
+    document.addEventListener('visibilitychange', handleVisibility)
+
+    const io = new IntersectionObserver(([entry]) => {
+      isPausedRef.current = !entry.isIntersecting
+    }, { threshold: 0.05 })
     io.observe(container)
 
-    const handleVisibilityChange = () => {
-      checkPauseState()
-    }
-    document.addEventListener('visibilitychange', handleVisibilityChange)
-
-    // 6. GSAP Timeline Reveal
-    const animState = { progress: hasPlayedHeroIntro ? 1.0 : 0.0 }
-    let isAmbient = hasPlayedHeroIntro
-
+    // Intro Animation Timeline
     const masterTl = gsap.timeline({
       paused: true,
       onComplete: () => {
         hasPlayedHeroIntro = true
-        isAmbient = true
-        setHeroState(renderer.lite ? 'lite' : 'ambient')
+        setHeroState('live')
+        // Hide plain fallback image once first WebGL frames render smoothly
+        if (artImgRef.current) gsap.set(artImgRef.current, { opacity: 0 })
       },
     })
 
     if (!hasPlayedHeroIntro) {
-      // Artwork & Museum Spotlight fade-up
-      masterTl.to(
-        animState,
-        {
-          progress: 1.0,
-          duration: 1.8,
-          ease: 'power2.out',
-        },
-        0.05
-      )
-
-      if (artImgRef.current) {
-        masterTl.fromTo(
-          artImgRef.current,
-          { opacity: 0, scale: 1.05 },
-          { opacity: 1, scale: 1, duration: 1.8, ease: 'power2.out' },
-          0.05
-        )
-      }
-
-      // Staggered luxury editorial text entrance
-      if (eyebrowRef.current) {
-        masterTl.fromTo(
-          eyebrowRef.current,
-          { opacity: 0, y: -8 },
-          { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out' },
-          0.35
-        )
-      }
-
+      // Headline and Button reveal
       if (titleRef.current) {
         masterTl.fromTo(
           titleRef.current,
-          { opacity: 0, y: 18 },
-          { opacity: 1, y: 0, duration: 0.85, ease: 'power3.out' },
-          0.60
-        )
-      }
-
-      if (subheadingRef.current) {
-        masterTl.fromTo(
-          subheadingRef.current,
-          { opacity: 0, y: 12 },
-          { opacity: 1, y: 0, duration: 0.75, ease: 'power2.out' },
-          0.90
+          { opacity: 0, y: 22 },
+          { opacity: 1, y: 0, duration: 1.1, ease: 'power3.out' },
+          0.4
         )
       }
 
       if (ctaRef.current) {
         masterTl.fromTo(
           ctaRef.current,
-          { opacity: 0, y: 10 },
-          { opacity: 1, y: 0, duration: 0.75, ease: 'power2.out' },
-          1.20
+          { opacity: 0, y: 12 },
+          { opacity: 1, y: 0, duration: 0.85, ease: 'power2.out' },
+          0.9
         )
       }
 
@@ -237,22 +181,19 @@ export function useHeroAnimation({
           scrollCueRef.current,
           { opacity: 0 },
           { opacity: 0.85, duration: 0.6, ease: 'power2.out' },
-          1.55
+          1.3
         )
       }
 
       masterTl.play()
     } else {
-      animState.progress = 1.0
-      if (artImgRef.current) gsap.set(artImgRef.current, { opacity: 1, scale: 1 })
-      if (eyebrowRef.current) gsap.set(eyebrowRef.current, { opacity: 1, y: 0 })
       if (titleRef.current) gsap.set(titleRef.current, { opacity: 1, y: 0 })
-      if (subheadingRef.current) gsap.set(subheadingRef.current, { opacity: 1, y: 0 })
       if (ctaRef.current) gsap.set(ctaRef.current, { opacity: 1, y: 0 })
       if (scrollCueRef.current) gsap.set(scrollCueRef.current, { opacity: 0.85, y: 0 })
+      if (artImgRef.current) gsap.set(artImgRef.current, { opacity: 0 })
     }
 
-    // 7. Scroll parallax & cue fading
+    // Scroll parallax & cue fading
     const scrollTrigger = ScrollTrigger.create({
       trigger: container,
       start: 'top top',
@@ -261,38 +202,32 @@ export function useHeroAnimation({
       onUpdate: (self) => {
         const p = self.progress
         if (scrollCueRef.current) {
-          scrollCueRef.current.dataset.hidden = p > 0.04 ? 'true' : 'false'
+          scrollCueRef.current.dataset.hidden = p > 0.03 ? 'true' : 'false'
         }
-        if (artImgRef.current) {
-          gsap.set(artImgRef.current, { y: p * 80 })
-        }
-        if (canvas) {
-          gsap.set(canvas, { y: p * 80 })
-        }
-        if (container) {
-          gsap.set(container, { opacity: Math.max(0, 1 - p * 0.95) })
-        }
+        if (canvas) gsap.set(canvas, { y: p * 60 })
+        if (overlayCanvas) gsap.set(overlayCanvas, { y: p * 60 })
       },
     })
 
-    // 8. Animation Ticker Render Loop
+    // Animation Ticker
     let lastTime = performance.now()
     const onTick = () => {
       const now = performance.now()
       const dt = Math.min(0.1, (now - lastTime) / 1000)
       lastTime = now
 
-      if (document.hidden || isPausedRef.current) {
-        return
-      }
+      if (isPausedRef.current) return
 
-      renderer.render(animState.progress, isAmbient, dt)
+      renderer.render(dt)
+      if (overlayManager) overlayManager.updateAndDraw(dt)
+
+      // Fade out plain fallback once WebGL is loaded and rendering
+      if (renderer.textureLoaded && artImgRef.current && artImgRef.current.style.opacity !== '0') {
+        gsap.to(artImgRef.current, { opacity: 0, duration: 0.4 })
+      }
     }
 
     gsap.ticker.add(onTick)
-    if (typeof window !== 'undefined') {
-      window.__heroMountedTime = performance.now()
-    }
 
     return () => {
       gsap.ticker.remove(onTick)
@@ -301,18 +236,21 @@ export function useHeroAnimation({
       ro.disconnect()
       io.disconnect()
       window.removeEventListener('pointermove', handlePointerMove)
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
-      if (renderer && typeof renderer.destroy === 'function') {
-        renderer.destroy()
+      window.removeEventListener('touchstart', handleTouchStart)
+      document.removeEventListener('visibilitychange', handleVisibility)
+      canvas.removeEventListener('webglcontextlost', handleContextLost)
+      if (hasBoundTilt) {
+        window.removeEventListener('deviceorientation', () => {})
       }
+      renderer.destroy()
+      if (overlayManager) overlayManager.destroy()
     }
   }, [
     containerRef,
     canvasRef,
+    overlayCanvasRef,
     artImgRef,
-    eyebrowRef,
     titleRef,
-    subheadingRef,
     ctaRef,
     scrollCueRef,
   ])
