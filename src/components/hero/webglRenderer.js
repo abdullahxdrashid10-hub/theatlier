@@ -44,11 +44,24 @@ float hash(vec2 p) {
   return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
 }
 
-void main() {
-  vec2 base_uv = v_uv;
+vec2 getCoverUV(vec2 st, float screenAspect, float imgAspect) {
+  vec2 p = st - 0.5;
+  if (screenAspect > imgAspect) {
+    p.y *= imgAspect / screenAspect;
+  } else {
+    p.x *= screenAspect / imgAspect;
+  }
+  return p + 0.5;
+}
 
-  // 1. BASELINE SCALE & PARALLAX
-  vec2 uv = (base_uv - 0.5) / 1.05 + 0.5;
+void main() {
+  vec2 screen_uv = v_uv;
+  float screen_aspect = u_resolution.x / u_resolution.y;
+  float img_aspect = 16.0 / 9.0;
+
+  // 1. COVER-FIT BASELINE SCALE
+  vec2 cover_uv = getCoverUV(screen_uv, screen_aspect, img_aspect);
+  vec2 uv = (cover_uv - 0.5) / 1.05 + 0.5;
 
   if (u_enable_parallax > 0.5) {
     vec4 init_col = texture2D(u_texture, uv);
@@ -110,7 +123,7 @@ void main() {
   // 3. FOREGROUND GOLD SPECKS (Drifting slowly, moving at 2x parallax)
   if (u_enable_parallax > 0.5) {
     vec2 speck_offset = -u_pointer_offset * (28.0 / u_resolution);
-    vec2 speck_uv = base_uv + speck_offset;
+    vec2 speck_uv = cover_uv + speck_offset;
 
     // Grid of 55 tiny potential specks
     vec2 grid_uv = speck_uv * vec2(28.0, 18.0);
@@ -238,6 +251,12 @@ export class WebGLHeroRenderer {
     gl.attachShader(this.program, vs)
     gl.attachShader(this.program, fs)
     gl.linkProgram(this.program)
+
+    if (!gl.getProgramParameter(this.program, gl.LINK_STATUS)) {
+      console.error('Program link error:', gl.getProgramInfoLog(this.program))
+      this.program = null
+      return
+    }
 
     gl.useProgram(this.program)
 

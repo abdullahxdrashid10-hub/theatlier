@@ -227,38 +227,66 @@ export class OverlayEffectsManager {
     ctx.arc(x, y, r, 0, Math.PI * 2)
     ctx.clip()
 
-    // Sample magnified 1.6x from artwork
+    // Sample magnified 1.6x from artwork using SAME cover-fit UV transform as main render
     const cW = this.container.clientWidth
     const cH = this.container.clientHeight
-    const mag = this.magnification
+    const imgW = this.artImg.naturalWidth || 1920
+    const imgH = this.artImg.naturalHeight || 1080
+    const screenAspect = cW / cH
+    const imgAspect = 16 / 9
 
-    // Draw magnified image centered on current pointer
-    const imgAspect = (this.artImg.naturalWidth || 16) / (this.artImg.naturalHeight || 9)
-    const contAspect = cW / cH
+    // 1. EXACT SAME COVER-FIT UV TRANSFORM AS MAIN RENDER
+    const stX = x / cW
+    const stY = y / cH
 
-    let sW, sH
-    if (contAspect > imgAspect) {
-      sW = cW
-      sH = cW / imgAspect
+    let pX = stX - 0.5
+    let pY = stY - 0.5
+    if (screenAspect > imgAspect) {
+      pY *= imgAspect / screenAspect
     } else {
-      sH = cH
-      sW = cH * imgAspect
+      pX *= screenAspect / imgAspect
     }
 
-    const imgX = (cW - sW) * 0.5
-    const imgY = (cH - sH) * 0.5
+    let coverUvX = pX / 1.05 + 0.5
+    let coverUvY = pY / 1.05 + 0.5
 
-    const destX = x - (x - imgX) * mag
-    const destY = y - (y - imgY) * mag
+    // Plus parallax offset if provided
+    if (this.options && this.options.getParallaxOffset) {
+      const pOff = this.options.getParallaxOffset()
+      coverUvX += pOff.x
+      coverUvY += pOff.y
+    }
 
-    ctx.drawImage(this.artImg, destX, destY, sW * mag, sH * mag)
+    const centerSourceX = coverUvX * imgW
+    const centerSourceY = coverUvY * imgH
+
+    // Isotropic scaling factor of source pixels per screen pixel
+    const scaleFactor = (screenAspect > imgAspect ? (imgW / cW) : (imgH / cH)) / 1.05
+    const diameter = r * 2
+    const sourceDiameter = (diameter / this.magnification) * scaleFactor
+
+    const sourceX = centerSourceX - sourceDiameter / 2
+    const sourceY = centerSourceY - sourceDiameter / 2
+
+    // Draw magnified image centered on current pointer
+    ctx.drawImage(
+      this.artImg,
+      sourceX,
+      sourceY,
+      sourceDiameter,
+      sourceDiameter,
+      x - r,
+      y - r,
+      diameter,
+      diameter
+    )
 
     // Inner lens shadow
     const innerShadow = ctx.createRadialGradient(x, y, r * 0.65, x, y, r)
     innerShadow.addColorStop(0, 'rgba(0,0,0,0)')
     innerShadow.addColorStop(1, 'rgba(0,0,0,0.55)')
     ctx.fillStyle = innerShadow
-    ctx.fillRect(x - r, y - r, r * 2, r * 2)
+    ctx.fillRect(x - r, y - r, diameter, diameter)
 
     ctx.restore()
 

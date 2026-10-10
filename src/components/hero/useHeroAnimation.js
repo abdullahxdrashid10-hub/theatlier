@@ -80,10 +80,20 @@ export function useHeroAnimation({
     }
     canvas.addEventListener('webglcontextlost', handleContextLost, false)
 
-    // Initialize Overlay (dust & loupe)
+    // Initialize Overlay (dust & loupe) - strictly fine-pointer only
     let overlayManager = null
-    if (overlayCanvas) {
-      overlayManager = new OverlayEffectsManager(overlayCanvas, container)
+    const isFinePointer = typeof window !== 'undefined' && window.matchMedia('(pointer: fine)').matches
+    if (overlayCanvas && isFinePointer) {
+      overlayManager = new OverlayEffectsManager(overlayCanvas, container, {
+        getParallaxOffset: () => {
+          if (!renderer || !renderer.activeEffects.parallax) return { x: 0, y: 0 }
+          const maxOffset = 14.0 / (renderer.canvas.width || 1440)
+          return {
+            x: -renderer.parallaxX * maxOffset * 0.5,
+            y: -renderer.parallaxY * maxOffset * 0.5,
+          }
+        },
+      })
       overlayRef.current = overlayManager
     }
 
