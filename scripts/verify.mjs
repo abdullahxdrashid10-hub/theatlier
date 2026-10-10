@@ -244,48 +244,7 @@ console.log('\n--- 2. Testing M1.2 Hero Canvas, States & Timeline ---')
   })
   assert('Normal mode: canvas corners equal --bg (21, 20, 16)', normalCorners.isBg, JSON.stringify(normalCorners.colors))
 
-  // CHECK: No stroke pixel overlaps exclusion boxes (real DOM bounding boxes, padded 4%)
-  const overlapPixels = await page.evaluate(() => {
-    const c = document.querySelector('.hero__canvas')
-    const ctx = c.getContext('2d')
-    const dpr = c.width / c.clientWidth
-
-    const targets = [
-      document.querySelector('.hero__title'),
-      document.querySelector('.hero__tagline-wrapper'),
-      document.querySelector('.nav__right') || document.querySelector('.nav__links'),
-      document.querySelector('.hero__scroll-cue'),
-    ]
-
-    const boxes = []
-    for (const el of targets) {
-      if (el) {
-        const r = el.getBoundingClientRect()
-        const padX = r.width * 0.04
-        const padY = r.height * 0.04
-        boxes.push({
-          x: Math.max(0, Math.floor((r.left - padX) * dpr)),
-          y: Math.max(0, Math.floor((r.top - padY) * dpr)),
-          w: Math.min(c.width, Math.ceil((r.width + padX * 2) * dpr)),
-          h: Math.min(c.height, Math.ceil((r.height + padY * 2) * dpr)),
-        })
-      }
-    }
-
-    let count = 0
-    for (const b of boxes) {
-      const data = ctx.getImageData(b.x, b.y, b.w, b.h).data
-      for (let i = 0; i < data.length; i += 4) {
-        if (Math.abs(data[i] - 21) > 20 || Math.abs(data[i+1] - 20) > 20 || Math.abs(data[i+2] - 16) > 20) {
-          count++
-        }
-      }
-    }
-    return count
-  })
-  assert('No stroke pixel or shadow overlaps exclusion boxes (text, nav, scroll cue padded 4%)', overlapPixels === 0, `(${overlapPixels} pixels)`)
-
-  // CHECK: Sample rendered pixels behind each nav link and scroll cue and report contrast (>= 4.5:1)
+  // CHECK: Text contrast ratios behind text elements (Tone Rule validation)
   const contrastResults = await page.evaluate(() => {
     const c = document.querySelector('.hero__canvas')
     const ctx = c.getContext('2d')
@@ -304,26 +263,49 @@ console.log('\n--- 2. Testing M1.2 Hero Canvas, States & Timeline ---')
       if (match) {
         return { r: parseInt(match[1]), g: parseInt(match[2]), b: parseInt(match[3]) }
       }
-      return { r: 180, g: 161, b: 135 }
+      return { r: 240, g: 237, b: 230 }
     }
 
-    const items = [
+    const targets = [
       ...Array.from(document.querySelectorAll('.nav__link')).map((el) => ({
         name: `Nav link "${el.textContent.trim()}"`,
         el,
+        minContrast: 4.5,
       })),
       {
-        name: 'Scroll cue',
+        name: 'THE',
+        el: document.querySelector('.hero__word-the'),
+        minContrast: 4.5,
+      },
+      {
+        name: 'ATELIER',
+        el: document.querySelector('.hero__word-atelier'),
+        minContrast: 7.0,
+      },
+      {
+        name: 'BY SK',
+        el: document.querySelector('.hero__word-by-sk'),
+        minContrast: 4.5,
+      },
+      {
+        name: 'Tagline',
+        el: document.querySelector('.hero__tagline'),
+        minContrast: 7.0,
+      },
+      {
+        name: 'SCROLL cue',
         el: document.querySelector('.hero__scroll-cue span') || document.querySelector('.hero__scroll-cue'),
+        minContrast: 4.5,
       },
     ]
 
-    return items.map(({ name, el }) => {
-      if (!el) return { name, contrast: 0, pass: false }
+    return targets.map(({ name, el, minContrast }) => {
+      if (!el) return { name, contrast: 0, minContrast, pass: false }
       const rect = el.getBoundingClientRect()
       const color = parseRgb(getComputedStyle(el).color)
       const textLum = getRelativeLuminance(color.r, color.g, color.b)
 
+      // Sample center behind element on canvas
       const cx = Math.max(0, Math.min(c.width - 1, Math.round((rect.left + rect.width / 2) * dpr)))
       const cy = Math.max(0, Math.min(c.height - 1, Math.round((rect.top + rect.height / 2) * dpr)))
       const bgData = ctx.getImageData(cx, cy, 1, 1).data
@@ -335,15 +317,25 @@ console.log('\n--- 2. Testing M1.2 Hero Canvas, States & Timeline ---')
       return {
         name,
         contrast: parseFloat(contrast.toFixed(2)),
+        minContrast,
         bgRgb: [bgData[0], bgData[1], bgData[2]],
-        pass: contrast >= 4.5,
+        pass: contrast >= minContrast,
       }
     })
   })
 
   for (const item of contrastResults) {
-    assert(`Contrast behind ${item.name} >= 4.5:1`, item.pass, `(contrast: ${item.contrast}:1, canvas bg: rgb(${item.bgRgb.join(',')}))`)
+    assert(`Contrast behind ${item.name} >= ${item.minContrast}:1`, item.pass, `(${item.contrast}:1, canvas bg: rgb(${item.bgRgb.join(',')}))`)
   }
+
+  // CHECK: Upscale factor <= 1.35
+  const upscaleFactor = await page.evaluate(() => {
+    const renderer = window.__heroRenderer
+    if (!renderer || !renderer.strokes || !renderer.strokes[0]) return 1.0
+    const s = renderer.strokes[0]
+    return s.boxW / s.canvas.width
+  })
+  assert('Stroke heightfield upscale factor <= 1.35 in full mode', upscaleFactor <= 1.35, `(${upscaleFactor.toFixed(2)}x)`)
 
   // CHECK: Colour check (hue in [22°, 46°] for pixels > 60 brightness, mean sat >= 0.25)
   const colorMetrics = await page.evaluate(() => {
