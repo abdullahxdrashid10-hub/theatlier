@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { gsap } from 'gsap'
 import { getAllPaintings, getPaintingBySlug } from '../data/api'
 import PaintingCard from '../components/PaintingCard'
 import { addToCart, isInCart, subscribeToCart } from '../utils/cartStorage'
@@ -37,11 +38,13 @@ export default function Painting() {
 
   // Active view / image thumbnail index
   const [activeViewIndex, setActiveViewIndex] = useState(0)
+  const [isSwitchingView, setIsSwitchingView] = useState(false)
 
   // Desktop hover zoom state
   const [isZooming, setIsZooming] = useState(false)
-  const [zoomOrigin, setZoomOrigin] = useState({ x: 50, y: 50 })
   const viewportRef = useRef(null)
+  const zoomLayerRef = useRef(null)
+  const pageRef = useRef(null)
 
   // Fullscreen Inspection Modal (Mobile & Desktop)
   const [lightboxOpen, setLightboxOpen] = useState(false)
@@ -95,6 +98,47 @@ export default function Painting() {
     }
   }, [slug])
 
+  // GSAP Entrance Reveal Animation
+  useEffect(() => {
+    if (loading || !painting) return
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (prefersReducedMotion) return
+
+    const ctx = gsap.context(() => {
+      gsap.from('.painting-detail__gallery', {
+        opacity: 0,
+        y: 20,
+        duration: 0.75,
+        ease: 'power2.out',
+      })
+
+      gsap.from(
+        [
+          '.painting-detail__breadcrumbs',
+          '.painting-detail__header-top',
+          '.painting-detail__title',
+          '.painting-detail__price-row',
+          '.painting-detail__specs-grid',
+          '.painting-detail__action-box',
+          '.painting-detail__accordions',
+        ],
+        {
+          opacity: 0,
+          y: 16,
+          duration: 0.65,
+          stagger: 0.05,
+          ease: 'power2.out',
+          delay: 0.08,
+        },
+      )
+    }, pageRef)
+
+    return () => {
+      ctx.revert()
+    }
+  }, [loading, painting])
+
   // Sync cart status on storage changes
   useEffect(() => {
     if (!painting) return
@@ -138,19 +182,26 @@ export default function Painting() {
 
   const activeImage = views[activeViewIndex]?.url || painting?.images?.[0] || '/placeholders/placeholder-01.svg'
 
+  const handleSelectView = (index) => {
+    if (index === activeViewIndex) return
+    setIsSwitchingView(true)
+    setTimeout(() => {
+      setActiveViewIndex(index)
+      setIsSwitchingView(false)
+    }, 110)
+  }
+
   // Desktop Pointer Move Zoom Handler
   const handlePointerMove = useCallback((e) => {
     const el = viewportRef.current
-    if (!el) return
+    const layer = zoomLayerRef.current
+    if (!el || !layer) return
 
     const rect = el.getBoundingClientRect()
     const x = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width))
     const y = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height))
 
-    setZoomOrigin({
-      x: +(x * 100).toFixed(2),
-      y: +(y * 100).toFixed(2),
-    })
+    layer.style.transformOrigin = `${(x * 100).toFixed(2)}% ${(y * 100).toFixed(2)}%`
   }, [])
 
   const handlePointerEnter = useCallback(() => {
@@ -249,7 +300,7 @@ export default function Painting() {
   const heightInches = (painting.heightCm * 0.393701).toFixed(1)
 
   return (
-    <main className="painting-detail">
+    <main ref={pageRef} className="painting-detail">
       <title>{`${painting.title} — The Atelier by SK`}</title>
 
       {/* Breadcrumb Navigation */}
@@ -288,6 +339,7 @@ export default function Painting() {
                 src={activeImage}
                 alt={painting.title}
                 className="painting-detail__image"
+                style={{ opacity: isSwitchingView ? 0.35 : 1 }}
                 width={painting.widthCm * 10}
                 height={painting.heightCm * 10}
                 loading="eager"
@@ -296,10 +348,10 @@ export default function Painting() {
 
               {/* Magnified Zoom Layer (Desktop Fine Cursor Loupe) */}
               <div
+                ref={zoomLayerRef}
                 className="painting-detail__zoom-layer"
                 style={{
                   backgroundImage: `url("${activeImage}")`,
-                  transformOrigin: `${zoomOrigin.x}% ${zoomOrigin.y}%`,
                 }}
                 aria-hidden="true"
               />
@@ -340,7 +392,7 @@ export default function Painting() {
                     key={view.url}
                     type="button"
                     className={`painting-detail__thumb-btn ${isActive ? 'painting-detail__thumb-btn--active' : ''}`}
-                    onClick={() => setActiveViewIndex(index)}
+                    onClick={() => handleSelectView(index)}
                     aria-label={`View perspective ${index + 1}: ${view.label}`}
                     aria-pressed={isActive}
                   >
@@ -497,15 +549,19 @@ export default function Painting() {
                 <span>The Story & Technique</span>
                 <span className="painting-detail__accordion-icon" aria-hidden="true">+</span>
               </summary>
-              <div className="painting-detail__accordion-content">
-                <p>
-                  {painting.description.replace('PLACEHOLDER — ', '')}
-                </p>
-                <p>
-                  Layered with heavy palette-knife impasto on archival Belgian canvas. The surface features
-                  sculptural ridges that capture natural and gallery light differently throughout the day,
-                  accentuated by subtle champagne and antique gold mineral pigments.
-                </p>
+              <div className="painting-detail__accordion-wrapper">
+                <div className="painting-detail__accordion-inner">
+                  <div className="painting-detail__accordion-content">
+                    <p>
+                      {painting.description.replace('PLACEHOLDER — ', '')}
+                    </p>
+                    <p>
+                      Layered with heavy palette-knife impasto on archival Belgian canvas. The surface features
+                      sculptural ridges that capture natural and gallery light differently throughout the day,
+                      accentuated by subtle champagne and antique gold mineral pigments.
+                    </p>
+                  </div>
+                </div>
               </div>
             </details>
 
@@ -514,25 +570,29 @@ export default function Painting() {
                 <span>Provenance & Certificate of Authenticity</span>
                 <span className="painting-detail__accordion-icon" aria-hidden="true">+</span>
               </summary>
-              <div className="painting-detail__accordion-content">
-                <p>
-                  Each original artwork from The Atelier is unique and recorded in the studio registry.
-                  Upon acquisition, the collector receives:
-                </p>
-                <ul className="painting-detail__bullet-list">
-                  <li className="painting-detail__bullet-item">
-                    <span className="painting-detail__bullet-icon">✦</span>
-                    <span>An embossed Certificate of Authenticity individually signed and sealed by the artist.</span>
-                  </li>
-                  <li className="painting-detail__bullet-item">
-                    <span className="painting-detail__bullet-icon">✦</span>
-                    <span>Archival catalog reference number and provenance transfer dossier.</span>
-                  </li>
-                  <li className="painting-detail__bullet-item">
-                    <span className="painting-detail__bullet-icon">✦</span>
-                    <span>Artist signature and dating inscribed verso on the canvas stretcher.</span>
-                  </li>
-                </ul>
+              <div className="painting-detail__accordion-wrapper">
+                <div className="painting-detail__accordion-inner">
+                  <div className="painting-detail__accordion-content">
+                    <p>
+                      Each original artwork from The Atelier is unique and recorded in the studio registry.
+                      Upon acquisition, the collector receives:
+                    </p>
+                    <ul className="painting-detail__bullet-list">
+                      <li className="painting-detail__bullet-item">
+                        <span className="painting-detail__bullet-icon">✦</span>
+                        <span>An embossed Certificate of Authenticity individually signed and sealed by the artist.</span>
+                      </li>
+                      <li className="painting-detail__bullet-item">
+                        <span className="painting-detail__bullet-icon">✦</span>
+                        <span>Archival catalog reference number and provenance transfer dossier.</span>
+                      </li>
+                      <li className="painting-detail__bullet-item">
+                        <span className="painting-detail__bullet-icon">✦</span>
+                        <span>Artist signature and dating inscribed verso on the canvas stretcher.</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
               </div>
             </details>
 
@@ -541,24 +601,28 @@ export default function Painting() {
                 <span>White-Glove Shipping & Art Crating</span>
                 <span className="painting-detail__accordion-icon" aria-hidden="true">+</span>
               </summary>
-              <div className="painting-detail__accordion-content">
-                <p>
-                  Due to the heavy sculptural impasto surface, this painting is prepared with specialised care:
-                </p>
-                <ul className="painting-detail__bullet-list">
-                  <li className="painting-detail__bullet-item">
-                    <span className="painting-detail__bullet-icon">✦</span>
-                    <span>Encased in an acid-free barrier wrap and custom timber-reinforced exhibition crate.</span>
-                  </li>
-                  <li className="painting-detail__bullet-item">
-                    <span className="painting-detail__bullet-icon">✦</span>
-                    <span>Complimentary insured courier delivery across Pakistan (3–5 business days).</span>
-                  </li>
-                  <li className="painting-detail__bullet-item">
-                    <span className="painting-detail__bullet-icon">✦</span>
-                    <span>Worldwide temperature-stable fine art freight options available upon inquiry.</span>
-                  </li>
-                </ul>
+              <div className="painting-detail__accordion-wrapper">
+                <div className="painting-detail__accordion-inner">
+                  <div className="painting-detail__accordion-content">
+                    <p>
+                      Due to the heavy sculptural impasto surface, this painting is prepared with specialised care:
+                    </p>
+                    <ul className="painting-detail__bullet-list">
+                      <li className="painting-detail__bullet-item">
+                        <span className="painting-detail__bullet-icon">✦</span>
+                        <span>Encased in an acid-free barrier wrap and custom timber-reinforced exhibition crate.</span>
+                      </li>
+                      <li className="painting-detail__bullet-item">
+                        <span className="painting-detail__bullet-icon">✦</span>
+                        <span>Complimentary insured courier delivery across Pakistan (3–5 business days).</span>
+                      </li>
+                      <li className="painting-detail__bullet-item">
+                        <span className="painting-detail__bullet-icon">✦</span>
+                        <span>Worldwide temperature-stable fine art freight options available upon inquiry.</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
               </div>
             </details>
           </div>

@@ -37,7 +37,7 @@ console.log('--- 1. Testing Available Painting (placeholder-ember-field) ---')
   page.on('pageerror', (e) => issues.push(`pageerror: ${e.message}`))
 
   await page.goto(`${BASE}/painting/placeholder-ember-field`, { waitUntil: 'networkidle' })
-  await sleep(400)
+  await sleep(800)
 
   assert('Zero console errors/warnings on painting detail', issues.length === 0, issues.join('; '))
 
