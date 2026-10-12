@@ -3,7 +3,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-const BASE = 'http://127.0.0.1:5173'
+const BASE = 'http://localhost:5173'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
 const SHOTS_DIR = path.join(ROOT, 'screenshots')

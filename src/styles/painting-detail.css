@@ -1,0 +1,849 @@
+/* ==========================================================================
+   Painting Detail Page Styles — Gallery Noir Theme
+   The Atelier by SK
+   ========================================================================== */
+
+.painting-detail {
+  max-width: var(--max-width);
+  margin-inline: auto;
+  padding: calc(var(--nav-height) + var(--space-6)) var(--gutter) var(--space-10);
+  min-height: calc(100dvh - var(--nav-height));
+}
+
+/* Breadcrumbs */
+.painting-detail__breadcrumbs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--taupe);
+  margin-bottom: var(--space-6);
+}
+
+.painting-detail__breadcrumb-link {
+  color: var(--taupe);
+  text-decoration: none;
+  transition: color var(--duration-fast) var(--ease);
+}
+
+.painting-detail__breadcrumb-link:hover {
+  color: var(--champagne);
+}
+
+.painting-detail__breadcrumb-sep {
+  color: var(--line);
+  user-select: none;
+}
+
+.painting-detail__breadcrumb-current {
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 280px;
+}
+
+/* Main Grid Layout: 2 Columns on Desktop, Stacked on Mobile */
+.painting-detail__layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-7);
+  align-items: start;
+}
+
+@media (min-width: 960px) {
+  .painting-detail__layout {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    gap: clamp(var(--space-6), 4vw, var(--space-9));
+  }
+}
+
+/* --------------------------------------------------------------------------
+   LEFT COLUMN: Interactive Gallery & High-Res Zoom
+   -------------------------------------------------------------------------- */
+.painting-detail__gallery {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  position: relative;
+}
+
+@media (min-width: 960px) {
+  .painting-detail__gallery {
+    position: sticky;
+    top: calc(var(--nav-height) + var(--space-4));
+  }
+}
+
+/* Exhibition Frame */
+.painting-detail__frame {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  padding: clamp(var(--space-3), 2vw, var(--space-5));
+  box-shadow:
+    0 24px 60px -12px rgba(0, 0, 0, 0.85),
+    0 0 1px rgba(208, 169, 113, 0.2);
+  transition: border-color var(--duration) var(--ease);
+}
+
+.painting-detail__frame:hover {
+  border-color: rgba(208, 169, 113, 0.4);
+}
+
+/* Canvas Display Viewport */
+.painting-detail__viewport {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background: #0f0e0b;
+  cursor: zoom-in;
+  user-select: none;
+  border-radius: 1px;
+}
+
+/* Primary Static Image */
+.painting-detail__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: opacity 0.3s ease;
+}
+
+/* Magnified Zoom Layer */
+.painting-detail__zoom-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(2.5);
+  transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform-origin, opacity;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+}
+
+.painting-detail__viewport[data-zooming="true"] .painting-detail__zoom-layer {
+  opacity: 1;
+}
+
+.painting-detail__viewport[data-zooming="true"] .painting-detail__image {
+  opacity: 0;
+}
+
+/* Zoom Prompt Badge */
+.painting-detail__zoom-cue {
+  position: absolute;
+  bottom: var(--space-3);
+  right: var(--space-3);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 6px 12px;
+  background: rgba(21, 20, 16, 0.88);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 20px;
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--champagne);
+  pointer-events: none;
+  transition: opacity 0.25s ease, border-color 0.25s ease;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+}
+
+.painting-detail__zoom-icon {
+  width: 13px;
+  height: 13px;
+  stroke: var(--gold);
+}
+
+/* Sold watermark badge on frame */
+.painting-detail__sold-watermark {
+  position: absolute;
+  top: var(--space-4);
+  left: var(--space-4);
+  padding: 6px 14px;
+  background: rgba(21, 20, 16, 0.92);
+  border: 1px solid rgba(135, 109, 79, 0.6);
+  backdrop-filter: blur(8px);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--champagne);
+  border-radius: 2px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7);
+  pointer-events: none;
+}
+
+/* Extra Images: Stacked / Grid View (No slider) */
+.painting-detail__thumbs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.painting-detail__thumb-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  padding: 6px;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--ease), transform var(--duration-fast) var(--ease);
+  text-align: center;
+}
+
+.painting-detail__thumb-btn:hover {
+  border-color: rgba(208, 169, 113, 0.5);
+  transform: translateY(-2px);
+}
+
+.painting-detail__thumb-btn--active {
+  border-color: var(--gold);
+  box-shadow: 0 0 12px rgba(208, 169, 113, 0.35);
+}
+
+.painting-detail__thumb-img-wrap {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: #0f0e0b;
+  border-radius: 1px;
+}
+
+.painting-detail__thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.painting-detail__thumb-label {
+  font-family: var(--font-body);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  color: var(--taupe);
+  text-transform: uppercase;
+}
+
+.painting-detail__thumb-btn--active .painting-detail__thumb-label {
+  color: var(--champagne);
+  font-weight: 500;
+}
+
+/* Fullscreen Inspect Button (Mobile friendly) */
+.painting-detail__inspect-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-3);
+  background: rgba(30, 28, 23, 0.7);
+  border: 1px solid var(--line);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  border-radius: 2px;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease),
+    border-color var(--duration-fast) var(--ease),
+    color var(--duration-fast) var(--ease);
+}
+
+.painting-detail__inspect-btn:hover {
+  background: var(--surface);
+  border-color: var(--gold);
+  color: var(--champagne);
+}
+
+/* --------------------------------------------------------------------------
+   RIGHT COLUMN: Editorial Metadata & Acquisition Flow
+   -------------------------------------------------------------------------- */
+.painting-detail__info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+/* Eyebrow & Status Row */
+.painting-detail__header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.painting-detail__eyebrow {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--taupe);
+}
+
+/* Availability Badge */
+.painting-detail__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  background: rgba(30, 28, 23, 0.85);
+  border: 1px solid var(--line);
+}
+
+.painting-detail__badge--available {
+  border-color: rgba(208, 169, 113, 0.4);
+  color: var(--champagne);
+}
+
+.painting-detail__badge--available .painting-detail__badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 8px rgba(208, 169, 113, 0.9);
+}
+
+.painting-detail__badge--sold {
+  border-color: rgba(135, 109, 79, 0.4);
+  color: var(--taupe);
+}
+
+.painting-detail__badge--sold .painting-detail__badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--bronze);
+}
+
+/* Title & Price */
+.painting-detail__title {
+  font-family: var(--font-heading);
+  font-weight: 300;
+  font-size: clamp(2rem, 1.6rem + 1.8vw, 3.25rem);
+  line-height: var(--leading-tight);
+  color: var(--text);
+  margin: 0;
+  letter-spacing: 0.01em;
+}
+
+.painting-detail__price-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-4);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--line);
+}
+
+.painting-detail__price {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: var(--text-2xl);
+  color: var(--gold);
+  letter-spacing: 0.02em;
+}
+
+.painting-detail__price--sold {
+  color: var(--taupe);
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+.painting-detail__price-note {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--taupe);
+}
+
+/* Artwork Quick Specification Table */
+.painting-detail__specs-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3) var(--space-4);
+  background: rgba(30, 28, 23, 0.6);
+  border: 1px solid var(--line);
+  padding: var(--space-4);
+  border-radius: 2px;
+}
+
+.painting-detail__spec-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.painting-detail__spec-label {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--taupe);
+}
+
+.painting-detail__spec-value {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--text);
+  font-weight: 400;
+}
+
+/* Action Area */
+.painting-detail__action-box {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-top: var(--space-2);
+}
+
+.painting-detail__cta {
+  width: 100%;
+  padding-block: var(--space-4);
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-wide);
+}
+
+/* Disabled state when artwork is sold */
+.painting-detail__cta--sold {
+  cursor: not-allowed;
+  opacity: 0.55;
+  background: rgba(30, 28, 23, 0.9);
+  border-color: var(--line);
+  color: var(--taupe);
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.painting-detail__cta--sold:hover {
+  transform: none !important;
+  box-shadow: none !important;
+  border-color: var(--line) !important;
+  color: var(--taupe) !important;
+}
+
+/* In Cart indicator */
+.painting-detail__cta--incart {
+  background: rgba(75, 61, 44, 0.7);
+  border-color: var(--gold);
+  color: var(--champagne);
+}
+
+/* Cart feedback toast */
+.painting-detail__cart-toast {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: rgba(30, 28, 23, 0.95);
+  border: 1px solid var(--gold);
+  border-radius: 2px;
+  animation: toastFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes toastFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.painting-detail__toast-text {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  letter-spacing: 0.04em;
+  color: var(--champagne);
+}
+
+.painting-detail__toast-link {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-weight: 500;
+  transition: color var(--duration-fast) var(--ease);
+}
+
+.painting-detail__toast-link:hover {
+  color: var(--gold);
+}
+
+/* Secondary Action: Studio Inquiry */
+.painting-detail__secondary-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  padding-top: var(--space-1);
+}
+
+.painting-detail__inquire-link {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--taupe);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: color var(--duration-fast) var(--ease);
+}
+
+.painting-detail__inquire-link:hover {
+  color: var(--champagne);
+}
+
+/* Editorial Accordions / Collapsible Sections */
+.painting-detail__accordions {
+  display: flex;
+  flex-direction: column;
+  margin-top: var(--space-4);
+  border-top: 1px solid var(--line);
+}
+
+.painting-detail__accordion {
+  border-bottom: 1px solid var(--line);
+}
+
+.painting-detail__accordion-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) 0;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--text);
+  cursor: pointer;
+  list-style: none;
+  transition: color var(--duration-fast) var(--ease);
+}
+
+.painting-detail__accordion-summary::-webkit-details-marker {
+  display: none;
+}
+
+.painting-detail__accordion-summary:hover {
+  color: var(--champagne);
+}
+
+.painting-detail__accordion-icon {
+  font-size: 1.1rem;
+  line-height: 1;
+  color: var(--taupe);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), color 0.3s ease;
+}
+
+.painting-detail__accordion[open] .painting-detail__accordion-icon {
+  transform: rotate(45deg);
+  color: var(--gold);
+}
+
+.painting-detail__accordion-content {
+  padding-bottom: var(--space-5);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+  color: var(--taupe);
+}
+
+.painting-detail__accordion-content p {
+  margin: 0 0 var(--space-3) 0;
+}
+
+.painting-detail__accordion-content p:last-child {
+  margin-bottom: 0;
+}
+
+.painting-detail__bullet-list {
+  list-style: none;
+  padding: 0;
+  margin: var(--space-2) 0 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.painting-detail__bullet-item {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.painting-detail__bullet-icon {
+  color: var(--gold);
+  font-size: 10px;
+}
+
+/* --------------------------------------------------------------------------
+   FULLSCREEN HIGH-RES INSPECTION LIGHTBOX (Mobile & Desktop)
+   -------------------------------------------------------------------------- */
+.painting-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(13, 12, 10, 0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  display: flex;
+  flex-direction: column;
+  animation: lightboxFade 0.25s ease;
+}
+
+@keyframes lightboxFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.painting-lightbox__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--gutter);
+  border-bottom: 1px solid var(--line);
+  background: rgba(21, 20, 16, 0.8);
+}
+
+.painting-lightbox__title {
+  font-family: var(--font-heading);
+  font-weight: 400;
+  font-size: var(--text-lg);
+  color: var(--text);
+  margin: 0;
+}
+
+.painting-lightbox__meta {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--taupe);
+  text-transform: uppercase;
+}
+
+.painting-lightbox__controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.painting-lightbox__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(30, 28, 23, 0.9);
+  border: 1px solid var(--line);
+  color: var(--text);
+  padding: 8px 14px;
+  border-radius: 2px;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  transition:
+    background-color var(--duration-fast) var(--ease),
+    border-color var(--duration-fast) var(--ease),
+    color var(--duration-fast) var(--ease);
+}
+
+.painting-lightbox__btn:hover {
+  border-color: var(--gold);
+  color: var(--champagne);
+}
+
+.painting-lightbox__close-btn {
+  font-size: 1.5rem;
+  line-height: 1;
+  padding: 6px 12px;
+}
+
+.painting-lightbox__body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+  padding: var(--space-4);
+  position: relative;
+  cursor: grab;
+}
+
+.painting-lightbox__body:active {
+  cursor: grabbing;
+}
+
+.painting-lightbox__stage {
+  max-width: 90vw;
+  max-height: 82vh;
+  position: relative;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.painting-lightbox__stage[data-zoomed="true"] {
+  transform: scale(2.2);
+  cursor: move;
+}
+
+.painting-lightbox__img {
+  max-width: 90vw;
+  max-height: 82vh;
+  object-fit: contain;
+  display: block;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
+  border: 1px solid var(--line);
+}
+
+.painting-lightbox__footer {
+  text-align: center;
+  padding: var(--space-3);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--taupe);
+  text-transform: uppercase;
+  border-top: 1px solid var(--line);
+  background: rgba(21, 20, 16, 0.8);
+}
+
+/* --------------------------------------------------------------------------
+   CURATED COLLECTION RECOMMENDATIONS ("More Works")
+   -------------------------------------------------------------------------- */
+.painting-detail__related {
+  margin-top: var(--space-10);
+  padding-top: var(--space-8);
+  border-top: 1px solid var(--line);
+}
+
+.painting-detail__related-header {
+  margin-bottom: var(--space-6);
+  text-align: left;
+}
+
+.painting-detail__related-eyebrow {
+  display: block;
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--taupe);
+  margin-bottom: var(--space-1);
+}
+
+.painting-detail__related-title {
+  font-family: var(--font-heading);
+  font-weight: 300;
+  font-size: var(--text-2xl);
+  color: var(--text);
+  margin: 0;
+}
+
+.painting-detail__related-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-6);
+}
+
+/* --------------------------------------------------------------------------
+   LOADING & ERROR STATES
+   -------------------------------------------------------------------------- */
+.painting-detail__loading,
+.painting-detail__error {
+  min-height: 50vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: var(--space-4);
+  padding: var(--space-8) var(--gutter);
+}
+
+.painting-detail__spinner {
+  width: 44px;
+  height: 44px;
+  border: 2px solid var(--line);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: paintingSpin 0.9s linear infinite;
+}
+
+@keyframes paintingSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.painting-detail__loading p,
+.painting-detail__error p {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  color: var(--taupe);
+  letter-spacing: 0.02em;
+}
+
+.painting-detail__error-title {
+  font-family: var(--font-heading);
+  font-weight: 300;
+  font-size: var(--text-2xl);
+  color: var(--text);
+  margin: 0;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .painting-detail__zoom-layer {
+    transition: none !important;
+  }
+  .painting-detail__spinner {
+    animation-duration: 2s !important;
+  }
+  .painting-lightbox {
+    animation: none !important;
+  }
+  .painting-detail__cart-toast {
+    animation: none !important;
+  }
+}
