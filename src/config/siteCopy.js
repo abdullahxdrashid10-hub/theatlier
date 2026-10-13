@@ -54,7 +54,15 @@ export const shippingDetails = {
 export const studioIntroText =
   'Every work at The Atelier is sculpted with the palette knife. Rich pigments and textured strokes are applied with intention—creating tactile crests and ridges that catch the shifting daylight of your room. Each piece is singular and original.'
 
+// TODO CLIENT: confirm with SK (flag: show a one-line note under the Bank transfer option)
+export const bankTransferNote = false
+
+// TODO CLIENT: confirm with SK (the single line shown when bankTransferNote is true; no bank details here)
+export const bankTransferNoteText = 'TODO_CLIENT_BANK_TRANSFER_NOTE'
+
 export const siteCopy = {
+  bankTransferNote,
+  bankTransferNoteText,
   showFramingShippingNote,
   showAuthenticityDetails,
   showShippingAccordion,

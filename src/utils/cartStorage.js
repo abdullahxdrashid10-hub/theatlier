@@ -90,3 +90,13 @@ export function subscribeToCart(callback) {
     window.removeEventListener('storage', handler)
   }
 }
+
+export function clearCart() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify([]))
+    window.dispatchEvent(new CustomEvent(EVENT_KEY, { detail: { items: [] } }))
+  } catch (err) {
+    console.error('Failed to clear cart:', err)
+  }
+}
+

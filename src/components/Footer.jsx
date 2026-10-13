@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { NAV_LINKS } from '../data/navLinks'
+import { CONTACT_LINE, isTodoValue } from '../config/site'
 
 export default function Footer() {
   return (
@@ -25,13 +26,12 @@ export default function Footer() {
           </ul>
         </nav>
 
-        <div>
-          <h2 className="footer__heading">Contact</h2>
-          <p className="footer__contact">
-            <span className="footer__todo">TODO</span> — contact details (email, phone, WhatsApp,
-            Instagram) to be supplied by the client.
-          </p>
-        </div>
+        {!isTodoValue(CONTACT_LINE) && (
+          <div>
+            <h2 className="footer__heading">Contact</h2>
+            <p className="footer__contact">{CONTACT_LINE}</p>
+          </div>
+        )}
 
         <p className="footer__legal">&copy; The Atelier by SK</p>
       </div>
