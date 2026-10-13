@@ -1,9 +1,9 @@
 /* Featured Works — Editorial Section */
 .featured-works {
   position: relative;
-  background: var(--bg);
+  z-index: 1;
+  background: transparent;
   padding: var(--space-9) var(--gutter) var(--space-10);
-  border-top: 1px solid var(--line);
   overflow: hidden;
 }
 

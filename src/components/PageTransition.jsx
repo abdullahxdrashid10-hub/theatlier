@@ -39,7 +39,7 @@ export default function PageTransition({ children }) {
       tl.fromTo(
         contentRef.current,
         { opacity: 0, y: 16 },
-        { opacity: 1, y: 0, duration: 0.55, ease: 'power2.out' },
+        { opacity: 1, y: 0, duration: 0.55, ease: 'power2.out', clearProps: 'transform' },
         0.08,
       )
     }

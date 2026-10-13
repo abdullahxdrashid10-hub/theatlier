@@ -1,9 +1,10 @@
 /* Studio Introduction Section — Gallery Noir */
 .studio-intro {
   position: relative;
-  background: var(--bg);
+  z-index: 1;
+  background: transparent;
   padding: var(--space-9) var(--gutter) var(--space-10);
-  border-top: 1px solid var(--line);
+  border-top: 1px solid rgba(208, 169, 113, 0.12);
   overflow: hidden;
 }
 

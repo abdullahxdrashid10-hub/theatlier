@@ -21,6 +21,7 @@ export function useHeroAnimation({
   titleRef,
   ctaRef,
   scrollCueRef,
+  scrollVeilRef,
 }) {
   const [heroState, setHeroState] = useState(() => {
     if (typeof window === 'undefined') return 'intro'
@@ -53,6 +54,7 @@ export function useHeroAnimation({
       if (titleRef.current) gsap.set(titleRef.current, { opacity: 1, y: 0 })
       if (ctaRef.current) gsap.set(ctaRef.current, { opacity: 1, y: 0 })
       if (scrollCueRef.current) gsap.set(scrollCueRef.current, { opacity: 0.85, y: 0 })
+      if (scrollVeilRef?.current) gsap.set(scrollVeilRef.current, { opacity: 0 })
       return
     }
 
@@ -203,7 +205,7 @@ export function useHeroAnimation({
       if (artImgRef.current) gsap.set(artImgRef.current, { opacity: 0 })
     }
 
-    // Scroll parallax & cue fading
+    // Scroll parallax, cue fading & progressive ambient blur/dimming
     const scrollTrigger = ScrollTrigger.create({
       trigger: container,
       start: 'top top',
@@ -216,6 +218,10 @@ export function useHeroAnimation({
         }
         if (canvas) gsap.set(canvas, { y: p * 60 })
         if (overlayCanvas) gsap.set(overlayCanvas, { y: p * 60 })
+        if (scrollVeilRef?.current) {
+          const veilOpacity = Math.min(1, Math.max(0, p * 1.33))
+          gsap.set(scrollVeilRef.current, { opacity: veilOpacity })
+        }
       },
     })
 
@@ -263,6 +269,7 @@ export function useHeroAnimation({
     titleRef,
     ctaRef,
     scrollCueRef,
+    scrollVeilRef,
   ])
 
   return { heroState }

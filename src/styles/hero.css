@@ -7,6 +7,21 @@
   width: 100%;
   height: 100svh;
   min-height: 600px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+}
+
+/* Pinned Ambient Gallery Backdrop: Stays fixed across Home page flow */
+.hero__backdrop {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100svh;
+  z-index: 0;
+  pointer-events: none;
   overflow: hidden;
   background-color: var(--bg);
   /* Gallery track-light ambient baseline */
@@ -16,9 +31,7 @@
     #1A1713 50%,
     #151410 100%
   );
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  transform: translateZ(0);
 }
 
 /* Background Artwork: Authentic Impasto Oil Painting Composition */
@@ -78,6 +91,25 @@
     rgba(21, 20, 16, 0.45) 50%,
     transparent 85%
   );
+}
+
+/* Progressive Depth-of-Field Blur & Atmospheric Dimming Scrim */
+.hero__scroll-veil {
+  position: absolute;
+  inset: -30px;
+  z-index: 4;
+  pointer-events: none;
+  background: rgba(21, 20, 16, 0.82);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  opacity: 0;
+  will-change: opacity;
+}
+
+@supports not (backdrop-filter: blur(8px)) {
+  .hero__scroll-veil {
+    background: rgba(21, 20, 16, 0.90);
+  }
 }
 
 /* Central Editorial Typography Lockup */

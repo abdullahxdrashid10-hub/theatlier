@@ -11,6 +11,7 @@ export default function Hero() {
   const titleRef = useRef(null)
   const ctaRef = useRef(null)
   const scrollCueRef = useRef(null)
+  const scrollVeilRef = useRef(null)
 
   const { heroState } = useHeroAnimation({
     containerRef,
@@ -20,6 +21,7 @@ export default function Hero() {
     titleRef,
     ctaRef,
     scrollCueRef,
+    scrollVeilRef,
   })
 
   const handleScrollToDiscover = () => {
@@ -38,33 +40,37 @@ export default function Hero() {
       data-hero-state={heroState}
       aria-label="The Atelier by SK — Art lives here"
     >
-      {/* Fallback image: stays visible until WebGL texture is ready */}
-      <div className="hero__art-container" aria-hidden="true">
-        <img
-          ref={artImgRef}
-          src="/hero-impasto.jpg"
-          alt=""
-          className="hero__art-img"
-          fetchPriority="high"
+      {/* Pinned Ambient Gallery Backdrop with Progressive Blur & Atmospheric Dimming */}
+      <div className="hero__backdrop" aria-hidden="true">
+        {/* Fallback image: stays visible until WebGL texture is ready */}
+        <div className="hero__art-container">
+          <img
+            ref={artImgRef}
+            src="/hero-impasto.jpg"
+            alt=""
+            className="hero__art-img"
+            fetchPriority="high"
+          />
+        </div>
+
+        {/* Raw WebGL Museum Spotlight & Parallax Shader Canvas */}
+        <canvas
+          ref={canvasRef}
+          className="hero__canvas"
         />
+
+        {/* Lightweight 2D Overlay Canvas for Fine-Pointer Dust Trail & Loupe */}
+        <canvas
+          ref={overlayCanvasRef}
+          className="hero__overlay-canvas"
+        />
+
+        {/* Dark warm radial scrim for pristine text contrast */}
+        <div className="hero__scrim" />
+
+        {/* Scroll-Driven Atmospheric Blur & Dimming Veil */}
+        <div ref={scrollVeilRef} className="hero__scroll-veil" />
       </div>
-
-      {/* Raw WebGL Museum Spotlight & Parallax Shader Canvas */}
-      <canvas
-        ref={canvasRef}
-        className="hero__canvas"
-        aria-hidden="true"
-      />
-
-      {/* Lightweight 2D Overlay Canvas for Fine-Pointer Dust Trail & Loupe */}
-      <canvas
-        ref={overlayCanvasRef}
-        className="hero__overlay-canvas"
-        aria-hidden="true"
-      />
-
-      {/* Dark warm radial scrim for pristine text contrast */}
-      <div className="hero__scrim" aria-hidden="true" />
 
       {/* Luxury Editorial Typography: Only Headline, Button, and Scroll Cue */}
       <div className="hero__content">
