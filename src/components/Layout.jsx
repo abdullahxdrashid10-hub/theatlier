@@ -21,6 +21,11 @@ export default function Layout() {
         Skip to content
       </a>
       <Nav />
+      {/* Global Ambient Gallery Depth Backdrop across all pages */}
+      <div className="app__ambient-backdrop" aria-hidden="true">
+        <div className="app__ambient-art" />
+        <div className="app__ambient-scrim" />
+      </div>
       <div id="page-content" className="app__content">
         <main id="main-content" className="app__main" tabIndex={-1}>
           <PageTransition>
