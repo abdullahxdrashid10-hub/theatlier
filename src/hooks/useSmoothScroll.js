@@ -21,12 +21,19 @@ export default function useSmoothScroll() {
 
     const start = () => {
       if (lenis) return
-      lenis = new Lenis({ autoRaf: false })
+      lenis = new Lenis({
+        autoRaf: false,
+        duration: 1.1,
+        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        smoothWheel: true,
+        syncTouch: false,
+        wheelMultiplier: 0.95,
+      })
       setLenis(lenis)
       lenis.on('scroll', ScrollTrigger.update)
       tick = (time) => lenis.raf(time * 1000)
       gsap.ticker.add(tick)
-      gsap.ticker.lagSmoothing(500, 33)
+      gsap.ticker.lagSmoothing(0)
     }
 
     const stop = () => {

@@ -210,7 +210,6 @@ export function useHeroAnimation({
       trigger: container,
       start: 'top top',
       end: 'bottom top',
-      scrub: true,
       onUpdate: (self) => {
         const p = self.progress
         if (scrollCueRef.current) {
@@ -225,6 +224,7 @@ export function useHeroAnimation({
 
     // Animation Ticker
     let lastTime = performance.now()
+    let hasFadedFallback = false
     const onTick = () => {
       const now = performance.now()
       const dt = Math.min(0.1, (now - lastTime) / 1000)
@@ -236,7 +236,8 @@ export function useHeroAnimation({
       if (overlayManager) overlayManager.updateAndDraw(dt)
 
       // Fade out plain fallback once WebGL is loaded and rendering
-      if (renderer.textureLoaded && artImgRef.current && artImgRef.current.style.opacity !== '0') {
+      if (!hasFadedFallback && renderer.textureLoaded && artImgRef.current) {
+        hasFadedFallback = true
         gsap.to(artImgRef.current, { opacity: 0, duration: 0.4 })
       }
     }

@@ -13,6 +13,7 @@ const MOCK_PREVIEWS = {
 export default function PaintingCard({ painting, variant = 'default', className = '' }) {
   const frameRef = useRef(null)
   const rectRef = useRef(null)
+  const rafRef = useRef(null)
 
   const handlePointerEnter = useCallback(() => {
     if (!frameRef.current) return
@@ -22,24 +23,36 @@ export default function PaintingCard({ painting, variant = 'default', className 
   const handlePointerMove = useCallback((e) => {
     if (!frameRef.current) return
     if (typeof window !== 'undefined' && !window.matchMedia('(pointer: fine)').matches) return
-    if (!rectRef.current) {
-      rectRef.current = frameRef.current.getBoundingClientRect()
-    }
-    const rect = rectRef.current
-    const x = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width))
-    const y = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height))
-    const rx = ((0.5 - y) * 5).toFixed(2)
-    const ry = ((x - 0.5) * 5).toFixed(2)
-    const mx = (x * 100).toFixed(1)
-    const my = (y * 100).toFixed(1)
+    const clientX = e.clientX
+    const clientY = e.clientY
 
-    frameRef.current.style.setProperty('--rx', `${rx}deg`)
-    frameRef.current.style.setProperty('--ry', `${ry}deg`)
-    frameRef.current.style.setProperty('--mx', `${mx}%`)
-    frameRef.current.style.setProperty('--my', `${my}%`)
+    if (rafRef.current) return
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = null
+      if (!frameRef.current) return
+      if (!rectRef.current) {
+        rectRef.current = frameRef.current.getBoundingClientRect()
+      }
+      const rect = rectRef.current
+      const x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width))
+      const y = Math.max(0, Math.min(1, (clientY - rect.top) / rect.height))
+      const rx = ((0.5 - y) * 5).toFixed(2)
+      const ry = ((x - 0.5) * 5).toFixed(2)
+      const mx = (x * 100).toFixed(1)
+      const my = (y * 100).toFixed(1)
+
+      frameRef.current.style.setProperty('--rx', `${rx}deg`)
+      frameRef.current.style.setProperty('--ry', `${ry}deg`)
+      frameRef.current.style.setProperty('--mx', `${mx}%`)
+      frameRef.current.style.setProperty('--my', `${my}%`)
+    })
   }, [])
 
   const handlePointerLeave = useCallback(() => {
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current)
+      rafRef.current = null
+    }
     rectRef.current = null
     if (!frameRef.current) return
     frameRef.current.style.setProperty('--rx', '0deg')
