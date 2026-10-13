@@ -22,3 +22,22 @@ export function getPaintingBySlug(slug) {
 export function getFeaturedPaintings() {
   return Promise.resolve(clone(paintings.filter((painting) => painting.featured)))
 }
+
+/**
+ * Submits a customer order.
+ * TODO (Phase 2): replace this stub with a real API call (POST /api/orders).
+ * Currently it persists NOTHING and just resolves with a generated order id after 700 ms.
+ *
+ * @param {object} order - { customer, paymentMethod, items, totalPKR }
+ * @returns {Promise<{ orderId: string }>}
+ */
+export function submitOrder(order) {
+  void order
+  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+  const bytes = crypto.getRandomValues(new Uint8Array(6))
+  const code = Array.from(bytes, (b) => alphabet[b % alphabet.length]).join('')
+  return new Promise((resolve) => {
+    setTimeout(() => resolve({ orderId: `ATL-${code}` }), 700)
+  })
+}
+

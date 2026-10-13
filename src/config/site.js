@@ -38,3 +38,11 @@ export function buildWhatsAppEnquiry({ title, url }) {
     isConfigured: true,
   }
 }
+
+// TODO CLIENT: confirm with SK (footer contact line: email, phone, WhatsApp or Instagram text).
+// While the value contains TODO, the footer Contact block is not rendered.
+export const CONTACT_LINE = 'TODO_CLIENT_CONTACT'
+
+/** True when a configured value is still a TODO placeholder. */
+export const isTodoValue = (value) => !value || String(value).includes('TODO')
+
