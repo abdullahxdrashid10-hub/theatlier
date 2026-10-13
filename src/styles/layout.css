@@ -17,6 +17,7 @@
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
+  contain: strict;
   background-color: var(--bg);
   background-image: radial-gradient(
     ellipse 80% 60% at 56% 45%,
@@ -29,14 +30,13 @@
 
 .app__ambient-art {
   position: absolute;
-  inset: -30px;
+  inset: -16px;
   background-image: url('/hero-impasto.jpg');
   background-size: cover;
   background-position: center center;
-  filter: blur(4.5px) saturate(1.08) contrast(1.06);
-  transform: scale(1.04);
+  filter: blur(3.5px) saturate(1.08) contrast(1.06);
+  transform: scale(1.03) translateZ(0);
   opacity: 0.68;
-  will-change: transform, filter;
 }
 
 .app__ambient-scrim {

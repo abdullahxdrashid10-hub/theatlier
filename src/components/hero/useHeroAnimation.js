@@ -216,8 +216,6 @@ export function useHeroAnimation({
         if (scrollCueRef.current) {
           scrollCueRef.current.dataset.hidden = p > 0.03 ? 'true' : 'false'
         }
-        if (canvas) gsap.set(canvas, { y: p * 60 })
-        if (overlayCanvas) gsap.set(overlayCanvas, { y: p * 60 })
         if (scrollVeilRef?.current) {
           const veilOpacity = Math.min(1, Math.max(0, p * 1.33))
           gsap.set(scrollVeilRef.current, { opacity: veilOpacity })

@@ -26,11 +26,16 @@
   border-radius: 1px;
   transform: perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
   transform-style: preserve-3d;
-  will-change: transform;
   transition:
     border-color 0.45s ease,
     box-shadow 0.45s ease,
-    transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.painting-card:hover .painting-card__frame {
+  transition:
+    border-color 0.45s ease,
+    box-shadow 0.45s ease;
 }
 
 .painting-card__sheen {

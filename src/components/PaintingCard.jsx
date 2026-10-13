@@ -12,15 +12,24 @@ const MOCK_PREVIEWS = {
 
 export default function PaintingCard({ painting, variant = 'default', className = '' }) {
   const frameRef = useRef(null)
+  const rectRef = useRef(null)
+
+  const handlePointerEnter = useCallback(() => {
+    if (!frameRef.current) return
+    rectRef.current = frameRef.current.getBoundingClientRect()
+  }, [])
 
   const handlePointerMove = useCallback((e) => {
     if (!frameRef.current) return
     if (typeof window !== 'undefined' && !window.matchMedia('(pointer: fine)').matches) return
-    const rect = frameRef.current.getBoundingClientRect()
+    if (!rectRef.current) {
+      rectRef.current = frameRef.current.getBoundingClientRect()
+    }
+    const rect = rectRef.current
     const x = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width))
     const y = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height))
-    const rx = ((0.5 - y) * 6).toFixed(2)
-    const ry = ((x - 0.5) * 6).toFixed(2)
+    const rx = ((0.5 - y) * 5).toFixed(2)
+    const ry = ((x - 0.5) * 5).toFixed(2)
     const mx = (x * 100).toFixed(1)
     const my = (y * 100).toFixed(1)
 
@@ -31,6 +40,7 @@ export default function PaintingCard({ painting, variant = 'default', className 
   }, [])
 
   const handlePointerLeave = useCallback(() => {
+    rectRef.current = null
     if (!frameRef.current) return
     frameRef.current.style.setProperty('--rx', '0deg')
     frameRef.current.style.setProperty('--ry', '0deg')
@@ -55,6 +65,7 @@ export default function PaintingCard({ painting, variant = 'default', className 
         to={`/painting/${painting.slug}`}
         className="painting-card__link"
         aria-label={`${painting.title}, ${painting.medium}, ${painting.widthCm} by ${painting.heightCm} centimeters${isSold ? ', Sold' : `, ${formatPKR(painting.price)}`}`}
+        onPointerEnter={!isSold ? handlePointerEnter : undefined}
         onPointerMove={!isSold ? handlePointerMove : undefined}
         onPointerLeave={!isSold ? handlePointerLeave : undefined}
       >
