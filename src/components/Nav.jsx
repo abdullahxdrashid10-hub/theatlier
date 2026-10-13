@@ -4,6 +4,7 @@ import { NAV_LINKS } from '../data/navLinks'
 import useScrolled from '../hooks/useScrolled'
 import useFocusTrap from '../hooks/useFocusTrap'
 import { lockScroll } from '../utils/scroll'
+import { getCartCount, subscribeToCart } from '../utils/cartStorage'
 
 function CartIcon() {
   return (
@@ -21,7 +22,16 @@ export default function Nav() {
   const scrolled = useScrolled(40)
   const [open, setOpen] = useState(false)
   const [seenKey, setSeenKey] = useState(location.key)
+  const [cartCount, setCartCount] = useState(() => getCartCount())
   const shellRef = useRef(null)
+
+  // Live cart count update
+  useEffect(() => {
+    const unsubscribe = subscribeToCart((items) => {
+      setCartCount(items.length)
+    })
+    return unsubscribe
+  }, [])
 
   // Close the menu whenever the route changes (adjusting state during render).
   if (seenKey !== location.key) {
@@ -71,8 +81,17 @@ export default function Nav() {
               ))}
             </nav>
 
-            <Link to="/cart" className="nav__icon-btn" aria-label="Cart">
+            <Link
+              to="/cart"
+              className="nav__icon-btn nav__cart-btn"
+              aria-label={cartCount > 0 ? `Cart (${cartCount} items)` : 'Cart'}
+            >
               <CartIcon />
+              {cartCount > 0 && (
+                <span className="nav__cart-badge" aria-hidden="true">
+                  {cartCount}
+                </span>
+              )}
             </Link>
 
             <button

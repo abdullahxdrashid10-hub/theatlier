@@ -29,7 +29,7 @@ export function addToCart(painting) {
     return {
       success: false,
       reason: 'sold',
-      message: 'This piece has been acquired and is in a private collection.',
+      message: 'This piece has found its home.',
     }
   }
 
@@ -54,9 +54,11 @@ export function addToCart(painting) {
   }
 }
 
-export function removeFromCart(paintingId) {
+export function removeFromCart(paintingIdOrSlug) {
   const current = getCartItems()
-  const updated = current.filter((item) => item.id !== paintingId)
+  const updated = current.filter(
+    (item) => item.id !== paintingIdOrSlug && item.slug !== paintingIdOrSlug
+  )
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
     window.dispatchEvent(new CustomEvent(EVENT_KEY, { detail: { items: updated } }))
