@@ -25,18 +25,20 @@
     #1A1713 50%,
     #151410 100%
   );
-  transform: translateZ(0);
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
 }
 
 .app__ambient-art {
   position: absolute;
-  inset: -16px;
+  inset: 0;
   background-image: url('/hero-impasto.jpg');
   background-size: cover;
   background-position: center center;
-  filter: blur(3.5px) saturate(1.08) contrast(1.06);
-  transform: scale(1.03) translateZ(0);
-  opacity: 0.68;
+  filter: saturate(1.08) contrast(1.06);
+  transform: scale(1.02) translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  opacity: 0.58;
 }
 
 .app__ambient-scrim {
@@ -44,10 +46,11 @@
   inset: 0;
   background: radial-gradient(
     ellipse 80% 70% at 50% 40%,
-    rgba(21, 20, 16, 0.68) 0%,
+    rgba(21, 20, 16, 0.65) 0%,
     rgba(21, 20, 16, 0.82) 65%,
-    rgba(21, 20, 16, 0.92) 100%
+    rgba(21, 20, 16, 0.94) 100%
   );
+  transform: translate3d(0, 0, 0);
 }
 
 .app__content {
@@ -56,6 +59,7 @@
   flex-direction: column;
   position: relative;
   z-index: 1;
+  transform: translate3d(0, 0, 0);
 }
 
 .app__main {
