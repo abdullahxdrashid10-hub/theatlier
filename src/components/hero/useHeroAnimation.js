@@ -215,6 +215,14 @@ export function useHeroAnimation({
         if (scrollCueRef.current) {
           scrollCueRef.current.dataset.hidden = p > 0.03 ? 'true' : 'false'
         }
+        if (titleRef.current) {
+          const titleOpacity = Math.max(0, 1 - p * 2.2)
+          gsap.set(titleRef.current, { opacity: titleOpacity, y: -p * 45 })
+        }
+        if (ctaRef.current) {
+          const ctaOpacity = Math.max(0, 1 - p * 2.5)
+          gsap.set(ctaRef.current, { opacity: ctaOpacity, y: -p * 30 })
+        }
         if (scrollVeilRef?.current) {
           const veilOpacity = Math.min(1, Math.max(0, p * 1.33))
           gsap.set(scrollVeilRef.current, { opacity: veilOpacity })
