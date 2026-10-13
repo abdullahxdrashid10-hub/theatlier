@@ -99,16 +99,16 @@
   inset: -30px;
   z-index: 4;
   pointer-events: none;
-  background: rgba(21, 20, 16, 0.82);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(21, 20, 16, 0.74);
+  backdrop-filter: blur(4.5px);
+  -webkit-backdrop-filter: blur(4.5px);
   opacity: 0;
   will-change: opacity;
 }
 
-@supports not (backdrop-filter: blur(8px)) {
+@supports not (backdrop-filter: blur(4.5px)) {
   .hero__scroll-veil {
-    background: rgba(21, 20, 16, 0.90);
+    background: rgba(21, 20, 16, 0.85);
   }
 }
 

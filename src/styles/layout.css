@@ -33,9 +33,9 @@
   background-image: url('/hero-impasto.jpg');
   background-size: cover;
   background-position: center center;
-  filter: blur(8px) saturate(1.05) contrast(1.04);
-  transform: scale(1.05);
-  opacity: 0.52;
+  filter: blur(4.5px) saturate(1.08) contrast(1.06);
+  transform: scale(1.04);
+  opacity: 0.68;
   will-change: transform, filter;
 }
 
@@ -44,9 +44,9 @@
   inset: 0;
   background: radial-gradient(
     ellipse 80% 70% at 50% 40%,
-    rgba(21, 20, 16, 0.76) 0%,
-    rgba(21, 20, 16, 0.88) 65%,
-    rgba(21, 20, 16, 0.95) 100%
+    rgba(21, 20, 16, 0.68) 0%,
+    rgba(21, 20, 16, 0.82) 65%,
+    rgba(21, 20, 16, 0.92) 100%
   );
 }
 
