@@ -12,8 +12,9 @@ Run the SQL files in this exact order in the **Supabase Dashboard → SQL Editor
    - Creates enums (`painting_status`, `order_status`, `payment_method`, `payment_status`).
    - Creates tables (`paintings`, `painting_images`, `orders`, `order_items`, `admins`).
    - Sets up indexes, `set_updated_at` triggers, and the automatic `sync_painting_status_from_order` status trigger.
-   - Declares the atomic, security definer `place_order()` transaction engine.
-   - Enforces strict Row Level Security (RLS) and explicit minimal role `GRANT` statements.
+   - Declares the atomic, security definer `place_order()` transaction engine with burst rate limits.
+   - Declares `release_stale_reservations(p_hours)` for admin-only cleanup of pending reservations.
+   - Enforces strict Row Level Security (RLS) and explicit minimal role `GRANT` statements (least privilege).
    - Creates and configures the public `paintings` storage bucket.
    - *Safe to run repeatedly (fully idempotent).*
 
@@ -22,9 +23,10 @@ Run the SQL files in this exact order in the **Supabase Dashboard → SQL Editor
    - *Safe to run repeatedly (uses `on conflict do nothing`).*
 
 3. **`supabase/tests/security.sql`**
-   - Automated 11-part security verification suite.
+   - Automated 16-part security verification suite.
    - Simulates `anon` and non-admin `authenticated` roles with JWT claims.
-   - Verifies read/write restrictions, RLS policies, validation checks, concurrency locks, rate limits, and order lifecycle triggers.
+   - Verifies read/write restrictions, RLS policies, input validation checks, rate limits, status sync rules, admin maintenance, and least-privilege grants.
+   - Note on Concurrency: Concurrency safety is guaranteed by PostgreSQL `FOR UPDATE` row locks acquired strictly in sorted primary key order (`order by id`), which eliminates race conditions and deadlocks. Because this test script runs sequentially in a single transaction, true concurrency safety is verified separately with parallel client calls.
    - *Runs inside a `begin; ... rollback;` transaction, leaving zero test artifacts behind.*
 
 ---
@@ -49,7 +51,7 @@ To grant administrative privileges:
 
 ---
 
-## 3. Policy Protection Overview
+## 3. Policy Protection & RPC Overview
 
 Every table starts with `REVOKE ALL ... FROM public, anon, authenticated;` so that access is granted strictly through explicit capabilities:
 
@@ -62,9 +64,19 @@ Every table starts with `REVOKE ALL ... FROM public, anon, authenticated;` so th
 | **`orders`** | `anon` | *None* | Zero direct access. Public orders must go through the atomic `place_order()` function. |
 | **`orders`** | `authenticated` | `SELECT`, `UPDATE` | Gated by `is_admin()`. The gallery owner can review orders and update fulfillment status. Direct `INSERT` / `DELETE` are revoked for all client roles. |
 | **`order_items`** | `anon` | *None* | Zero direct access. Populated only via `place_order()`. |
-| **`order_items`** | `authenticated` | `SELECT`, `UPDATE` | Gated by `is_admin()`. |
+| **`order_items`** | `authenticated` | `SELECT` only | Gated by `is_admin()`. `UPDATE` is revoked per least privilege (placed order snapshots are immutable). |
 | **`admins`** | `anon` | *None* | Zero access. Admin identity and presence are shielded. |
 | **`admins`** | `authenticated` | `SELECT` | Gated by `user_id = auth.uid()`. An admin can verify their own status, but cannot inspect other rows. |
-| **`place_order()`** | `anon`, `authenticated` | `EXECUTE` | Atomic checkout RPC (`SECURITY DEFINER`). Validates item count (1–5), customer info, Pakistani phone format, locks artwork rows with `FOR UPDATE`, enforces rate limits (max 3 pending orders per phone in 24h), computes total strictly from DB records, generates unique `ATL-XXXXXX` references, and reserves artwork. |
+| **`place_order()`** | `anon`, `authenticated` | `EXECUTE` | Atomic checkout RPC (`SECURITY DEFINER`). Validates item count (1–5), customer info, Pakistani phone format (`+923XXXXXXXXX`), locks artwork rows with sorted `FOR UPDATE`, enforces rate limits (max 3 pending orders per phone in 24h; store-wide burst cap of 20 orders in last 60 minutes raising `ATL04` with detail `'Store is busy, please try again shortly.'`), computes total strictly from DB records, generates unique `ATL-XXXXXX` references, and reserves artwork. |
+| **`release_stale_reservations(p_hours)`** | `authenticated` | `EXECUTE` | Admin-only maintenance routine (`SECURITY DEFINER`, default `p_hours = 48`). Raises `NOT_AUTHORIZED` (42501) unless `is_admin()`. Cancels pending orders older than `p_hours`, triggering the release of reserved paintings back to `available`. Returns the count of cancelled orders. Revoked from `anon` and `public`. |
 | **Storage (`paintings`)** | `anon`, `authenticated` | `SELECT` | Public CDN image delivery. |
 | **Storage (`paintings`)** | `authenticated` | `INSERT`, `UPDATE`, `DELETE` | Gated by `public.is_admin()`. |
+
+---
+
+## 4. Order & Painting Status Synchronization Rules
+
+Painting statuses transition strictly in tandem with order status changes via `sync_painting_status_from_order`:
+
+- **Order Confirmed (`status = 'confirmed'`)**: Associated paintings transition from `reserved` to `sold`.
+- **Order Cancelled (`status = 'cancelled'`)**: Associated paintings transition back to `available` if currently `reserved`, **OR** if currently `sold` AND the order's prior status was **NOT** `delivered` (ensures that returned or cancelled unfulfilled orders release their artworks while completed deliveries preserve collector history).

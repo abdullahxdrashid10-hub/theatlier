@@ -211,6 +211,7 @@ declare
   v_missing     uuid;
   v_unavailable uuid;
   v_total       bigint;
+  v_store_orders integer;
   v_pending     integer;
   v_order_id    uuid;
   v_reference   text;
@@ -269,6 +270,16 @@ begin
   end if;
 
   ---------------------------------------------------------------- anti-abuse
+  -- Store-wide burst cap: 20 or more orders created in the last 60 minutes
+  select count(*) into v_store_orders
+  from public.orders o
+  where o.created_at > now() - interval '60 minutes';
+
+  if v_store_orders >= 20 then
+    raise exception 'RATE_LIMITED' using errcode = 'ATL04',
+      detail = 'Store is busy, please try again shortly.';
+  end if;
+
   -- Serialise concurrent calls for the same phone so the count below is reliable.
   perform pg_advisory_xact_lock(hashtextextended('place_order:' || v_phone, 0));
 
@@ -378,7 +389,8 @@ $$;
 
 -- 4.5 Keep painting status in step with order status (no manual painting edits).
 --     confirmed -> paintings become 'sold'
---     cancelled -> paintings return to 'available' ONLY if currently 'reserved'
+--     cancelled -> paintings return to 'available' if 'reserved' OR
+--                  ('sold' AND the order's OLD status was NOT 'delivered')
 create or replace function public.sync_painting_status_from_order()
 returns trigger
 language plpgsql
@@ -395,9 +407,49 @@ begin
     update public.paintings p
        set status = 'available'
      where p.id in (select oi.painting_id from public.order_items oi where oi.order_id = new.id)
-       and p.status = 'reserved';
+       and (
+         p.status = 'reserved'
+         or (p.status = 'sold' and old.status <> 'delivered')
+       );
   end if;
   return new;
+end;
+$$;
+
+-- 4.6 Release stale pending reservations after p_hours (default 48).
+--     Admin-only maintenance routine. Cancels eligible pending orders;
+--     the sync trigger releases the associated paintings back to 'available'.
+create or replace function public.release_stale_reservations(
+  p_hours integer default 48
+)
+returns integer
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_cancelled_count integer := 0;
+begin
+  if not public.is_admin() then
+    raise exception 'NOT_AUTHORIZED' using errcode = '42501',
+      detail = 'Only administrators may release stale reservations.';
+  end if;
+
+  if p_hours is null or p_hours < 1 then
+    raise exception 'INVALID_ARGUMENT' using errcode = '22023',
+      detail = 'p_hours must be a positive integer.';
+  end if;
+
+  with cancelled_orders as (
+    update public.orders o
+       set status = 'cancelled'
+     where o.status = 'pending'
+       and o.created_at < now() - (p_hours || ' hours')::interval
+    returning o.id
+  )
+  select count(*) into v_cancelled_count from cancelled_orders;
+
+  return v_cancelled_count;
 end;
 $$;
 
@@ -449,10 +501,11 @@ grant select                         on public.painting_images to anon, authenti
 grant insert, update, delete         on public.paintings       to authenticated;
 grant insert, update, delete         on public.painting_images to authenticated;
 
--- Orders: anon has NOTHING. authenticated may SELECT/UPDATE, but policies
--- below restrict both to the admin. No insert/delete privilege exists at all.
+-- Orders: anon has NOTHING. authenticated may SELECT orders, but policies
+-- below restrict it to the admin. No insert/delete privilege exists at all.
+-- order_items is SELECT-only: UPDATE is revoked per least privilege.
 grant select, update on public.orders      to authenticated;
-grant select, update on public.order_items to authenticated;
+grant select         on public.order_items to authenticated;
 
 -- Admins: an authenticated user may read only their own row (policy below).
 grant select on public.admins to authenticated;
@@ -462,11 +515,14 @@ revoke all on function public.is_admin()                  from public;
 revoke all on function public.generate_order_reference()  from public, anon, authenticated;
 revoke all on function public.sync_painting_status_from_order() from public, anon, authenticated;
 revoke all on function public.place_order(uuid[], jsonb, public.payment_method) from public;
+revoke all on function public.release_stale_reservations(integer) from public, anon, authenticated;
 
 -- is_admin() is evaluated inside policies as the calling role, so both need it.
 grant execute on function public.is_admin() to anon, authenticated;
 -- The only public entry point for creating orders.
 grant execute on function public.place_order(uuid[], jsonb, public.payment_method) to anon, authenticated;
+-- Admin-only routine to cancel stale pending orders and release reservations.
+grant execute on function public.release_stale_reservations(integer) to authenticated;
 
 
 -- -----------------------------------------------------------------------------
@@ -512,14 +568,12 @@ create policy orders_admin_select on public.orders
 create policy orders_admin_update on public.orders
   for update to authenticated using (public.is_admin()) with check (public.is_admin());
 
--- 8.4 order_items (admin only)
+-- 8.4 order_items (admin only, SELECT only — UPDATE revoked)
 drop policy if exists order_items_admin_select on public.order_items;
 drop policy if exists order_items_admin_update on public.order_items;
 
 create policy order_items_admin_select on public.order_items
   for select to authenticated using (public.is_admin());
-create policy order_items_admin_update on public.order_items
-  for update to authenticated using (public.is_admin()) with check (public.is_admin());
 
 -- 8.5 admins: a user may see only their own row. No insert/update/delete policy.
 drop policy if exists admins_select_own on public.admins;
