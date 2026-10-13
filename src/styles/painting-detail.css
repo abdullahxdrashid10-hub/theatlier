@@ -371,8 +371,9 @@
 
 .painting-detail__price-row {
   display: flex;
-  align-items: baseline;
-  gap: var(--space-4);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
   padding-bottom: var(--space-4);
   border-bottom: 1px solid var(--line);
 }
@@ -380,9 +381,11 @@
 .painting-detail__price {
   font-family: var(--font-body);
   font-weight: 400;
-  font-size: var(--text-2xl);
+  font-size: clamp(1.75rem, 1.4rem + 1.2vw, 2.5rem);
+  white-space: nowrap;
   color: var(--gold);
   letter-spacing: 0.02em;
+  line-height: 1.15;
 }
 
 .painting-detail__price--sold {
@@ -397,6 +400,7 @@
   letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
   color: var(--taupe);
+  line-height: var(--leading-normal);
 }
 
 /* Artwork Quick Specification Table */
@@ -518,14 +522,66 @@
   color: var(--gold);
 }
 
-/* Secondary Action: Studio Inquiry */
+/* Secondary Action: Studio Inquiry & WhatsApp */
 .painting-detail__secondary-actions {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
   gap: var(--space-3);
-  flex-wrap: wrap;
   padding-top: var(--space-1);
+}
+
+.painting-detail__whatsapp-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--champagne);
+  background: rgba(30, 28, 23, 0.4);
+  border: 1px solid rgba(208, 169, 113, 0.35);
+  border-radius: 2px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease);
+}
+
+.painting-detail__whatsapp-link:hover:not(.painting-detail__whatsapp-link--disabled) {
+  background: rgba(208, 169, 113, 0.1);
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.painting-detail__whatsapp-link .btn__arrow {
+  transition: transform var(--duration-fast) var(--ease);
+}
+
+.painting-detail__whatsapp-link:hover:not(.painting-detail__whatsapp-link--disabled) .btn__arrow {
+  transform: translateX(4px);
+}
+
+.painting-detail__whatsapp-icon {
+  display: inline-flex;
+  align-items: center;
+  color: var(--gold);
+}
+
+.painting-detail__whatsapp-link--disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  border-style: dashed;
+  border-color: rgba(135, 109, 79, 0.3);
+  color: var(--taupe);
+}
+
+.painting-detail__whatsapp-link--disabled:hover {
+  border-color: rgba(135, 109, 79, 0.3);
+  color: var(--taupe);
+  background: rgba(30, 28, 23, 0.4);
 }
 
 .painting-detail__inquire-link {
@@ -537,8 +593,10 @@
   text-decoration: none;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   transition: color var(--duration-fast) var(--ease);
+  text-align: center;
 }
 
 .painting-detail__inquire-link:hover {

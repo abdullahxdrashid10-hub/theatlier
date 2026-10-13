@@ -140,6 +140,7 @@
   font-size: var(--text-sm);
   color: var(--gold);
   letter-spacing: 0.05em;
+  white-space: nowrap;
 }
 
 /* Sold state */

@@ -7,6 +7,8 @@ import PaintingCard from '../components/PaintingCard'
 import { addToCart, isInCart, subscribeToCart } from '../utils/cartStorage'
 import { formatPKR } from '../utils/formatPKR'
 import { lockScroll } from '../utils/scroll'
+import siteCopy from '../config/siteCopy'
+import { buildWhatsAppEnquiry } from '../config/site'
 import '../styles/painting-detail.css'
 
 // Exquisite photographic mockups for featured artworks
@@ -261,6 +263,30 @@ export default function Painting() {
     }
   }
 
+  const whatsAppEnquiry = useMemo(() => {
+    if (!painting) return { href: '#', isConfigured: false }
+    return buildWhatsAppEnquiry({
+      title: painting.title,
+      url: typeof window !== 'undefined' ? window.location.href : '',
+    })
+  }, [painting])
+
+  useEffect(() => {
+    if (painting && !whatsAppEnquiry.isConfigured && whatsAppEnquiry.warning) {
+      console.warn(whatsAppEnquiry.warning)
+    }
+  }, [painting, whatsAppEnquiry])
+
+  const handleWhatsAppClick = (e) => {
+    if (!whatsAppEnquiry.isConfigured) {
+      e.preventDefault()
+      console.warn(
+        whatsAppEnquiry.warning ||
+          'WhatsApp enquiry is disabled: WHATSAPP_NUMBER is currently set to TODO_CLIENT_NUMBER.'
+      )
+    }
+  }
+
   // Loading State
   if (loading) {
     return (
@@ -359,7 +385,7 @@ export default function Painting() {
               {/* Sold Watermark Indicator on Frame */}
               {isSold && (
                 <div className="painting-detail__sold-watermark">
-                  <span>Acquired · Private Collection</span>
+                  <span>SOLD</span>
                 </div>
               )}
 
@@ -425,14 +451,14 @@ export default function Painting() {
               role="status"
             >
               <span className="painting-detail__badge-dot" aria-hidden="true" />
-              <span>{isSold ? 'Acquired · In Private Collection' : 'Available for Acquisition'}</span>
+              <span>{isSold ? 'SOLD' : 'Available for Acquisition'}</span>
             </div>
           </div>
 
           {/* Title */}
           <h1 className="painting-detail__title">{painting.title}</h1>
 
-          {/* Price Row */}
+          {/* Price Row: Never wraps, fluid font size, note below */}
           <div className="painting-detail__price-row">
             {isSold ? (
               <>
@@ -440,7 +466,7 @@ export default function Painting() {
                   {formatPKR(painting.price)}
                 </span>
                 <span className="painting-detail__price-note">
-                  Acquired · Private Collection
+                  This piece has found its home.
                 </span>
               </>
             ) : (
@@ -448,9 +474,11 @@ export default function Painting() {
                 <span className="painting-detail__price">
                   {formatPKR(painting.price)}
                 </span>
-                <span className="painting-detail__price-note">
-                  Inclusive of bespoke museum framing & shipping
-                </span>
+                {siteCopy.showFramingShippingNote && (
+                  <span className="painting-detail__price-note">
+                    {siteCopy.framingShippingNote}
+                  </span>
+                )}
               </>
             )}
           </div>
@@ -471,10 +499,12 @@ export default function Painting() {
               <span className="painting-detail__spec-label">Creation Year</span>
               <span className="painting-detail__spec-value">{painting.year}</span>
             </div>
-            <div className="painting-detail__spec-item">
-              <span className="painting-detail__spec-label">Authenticity</span>
-              <span className="painting-detail__spec-value">Signed verso by artist</span>
-            </div>
+            {siteCopy.showAuthenticityDetails && (
+              <div className="painting-detail__spec-item">
+                <span className="painting-detail__spec-label">Authenticity</span>
+                <span className="painting-detail__spec-value">{siteCopy.authenticitySpec}</span>
+              </div>
+            )}
           </div>
 
           {/* Action Box: Acquisition or Sold Handling */}
@@ -487,11 +517,28 @@ export default function Painting() {
                   disabled
                   className="btn btn--framed painting-detail__cta painting-detail__cta--sold"
                   aria-disabled="true"
-                  title="This artwork has been acquired and cannot be added to the cart"
+                  title="This artwork has been sold and cannot be added to the cart"
                 >
-                  Acquired — In Private Collection
+                  SOLD
                 </button>
                 <div className="painting-detail__secondary-actions">
+                  <a
+                    href={whatsAppEnquiry.href}
+                    target={whatsAppEnquiry.isConfigured ? '_blank' : undefined}
+                    rel={whatsAppEnquiry.isConfigured ? 'noopener noreferrer' : undefined}
+                    className={`painting-detail__whatsapp-link ${!whatsAppEnquiry.isConfigured ? 'painting-detail__whatsapp-link--disabled' : ''}`}
+                    onClick={handleWhatsAppClick}
+                    aria-disabled={!whatsAppEnquiry.isConfigured}
+                    title={!whatsAppEnquiry.isConfigured ? 'WhatsApp number not configured' : undefined}
+                  >
+                    <span className="painting-detail__whatsapp-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                        <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm.02 18.06c-1.5 0-2.97-.4-4.25-1.16l-.3-.18-3.13.82.83-3.05-.2-.32a7.89 7.89 0 0 1-1.22-4.26c0-4.38 3.57-7.95 7.97-7.95 2.13 0 4.13.83 5.64 2.33a7.93 7.93 0 0 1 2.33 5.64c0 4.38-3.56 7.95-7.97 7.95zm4.37-5.96c-.24-.12-1.42-.7-1.64-.78-.22-.08-.38-.12-.54.12-.16.24-.62.78-.76.94-.14.16-.28.18-.52.06-.24-.12-1.02-.38-1.94-1.2-.72-.64-1.21-1.44-1.35-1.68-.14-.24-.01-.37.11-.49.11-.11.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.54-1.3-.74-1.78-.2-.47-.4-.41-.54-.42h-.46c-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2 0 1.18.86 2.32.98 2.48.12.16 1.7 2.6 4.12 3.64.58.25 1.03.4 1.38.51.58.18 1.11.16 1.53.1.47-.07 1.42-.58 1.62-1.14.2-.56.2-1.04.14-1.14-.06-.1-.22-.16-.46-.28z" />
+                      </svg>
+                    </span>
+                    <span>ENQUIRE ON WHATSAPP</span>
+                    <span className="btn__arrow" aria-hidden="true">→</span>
+                  </a>
                   <Link
                     to={`/contact?inquiry=commission&title=${encodeURIComponent(painting.title)}`}
                     className="painting-detail__inquire-link"
@@ -531,12 +578,23 @@ export default function Painting() {
                 )}
 
                 <div className="painting-detail__secondary-actions">
-                  <Link
-                    to={`/contact?inquiry=viewing&title=${encodeURIComponent(painting.title)}`}
-                    className="painting-detail__inquire-link"
+                  <a
+                    href={whatsAppEnquiry.href}
+                    target={whatsAppEnquiry.isConfigured ? '_blank' : undefined}
+                    rel={whatsAppEnquiry.isConfigured ? 'noopener noreferrer' : undefined}
+                    className={`painting-detail__whatsapp-link ${!whatsAppEnquiry.isConfigured ? 'painting-detail__whatsapp-link--disabled' : ''}`}
+                    onClick={handleWhatsAppClick}
+                    aria-disabled={!whatsAppEnquiry.isConfigured}
+                    title={!whatsAppEnquiry.isConfigured ? 'WhatsApp number not configured' : undefined}
                   >
-                    Schedule a private atelier viewing or consultation <span aria-hidden="true">→</span>
-                  </Link>
+                    <span className="painting-detail__whatsapp-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                        <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm.02 18.06c-1.5 0-2.97-.4-4.25-1.16l-.3-.18-3.13.82.83-3.05-.2-.32a7.89 7.89 0 0 1-1.22-4.26c0-4.38 3.57-7.95 7.97-7.95 2.13 0 4.13.83 5.64 2.33a7.93 7.93 0 0 1 2.33 5.64c0 4.38-3.56 7.95-7.97 7.95zm4.37-5.96c-.24-.12-1.42-.7-1.64-.78-.22-.08-.38-.12-.54.12-.16.24-.62.78-.76.94-.14.16-.28.18-.52.06-.24-.12-1.02-.38-1.94-1.2-.72-.64-1.21-1.44-1.35-1.68-.14-.24-.01-.37.11-.49.11-.11.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.54-1.3-.74-1.78-.2-.47-.4-.41-.54-.42h-.46c-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2 0 1.18.86 2.32.98 2.48.12.16 1.7 2.6 4.12 3.64.58.25 1.03.4 1.38.51.58.18 1.11.16 1.53.1.47-.07 1.42-.58 1.62-1.14.2-.56.2-1.04.14-1.14-.06-.1-.22-.16-.46-.28z" />
+                      </svg>
+                    </span>
+                    <span>ENQUIRE ON WHATSAPP</span>
+                    <span className="btn__arrow" aria-hidden="true">→</span>
+                  </a>
                 </div>
               </>
             )}
@@ -555,76 +613,61 @@ export default function Painting() {
                     <p>
                       {painting.description.replace('PLACEHOLDER — ', '')}
                     </p>
-                    <p>
-                      Layered with heavy palette-knife impasto on archival Belgian canvas. The surface features
-                      sculptural ridges that capture natural and gallery light differently throughout the day,
-                      accentuated by subtle champagne and antique gold mineral pigments.
-                    </p>
+                    {siteCopy.showMaterialsClaims && (
+                      <p>{siteCopy.materialsClaims}</p>
+                    )}
                   </div>
                 </div>
               </div>
             </details>
 
-            <details className="painting-detail__accordion">
-              <summary className="painting-detail__accordion-summary">
-                <span>Provenance & Certificate of Authenticity</span>
-                <span className="painting-detail__accordion-icon" aria-hidden="true">+</span>
-              </summary>
-              <div className="painting-detail__accordion-wrapper">
-                <div className="painting-detail__accordion-inner">
-                  <div className="painting-detail__accordion-content">
-                    <p>
-                      Each original artwork from The Atelier is unique and recorded in the studio registry.
-                      Upon acquisition, the collector receives:
-                    </p>
-                    <ul className="painting-detail__bullet-list">
-                      <li className="painting-detail__bullet-item">
-                        <span className="painting-detail__bullet-icon">✦</span>
-                        <span>An embossed Certificate of Authenticity individually signed and sealed by the artist.</span>
-                      </li>
-                      <li className="painting-detail__bullet-item">
-                        <span className="painting-detail__bullet-icon">✦</span>
-                        <span>Archival catalog reference number and provenance transfer dossier.</span>
-                      </li>
-                      <li className="painting-detail__bullet-item">
-                        <span className="painting-detail__bullet-icon">✦</span>
-                        <span>Artist signature and dating inscribed verso on the canvas stretcher.</span>
-                      </li>
-                    </ul>
+            {siteCopy.showAuthenticityDetails && (
+              <details className="painting-detail__accordion">
+                <summary className="painting-detail__accordion-summary">
+                  <span>{siteCopy.authenticityDossier.title}</span>
+                  <span className="painting-detail__accordion-icon" aria-hidden="true">+</span>
+                </summary>
+                <div className="painting-detail__accordion-wrapper">
+                  <div className="painting-detail__accordion-inner">
+                    <div className="painting-detail__accordion-content">
+                      <p>{siteCopy.authenticityDossier.intro}</p>
+                      <ul className="painting-detail__bullet-list">
+                        {siteCopy.authenticityDossier.items.map((item) => (
+                          <li key={item} className="painting-detail__bullet-item">
+                            <span className="painting-detail__bullet-icon">✦</span>
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </details>
+              </details>
+            )}
 
-            <details className="painting-detail__accordion">
-              <summary className="painting-detail__accordion-summary">
-                <span>White-Glove Shipping & Art Crating</span>
-                <span className="painting-detail__accordion-icon" aria-hidden="true">+</span>
-              </summary>
-              <div className="painting-detail__accordion-wrapper">
-                <div className="painting-detail__accordion-inner">
-                  <div className="painting-detail__accordion-content">
-                    <p>
-                      Due to the heavy sculptural impasto surface, this painting is prepared with specialised care:
-                    </p>
-                    <ul className="painting-detail__bullet-list">
-                      <li className="painting-detail__bullet-item">
-                        <span className="painting-detail__bullet-icon">✦</span>
-                        <span>Encased in an acid-free barrier wrap and custom timber-reinforced exhibition crate.</span>
-                      </li>
-                      <li className="painting-detail__bullet-item">
-                        <span className="painting-detail__bullet-icon">✦</span>
-                        <span>Complimentary insured courier delivery across Pakistan (3–5 business days).</span>
-                      </li>
-                      <li className="painting-detail__bullet-item">
-                        <span className="painting-detail__bullet-icon">✦</span>
-                        <span>Worldwide temperature-stable fine art freight options available upon inquiry.</span>
-                      </li>
-                    </ul>
+            {siteCopy.showShippingAccordion && (
+              <details className="painting-detail__accordion">
+                <summary className="painting-detail__accordion-summary">
+                  <span>{siteCopy.shippingDetails.title}</span>
+                  <span className="painting-detail__accordion-icon" aria-hidden="true">+</span>
+                </summary>
+                <div className="painting-detail__accordion-wrapper">
+                  <div className="painting-detail__accordion-inner">
+                    <div className="painting-detail__accordion-content">
+                      <p>{siteCopy.shippingDetails.intro}</p>
+                      <ul className="painting-detail__bullet-list">
+                        {siteCopy.shippingDetails.items.map((item) => (
+                          <li key={item} className="painting-detail__bullet-item">
+                            <span className="painting-detail__bullet-icon">✦</span>
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </details>
+              </details>
+            )}
           </div>
         </section>
       </div>

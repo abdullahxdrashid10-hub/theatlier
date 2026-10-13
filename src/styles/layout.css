@@ -183,6 +183,32 @@
   transition: color var(--duration-fast) var(--ease);
 }
 
+.nav__cart-btn {
+  position: relative;
+}
+
+.nav__cart-badge {
+  position: absolute;
+  top: 4px;
+  right: 2px;
+  min-width: 17px;
+  height: 17px;
+  padding-inline: 4px;
+  background: var(--gold);
+  color: var(--bg);
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 17px;
+  text-align: center;
+  border-radius: 999px;
+  box-shadow: 0 0 10px rgba(208, 169, 113, 0.6);
+  pointer-events: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .nav__icon-btn:hover {
   color: var(--champagne);
 }

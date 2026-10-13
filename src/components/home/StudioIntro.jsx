@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { studioIntroText } from '../../config/siteCopy'
 import '../../styles/studio-intro.css'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -48,10 +49,7 @@ export default function StudioIntro() {
         <div className="studio-intro__hairline" aria-hidden="true" />
 
         <p className="studio-intro__body">
-          Every work at The Atelier is sculpted with the palette knife on Belgian linen. Rich
-          metallic pigments, burnt umber, and charcoal are applied with intention—creating
-          tactile crests and ridges that catch the shifting daylight of your room.
-          No reproductions. No editions. Each piece is singular and one of one.
+          {studioIntroText}
         </p>
 
         <div className="studio-intro__actions">
