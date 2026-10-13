@@ -192,6 +192,80 @@
   pointer-events: none;
 }
 
+/* Visual Action Triggers (Examine Texture & View in Room) */
+.painting-detail__visual-actions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+@media (max-width: 520px) {
+  .painting-detail__visual-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
+.painting-detail__inspect-btn,
+.painting-detail__wall-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background: rgba(30, 28, 23, 0.7);
+  border: 1px solid var(--line);
+  color: var(--champagne);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease);
+  text-align: center;
+  min-height: 44px;
+}
+
+.painting-detail__inspect-btn:hover,
+.painting-detail__wall-btn:hover {
+  background: rgba(208, 169, 113, 0.1);
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.painting-detail__inspect-btn:focus-visible,
+.painting-detail__wall-btn:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.painting-detail__spec-scale-link {
+  display: inline-block;
+  margin-left: var(--space-2);
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: var(--gold);
+  font-family: var(--font-body);
+  font-size: 11px;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color var(--duration-fast) var(--ease);
+}
+
+.painting-detail__spec-scale-link:hover {
+  color: var(--champagne);
+}
+
+.painting-detail__spec-scale-link:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
 /* Extra Images: Stacked / Grid View (No slider) */
 .painting-detail__thumbs {
   display: grid;

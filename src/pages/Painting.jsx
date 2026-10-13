@@ -9,6 +9,7 @@ import { formatPKR } from '../utils/formatPKR'
 import { lockScroll } from '../utils/scroll'
 import siteCopy from '../config/siteCopy'
 import { buildWhatsAppEnquiry } from '../config/site'
+import WallSimulator from '../components/WallSimulator'
 import '../styles/painting-detail.css'
 
 // Exquisite photographic mockups for featured artworks
@@ -25,6 +26,16 @@ function ZoomIcon() {
       <line x1="21" y1="21" x2="16.65" y2="16.65" />
       <line x1="11" y1="8" x2="11" y2="14" />
       <line x1="8" y1="11" x2="14" y2="11" />
+    </svg>
+  )
+}
+
+function WallIcon() {
+  return (
+    <svg className="painting-detail__zoom-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="3" y="3" width="18" height="18" rx="2" />
+      <line x1="3" y1="9" x2="21" y2="9" />
+      <line x1="9" y1="21" x2="9" y2="9" />
     </svg>
   )
 }
@@ -51,6 +62,7 @@ export default function Painting() {
   // Fullscreen Inspection Modal (Mobile & Desktop)
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [lightboxZoomed, setLightboxZoomed] = useState(false)
+  const [wallSimulatorOpen, setWallSimulatorOpen] = useState(false)
 
   // Cart state
   const [inCart, setInCart] = useState(false)
@@ -397,16 +409,27 @@ export default function Painting() {
             </div>
           </div>
 
-          {/* Fullscreen Inspection Trigger Button for Phones & Assistive Tech */}
-          <button
-            type="button"
-            className="painting-detail__inspect-btn"
-            onClick={openLightbox}
-            aria-haspopup="dialog"
-          >
-            <ZoomIcon />
-            <span>Examine High-Resolution Texture & Relief</span>
-          </button>
+          {/* Action Trigger Buttons for Inspection & Scale Simulation */}
+          <div className="painting-detail__visual-actions">
+            <button
+              type="button"
+              className="painting-detail__inspect-btn"
+              onClick={openLightbox}
+              aria-haspopup="dialog"
+            >
+              <ZoomIcon />
+              <span>Examine High-Res Texture</span>
+            </button>
+            <button
+              type="button"
+              className="painting-detail__wall-btn"
+              onClick={() => setWallSimulatorOpen(true)}
+              aria-haspopup="dialog"
+            >
+              <WallIcon />
+              <span>View to Scale on Wall</span>
+            </button>
+          </div>
 
           {/* Extra Images: Stacked / Grid View (Strictly no slider) */}
           {views.length > 1 && (
@@ -493,6 +516,14 @@ export default function Painting() {
               <span className="painting-detail__spec-label">Dimensions</span>
               <span className="painting-detail__spec-value">
                 {painting.widthCm} × {painting.heightCm} cm ({widthInches} × {heightInches} in)
+                <button
+                  type="button"
+                  className="painting-detail__spec-scale-link"
+                  onClick={() => setWallSimulatorOpen(true)}
+                  aria-label="View painting to scale in room"
+                >
+                  View in room →
+                </button>
               </span>
             </div>
             <div className="painting-detail__spec-item">
@@ -753,6 +784,13 @@ export default function Painting() {
           </div>
         </section>
       )}
+
+      {/* Interactive Wall Scale Simulator Modal */}
+      <WallSimulator
+        painting={painting}
+        isOpen={wallSimulatorOpen}
+        onClose={() => setWallSimulatorOpen(false)}
+      />
     </main>
   )
 }

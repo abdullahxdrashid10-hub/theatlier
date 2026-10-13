@@ -1,0 +1,466 @@
+/* ==========================================================================
+   Wall Simulator — Architectural Room Scale Preview
+   The Atelier by SK
+   ========================================================================== */
+
+.wall-simulator {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  animation: wallFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+  overflow: hidden;
+  user-select: none;
+}
+
+@keyframes wallFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Header bar */
+.wall-simulator__header {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4) clamp(var(--space-4), 3vw, var(--space-7));
+  background: rgba(21, 20, 16, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+}
+
+.wall-simulator__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.wall-simulator__eyebrow {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.wall-simulator__title {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-weight: 300;
+  font-size: clamp(1.2rem, 1.1rem + 0.8vw, 1.8rem);
+  color: var(--text);
+  line-height: var(--leading-tight);
+}
+
+.wall-simulator__dimensions {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  color: var(--taupe);
+  letter-spacing: 0.04em;
+}
+
+.wall-simulator__controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.wall-simulator__btn-group {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(30, 28, 23, 0.85);
+  border: 1px solid var(--line);
+  padding: 3px;
+  border-radius: 4px;
+  gap: 2px;
+}
+
+.wall-simulator__opt-btn {
+  background: transparent;
+  border: none;
+  color: var(--taupe);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  padding: 6px 12px;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease);
+  white-space: nowrap;
+}
+
+.wall-simulator__opt-btn:hover {
+  color: var(--champagne);
+}
+
+.wall-simulator__opt-btn--active {
+  background: rgba(75, 61, 44, 0.6);
+  border: 1px solid rgba(208, 169, 113, 0.35);
+  color: var(--gold);
+  font-weight: 500;
+}
+
+.wall-simulator__close-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--champagne);
+  border-radius: 2px;
+  cursor: pointer;
+  font-size: 1.25rem;
+  line-height: 1;
+  transition: all var(--duration-fast) var(--ease);
+}
+
+.wall-simulator__close-btn:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: rgba(208, 169, 113, 0.1);
+}
+
+.wall-simulator__close-btn:focus-visible,
+.wall-simulator__opt-btn:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+/* Room viewport stage */
+.wall-simulator__stage {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: background-color 0.5s ease, background-image 0.5s ease;
+}
+
+/* Wall Themes */
+.wall-simulator__stage--noir {
+  background: #14120E;
+  background-image:
+    radial-gradient(ellipse 65% 55% at 50% 40%, rgba(208, 169, 113, 0.12) 0%, transparent 80%),
+    radial-gradient(circle at 50% 100%, rgba(0, 0, 0, 0.8) 0%, transparent 60%);
+}
+
+.wall-simulator__stage--stone {
+  background: #D8D2C7;
+  background-image:
+    radial-gradient(ellipse 70% 60% at 50% 38%, rgba(255, 255, 255, 0.45) 0%, transparent 85%),
+    linear-gradient(180deg, #CECEBE 0%, #D8D2C7 60%, #C4BDB0 100%);
+}
+
+.wall-simulator__stage--linen {
+  background: #2C261F;
+  background-image:
+    radial-gradient(ellipse 70% 60% at 50% 40%, rgba(228, 196, 143, 0.15) 0%, transparent 80%),
+    linear-gradient(180deg, #241F1A 0%, #2C261F 65%, #1A1713 100%);
+}
+
+/* Floor & Wall Division */
+.wall-simulator__floor {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 18%;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.75) 100%);
+  border-top: 1px solid rgba(75, 61, 44, 0.4);
+}
+
+.wall-simulator__stage--stone .wall-simulator__floor {
+  background: linear-gradient(180deg, #A89F91 0%, #7E7568 100%);
+  border-top: 2px solid #5C554B;
+}
+
+.wall-simulator__stage--linen .wall-simulator__floor {
+  background: linear-gradient(180deg, #1C1814 0%, #0F0D0A 100%);
+  border-top: 1px solid rgba(135, 109, 79, 0.4);
+}
+
+/* Floor Ambient Occlusion Shadow */
+.wall-simulator__floor-shadow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.6) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+/* The scaled canvas frame on the wall */
+.wall-simulator__canvas-anchor {
+  position: absolute;
+  top: 42%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.wall-simulator__canvas-frame {
+  position: relative;
+  background: #11100D;
+  border-radius: 1px;
+  box-shadow:
+    0 32px 70px -15px rgba(0, 0, 0, 0.85),
+    0 12px 24px -6px rgba(0, 0, 0, 0.6),
+    0 0 1px 1px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+  display: flex;
+}
+
+.wall-simulator__stage--stone .wall-simulator__canvas-frame {
+  box-shadow:
+    0 28px 60px -12px rgba(40, 36, 30, 0.55),
+    0 10px 22px -5px rgba(40, 36, 30, 0.35),
+    0 0 0 1px rgba(60, 52, 42, 0.3);
+}
+
+.wall-simulator__artwork-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Canvas edge lighting relief */
+.wall-simulator__canvas-frame::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 0 1px rgba(228, 196, 143, 0.2);
+  pointer-events: none;
+}
+
+/* Dimension tags floating beside the canvas */
+.wall-simulator__tag {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-body);
+  font-size: 11px;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--champagne);
+  background: rgba(21, 20, 16, 0.88);
+  border: 1px solid var(--line);
+  padding: 3px 8px;
+  border-radius: 2px;
+  white-space: nowrap;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.wall-simulator__stage--stone .wall-simulator__tag {
+  background: rgba(245, 240, 232, 0.95);
+  border-color: #8C8274;
+  color: #2D271E;
+}
+
+.wall-simulator__tag--width {
+  bottom: calc(100% + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.wall-simulator__tag--height {
+  top: 50%;
+  left: calc(100% + 14px);
+  transform: translateY(-50%);
+}
+
+/* Architectural furniture scale reference */
+.wall-simulator__furniture {
+  position: absolute;
+  bottom: 12%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+
+/* Credenza Console Silhouette */
+.wall-simulator__credenza {
+  position: relative;
+  background: #181612;
+  border: 1px solid #362E24;
+  box-shadow:
+    0 24px 50px -10px rgba(0, 0, 0, 0.95),
+    inset 0 1px 0 rgba(228, 196, 143, 0.2);
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wall-simulator__stage--stone .wall-simulator__credenza {
+  background: #38322A;
+  border-color: #554C3F;
+  box-shadow: 0 20px 45px -8px rgba(0, 0, 0, 0.55);
+}
+
+.wall-simulator__credenza-legs {
+  display: flex;
+  justify-content: space-between;
+  width: 90%;
+  height: 24px;
+}
+
+.wall-simulator__credenza-leg {
+  width: 4px;
+  height: 100%;
+  background: #24201A;
+}
+
+.wall-simulator__stage--stone .wall-simulator__credenza-leg {
+  background: #201C17;
+}
+
+/* Gallery Bench Silhouette */
+.wall-simulator__bench {
+  background: #1A1713;
+  border: 1px solid #3A3228;
+  border-radius: 2px;
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wall-simulator__stage--stone .wall-simulator__bench {
+  background: #423B32;
+  border-color: #63584B;
+  box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.5);
+}
+
+.wall-simulator__bench-legs {
+  display: flex;
+  justify-content: space-between;
+  width: 85%;
+  height: 26px;
+}
+
+.wall-simulator__bench-leg {
+  width: 6px;
+  height: 100%;
+  background: #26211B;
+}
+
+/* Furniture reference label */
+.wall-simulator__furniture-label {
+  margin-top: 6px;
+  font-family: var(--font-body);
+  font-size: 10px;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--taupe);
+  opacity: 0.75;
+}
+
+.wall-simulator__stage--stone .wall-simulator__furniture-label {
+  color: #574F43;
+}
+
+/* Eye-level reference line (150cm museum standard) */
+.wall-simulator__eye-line {
+  position: absolute;
+  top: 45%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  border-top: 1px dashed rgba(208, 169, 113, 0.35);
+  pointer-events: none;
+  display: flex;
+  justify-content: flex-end;
+  padding-right: var(--space-4);
+}
+
+.wall-simulator__stage--stone .wall-simulator__eye-line {
+  border-top-color: rgba(90, 80, 68, 0.4);
+}
+
+.wall-simulator__eye-label {
+  transform: translateY(-50%);
+  background: rgba(21, 20, 16, 0.85);
+  padding: 2px 6px;
+  border-radius: 2px;
+  font-family: var(--font-body);
+  font-size: 10px;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.wall-simulator__stage--stone .wall-simulator__eye-label {
+  background: rgba(240, 235, 226, 0.95);
+  color: #383025;
+}
+
+/* Footer note */
+.wall-simulator__footer {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) clamp(var(--space-4), 3vw, var(--space-7));
+  background: rgba(21, 20, 16, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid var(--line);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  color: var(--taupe);
+  letter-spacing: 0.02em;
+  flex-shrink: 0;
+}
+
+.wall-simulator__footer-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+@media (max-width: 768px) {
+  .wall-simulator__header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-3);
+  }
+
+  .wall-simulator__controls {
+    justify-content: space-between;
+  }
+
+  .wall-simulator__footer {
+    font-size: 11px;
+  }
+}

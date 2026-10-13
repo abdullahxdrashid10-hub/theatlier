@@ -24,10 +24,32 @@
   position: relative;
   overflow: hidden;
   border-radius: 1px;
+  transform: perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transform-style: preserve-3d;
+  will-change: transform;
   transition:
     border-color 0.45s ease,
     box-shadow 0.45s ease,
-    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+    transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.painting-card__sheen {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at var(--mx, 50%) var(--my, 50%),
+    rgba(228, 196, 143, 0.16) 0%,
+    rgba(208, 169, 113, 0.06) 40%,
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  mix-blend-mode: screen;
+}
+
+.painting-card:not(.painting-card--sold):hover .painting-card__sheen {
+  opacity: 1;
 }
 
 .painting-card__image-wrap {

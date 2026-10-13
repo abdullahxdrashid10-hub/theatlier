@@ -54,6 +54,17 @@ export default function Shop() {
   const isSwitching = useRef(false)
   const isInitialMount = useRef(true)
 
+  // Counts per category
+  const counts = useMemo(() => {
+    let available = 0
+    let sold = 0
+    paintings.forEach((p) => {
+      if (p.status === 'sold') sold++
+      else available++
+    })
+    return { all: paintings.length, available, sold }
+  }, [paintings])
+
   // Filter & sort: Available first, then sold
   const displayedPaintings = useMemo(() => {
     let list = [...paintings]
@@ -189,7 +200,7 @@ export default function Shop() {
             className={`gallery-toggle-btn ${filter === 'all' ? 'gallery-toggle-btn--active' : ''}`}
             onClick={() => handleFilterChange('all')}
           >
-            All
+            All <span className="gallery-toggle-btn__count">({counts.all})</span>
           </button>
           <button
             type="button"
@@ -198,7 +209,7 @@ export default function Shop() {
             className={`gallery-toggle-btn ${filter === 'available' ? 'gallery-toggle-btn--active' : ''}`}
             onClick={() => handleFilterChange('available')}
           >
-            Available
+            Available <span className="gallery-toggle-btn__count">({counts.available})</span>
           </button>
           <button
             type="button"
@@ -207,7 +218,7 @@ export default function Shop() {
             className={`gallery-toggle-btn ${filter === 'sold' ? 'gallery-toggle-btn--active' : ''}`}
             onClick={() => handleFilterChange('sold')}
           >
-            Sold
+            Sold <span className="gallery-toggle-btn__count">({counts.sold})</span>
           </button>
         </div>
       </header>

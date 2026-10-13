@@ -243,6 +243,14 @@
   outline-offset: 2px;
 }
 
+.gallery-toggle-btn__count {
+  font-size: 0.8em;
+  opacity: 0.75;
+  margin-left: 3px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
 @media (hover: hover) and (pointer: fine) {
   .gallery-toggle-btn:hover {
     color: var(--champagne);
