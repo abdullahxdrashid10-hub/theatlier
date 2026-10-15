@@ -81,7 +81,7 @@ export default function AboutDialogue() {
                   <div className="about-dialogue__answer-wrap">
                     <p className="about-dialogue__answer">{item.a}</p>
                     <div className="about-dialogue__author-tag">
-                      <span>— Zuha (SK) · Studio Archive</span>
+                      <span>— SK · Studio Archive</span>
                     </div>
                   </div>
                 )}
