@@ -39,7 +39,7 @@ export default function AboutHero() {
         <h1 className="about-hero__title">Sculpting Light, Shadow & Form</h1>
         <div className="about-hero__hairline" aria-hidden="true" />
         <p className="about-hero__epigraph">
-          “Canvas is not a flat boundary to be coloured. It is a dimensional plane where thick oil and metal pigment are sculpted into living topography.”
+          “Every canvas begins as a quiet passion—crafted by hand with acrylic, brush, palette knife, and emotion, to bring warmth and individuality into your home.”
         </p>
       </div>
     </header>

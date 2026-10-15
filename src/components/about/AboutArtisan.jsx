@@ -43,16 +43,16 @@ export default function AboutArtisan() {
         <div className="about-artisan__content">
           <span className="about-section-label">The Artisan & Sanctuary</span>
           <h2 id="artisan-title" className="about-section-title">
-            Solitary Discipline & Master Provenance
+            Passion, Patience & The Living Canvas
           </h2>
           <p className="about-copy">
-            Inside the studio, the creative process is one of patient, rigorous meditation. Each large-format canvas begins with hand-stretching unbleached Belgian linen over custom timber frames, primed with an archival mineral base to withstand immense textural weight.
+            What began as an intuitive passion has deepened into an enduring artistic calling. Inside the quiet sanctuary of the studio, every artwork begins with a blank canvas carefully chosen to honor the scale, weight, and voice of the piece to come.
           </p>
           <p className="about-copy">
-            SK works in continuous multi-week cycles. Pigments are hand-mixed using artist-grade heavy oils, raw umber, burnt sienna, and genuine metallic leaf. Applying paint with Italian spring-steel palette knives, layers are applied wet-on-wet to create organic marbling, then allowed to cure naturally before sculpted ridges are carved and refined.
+            Days are spent in rhythmic exploration—mixing custom palettes, layering acrylics and mixed media, and finding harmony between delicate brushwork and bold palette-knife ridges. Each layer cures naturally as dimensional textures rise from the surface, capturing light and shadows in an intimate dance.
           </p>
           <p className="about-copy">
-            Drawing inspiration from Pakistan’s arid mineral landscapes, ancient earthen architecture, and mid-century minimalism, every painting stands as an unrepeatable <strong>one-of-one original</strong>.
+            Inspired by the quiet poetry of everyday life, nature's earthy nuances, and sacred words, SK crafts each piece with patient care to bring warmth, emotion, and individuality into the collector's home as an unrepeatable <strong>one-of-one original</strong>.
           </p>
         </div>
       </div>

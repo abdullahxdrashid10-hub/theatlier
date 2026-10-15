@@ -22,9 +22,13 @@ export const framingShippingNote = 'Inclusive of bespoke museum framing & shippi
 // TODO CLIENT: confirm with SK
 export const authenticitySpec = 'Signed verso by artist'
 
-// TODO CLIENT: confirm with SK
+// Confirmed with SK: Acrylic on canvas, mixed media, and textured calligraphy
 export const materialsClaims =
-  'Layered with heavy palette-knife impasto on archival Belgian canvas. The surface features sculptural ridges that capture natural and gallery light differently throughout the day, accentuated by subtle champagne and antique gold mineral pigments.'
+  'Each original artwork is hand-created using artist-grade acrylics, mixed media, and textured palette-knife techniques on canvas. Handcrafted with both delicate brushwork and expressive dimensional impasto, alongside sculptural calligraphy combining painted and relief techniques.'
+
+// Confirmed with SK
+export const studioIntroText =
+  'Every artwork at The Atelier is a hands-on creative journey. Using brushes and palette knives, thick layers of acrylic and mixed media are sculpted into expressive textures and meaningful calligraphy—bringing warmth, emotion, and individuality into your home.'
 
 // TODO CLIENT: confirm with SK
 export const authenticityDossier = {
@@ -49,10 +53,6 @@ export const shippingDetails = {
     'Worldwide temperature-stable fine art freight options available upon inquiry.',
   ],
 }
-
-// TODO CLIENT: confirm with SK (neutral terms with no factual claims about materials or editions)
-export const studioIntroText =
-  'Every work at The Atelier is sculpted with the palette knife. Rich pigments and textured strokes are applied with intention—creating tactile crests and ridges that catch the shifting daylight of your room. Each piece is singular and original.'
 
 // TODO CLIENT: confirm with SK (flag: show a one-line note under the Bank transfer option)
 export const bankTransferNote = false

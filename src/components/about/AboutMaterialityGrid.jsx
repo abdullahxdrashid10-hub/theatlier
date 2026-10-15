@@ -1,23 +1,23 @@
 const PILLARS = [
   {
     num: '01',
-    title: 'Belgian Archival Linen',
-    text: 'Heavy-weave European natural flax mounted over custom kiln-dried kiln timber stretchers, engineered to support substantial impasto weight without tension loss over decades.',
+    title: 'Acrylics & Mixed Media on Canvas',
+    text: 'Every canvas is thoughtfully chosen to complement each artwork’s unique composition, layered with rich artist-grade acrylics and mixed media to produce vibrant, enduring colour depth.',
   },
   {
     num: '02',
-    title: 'Mineral Pigments & Gold Leaf',
-    text: 'Formulated in-house with artist-grade heavy-body oils, earthen umber, copper leaf, and metallic mineral flake that capture and refract natural ambient light.',
+    title: 'Dual Mastery: Brush & Palette Knife',
+    text: 'A delicate balance between soft brushstrokes for intricate nuance and bold, impasto palette-knife relief that gives each painting living texture and dimensional weight.',
   },
   {
     num: '03',
-    title: 'Sculptural Palette Knife Relief',
-    text: 'Hand-wielded Italian spring-steel knives carve multidirectional ridges up to eight millimetres high, producing a living sculptural landscape on the canvas.',
+    title: 'Sculptural Textured Calligraphy',
+    text: 'A harmonious dialogue between meaningful, sacred words and tactile relief techniques, allowing expressive lettering to rise gently from the painted surface.',
   },
   {
     num: '04',
-    title: 'Registry & Provenance Seal',
-    text: 'Each one-of-one work is catalogued in the studio ledger, signed and dated verso, and accompanied by an artist-embossed Certificate of Authenticity.',
+    title: 'Handmade Individuality & Care',
+    text: 'An entirely hands-on creative journey from the first stroke to the final seal—crafted with intention to infuse your home with warmth, personality, and soul.',
   },
 ]
 
@@ -25,12 +25,12 @@ export default function AboutMaterialityGrid() {
   return (
     <section className="about-materiality" aria-labelledby="materiality-title">
       <header className="about-materiality__header">
-        <span className="about-section-label">Uncompromising Craftsmanship</span>
+        <span className="about-section-label">Authentic Craftsmanship</span>
         <h2 id="materiality-title" className="about-section-title">
           The Materiality Dossier
         </h2>
         <p className="about-copy">
-          From the unbleached linen grain to the final archival varnish, every physical component adheres to museum standards.
+          From carefully selected canvases to layered impasto ridges, every element is sculpted entirely by hand with patient devotion.
         </p>
       </header>
 

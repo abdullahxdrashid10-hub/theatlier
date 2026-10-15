@@ -4,6 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import AboutHero from '../components/about/AboutHero'
 import AboutPhilosophy from '../components/about/AboutPhilosophy'
 import AboutArtisan from '../components/about/AboutArtisan'
+import AboutDialogue from '../components/about/AboutDialogue'
 import AboutMaterialityGrid from '../components/about/AboutMaterialityGrid'
 import AboutSalonCTA from '../components/about/AboutSalonCTA'
 import '../styles/about.css'
@@ -38,6 +39,18 @@ export default function About() {
         ease: 'power2.out',
         scrollTrigger: {
           trigger: '.about-artisan',
+          start: 'top 85%',
+          once: true,
+        },
+      })
+
+      gsap.from('.about-dialogue__inner', {
+        y: 28,
+        opacity: 0,
+        duration: 0.8,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: '.about-dialogue',
           start: 'top 85%',
           once: true,
         },
@@ -78,8 +91,10 @@ export default function About() {
       <AboutHero />
       <AboutPhilosophy />
       <AboutArtisan />
+      <AboutDialogue />
       <AboutMaterialityGrid />
       <AboutSalonCTA />
     </main>
   )
 }
+
