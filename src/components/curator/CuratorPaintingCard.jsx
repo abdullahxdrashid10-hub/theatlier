@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { getAllPaintings, getPaintingBySlug } from '../../data/api'
 import { formatPKR } from '../../utils/formatPKR'
 
-export default function CuratorPaintingCard({ slug, initialPainting, onSelectArtwork, onOpenSimulator }) {
+export default function CuratorPaintingCard({ slug, initialPainting, onSelectArtwork }) {
   const [fetchedPainting, setFetchedPainting] = useState(null)
   const [loading, setLoading] = useState(!initialPainting)
 
@@ -137,27 +137,12 @@ export default function CuratorPaintingCard({ slug, initialPainting, onSelectArt
         <div className="curator-card__actions">
           <Link
             to={`/painting/${painting.slug}`}
-            className="curator-card__btn curator-card__btn--primary"
+            className="curator-card__btn curator-card__btn--discrete"
             onClick={onSelectArtwork}
           >
-            <span>Acquire / View Details</span>
+            <span>View Artwork Details</span>
             <span aria-hidden="true">→</span>
           </Link>
-
-          {onOpenSimulator && (
-            <button
-              type="button"
-              className="curator-card__btn curator-card__btn--secondary"
-              onClick={() => onOpenSimulator(painting)}
-              title="Simulate on your wall in true scale"
-            >
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                <circle cx="12" cy="12" r="3" />
-              </svg>
-              <span>View On Wall</span>
-            </button>
-          )}
         </div>
       </div>
     </article>

@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { getAllPaintings } from '../../data/api'
 import { buildCatalogManifest, STARTER_SUGGESTIONS } from '../../utils/curatorCatalog'
 import CuratorPaintingCard from './CuratorPaintingCard'
-import WallSimulator from '../WallSimulator'
 
 const LOCAL_STORAGE_KEY = 'atelier_curator_conversation'
 
@@ -33,7 +32,6 @@ export default function CuratorDrawer({ isOpen, onClose }) {
   const [input, setInput] = useState('')
   const [isStreaming, setIsStreaming] = useState(false)
   const [catalog, setCatalog] = useState([])
-  const [simPainting, setSimPainting] = useState(null)
   const feedRef = useRef(null)
   const inputRef = useRef(null)
 
@@ -150,8 +148,22 @@ export default function CuratorDrawer({ isOpen, onClose }) {
       }
     } catch (err) {
       console.warn('Curator streaming request notice:', err)
-      const fallbackResponse =
-        "Welcome to the Atelier archives. SK's work investigates the tactile interplay of light and heavy palette knife impasto on canvas.\n\nHere are two defining original works from the collection:\n[artwork:placeholder-gilded-wake]\n[artwork:placeholder-bronze-hour]\n\nEach canvas is one-of-one and accompanied by an artist-signed Certificate of Authenticity. Would you like to explore room scale simulation or inquire about an original commission?"
+      const lowerText = text.toLowerCase().trim()
+      const isGreeting =
+        /^(hello|hi|hey|salam|assalam|aoa|good morning|good evening|good afternoon|hiya|greetings)[\s!.,?]*$/i.test(lowerText) ||
+        lowerText === 'hello' || lowerText === 'hi' || lowerText === 'salam' || lowerText === 'hey' || lowerText === 'aoa'
+
+      let fallbackResponse
+      if (isGreeting) {
+        if (lowerText.includes('salam') || lowerText.includes('aoa')) {
+          fallbackResponse = 'Walaikum assalam. Welcome to The Atelier by SK. How may I assist your art collection today?'
+        } else {
+          fallbackResponse = "Hello. Welcome to The Atelier by SK. How may I assist you today — are you seeking a statement piece, or exploring SK's impasto works?"
+        }
+      } else {
+        fallbackResponse =
+          "Welcome to the Atelier archives. SK's work investigates the tactile interplay of light and heavy palette knife impasto on canvas.\n\nHere are two defining original works from the collection:\n[artwork:placeholder-gilded-wake]\n[artwork:placeholder-bronze-hour]\n\nEach canvas is one-of-one and accompanied by an artist-signed Certificate of Authenticity. Would you like to view artwork details or inquire about a bespoke commission?"
+      }
 
       setMessages((prev) =>
         prev.map((msg) =>
@@ -194,7 +206,6 @@ export default function CuratorDrawer({ isOpen, onClose }) {
           key={`card-${slug}-${match.index}`}
           slug={slug}
           onSelectArtwork={onClose}
-          onOpenSimulator={(p) => setSimPainting(p)}
         />
       )
 
@@ -364,15 +375,6 @@ export default function CuratorDrawer({ isOpen, onClose }) {
           </p>
         </footer>
       </aside>
-
-      {/* Wall Scale Simulator Modal if opened from chat card */}
-      {simPainting && (
-        <WallSimulator
-          painting={simPainting}
-          isOpen={Boolean(simPainting)}
-          onClose={() => setSimPainting(null)}
-        />
-      )}
     </>
   )
 }

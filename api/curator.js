@@ -25,8 +25,10 @@ CRITICAL ZERO-HALLUCINATION TOKEN CONTRACT:
 - When you mention, describe, or recommend an artwork from the collection, you MUST output its deterministic token: [artwork:slug].
   Example: "For a grand living room, I highly recommend [artwork:ephemeral-horizon], which features commanding chiaroscuro depth."
 - The website UI automatically parses [artwork:slug] into an interactive rich card showing verified photos, live availability, dimensions, and wall scale simulation.
-- NEVER invent fictional artworks, phantom slugs, or unverified dimensions. Only recommend paintings present in the provided manifest.
-- If a collector asks for bespoke sizing or a custom piece, warmly direct them to inquire about a private commission via WhatsApp or the contact page.`
+CONVERSATIONAL CONCISENESS & GREETINGS:
+- When a collector simply greets you with "hello", "hi", "salam", "hey", etc., respond with a warm, discrete, and SHORT reply (1 to 2 sentences max). Example: "Hello. Welcome to The Atelier by SK. How may I assist your art collection today?"
+- Do not launch into lengthy paragraphs or unsolicited artwork suggestions until the collector specifies what they are seeking or asks for a recommendation.
+- Keep all advice discrete, cultured, and focused.`
 
 export default async function handler(req) {
   if (req.method !== 'POST') {
@@ -57,9 +59,20 @@ export default async function handler(req) {
       start(controller) {
         const lastUser = [...messages].reverse().find((m) => m.role === 'user')?.content || ''
         const lower = lastUser.toLowerCase()
+        const trimmed = lastUser.trim()
+        const isGreeting =
+          /^(hello|hi|hey|salam|assalam|aoa|good morning|good evening|good afternoon|hiya|greetings)[\s!.,?]*$/i.test(trimmed) ||
+          lower === 'hello' || lower === 'hi' || lower === 'salam' || lower === 'hey' || lower === 'aoa'
+
         let reply
 
-        if (lower.includes('statement') || lower.includes('living') || lower.includes('lounge')) {
+        if (isGreeting) {
+          if (lower.includes('salam') || lower.includes('aoa')) {
+            reply = 'Walaikum assalam. Welcome to The Atelier by SK. How may I assist your art collection today?'
+          } else {
+            reply = "Hello. Welcome to The Atelier by SK. How may I assist you today — are you seeking a statement piece, or exploring SK's impasto works?"
+          }
+        } else if (lower.includes('statement') || lower.includes('living') || lower.includes('lounge')) {
           reply =
             'For a commanding living space, statement scale and structural balance are paramount. I recommend exploring [artwork:placeholder-gilded-wake] and [artwork:placeholder-bronze-hour]. Both canvases command attention with multi-layered palette knife reliefs that dynamically catch ambient natural light.'
         } else if (lower.includes('technique') || lower.includes('impasto') || lower.includes('knife')) {

@@ -9,7 +9,6 @@ import { formatPKR } from '../utils/formatPKR'
 import { lockScroll } from '../utils/scroll'
 import siteCopy from '../config/siteCopy'
 import { buildWhatsAppEnquiry } from '../config/site'
-import WallSimulator from '../components/WallSimulator'
 import '../styles/painting-detail.css'
 
 // Exquisite photographic mockups for studio artworks
@@ -39,15 +38,6 @@ function ZoomIcon() {
   )
 }
 
-function WallIcon() {
-  return (
-    <svg className="painting-detail__zoom-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <rect x="3" y="3" width="18" height="18" rx="2" />
-      <line x1="3" y1="9" x2="21" y2="9" />
-      <line x1="9" y1="21" x2="9" y2="9" />
-    </svg>
-  )
-}
 
 export default function Painting() {
   const { slug } = useParams()
@@ -71,7 +61,6 @@ export default function Painting() {
   // Fullscreen Inspection Modal (Mobile & Desktop)
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [lightboxZoomed, setLightboxZoomed] = useState(false)
-  const [wallSimulatorOpen, setWallSimulatorOpen] = useState(false)
 
   // Cart state
   const [inCart, setInCart] = useState(false)
@@ -453,7 +442,7 @@ export default function Painting() {
             </div>
           </div>
 
-          {/* Action Trigger Buttons for Inspection & Scale Simulation */}
+          {/* Action Trigger Button for Inspection */}
           <div className="painting-detail__visual-actions">
             <button
               type="button"
@@ -463,15 +452,6 @@ export default function Painting() {
             >
               <ZoomIcon />
               <span>Examine High-Res Texture</span>
-            </button>
-            <button
-              type="button"
-              className="painting-detail__wall-btn"
-              onClick={() => setWallSimulatorOpen(true)}
-              aria-haspopup="dialog"
-            >
-              <WallIcon />
-              <span>View to Scale on Wall</span>
             </button>
           </div>
 
@@ -573,14 +553,6 @@ export default function Painting() {
               <span className="painting-detail__spec-label">Dimensions</span>
               <span className="painting-detail__spec-value">
                 {painting.widthCm} × {painting.heightCm} cm ({widthInches} × {heightInches} in)
-                <button
-                  type="button"
-                  className="painting-detail__spec-scale-link"
-                  onClick={() => setWallSimulatorOpen(true)}
-                  aria-label="View painting to scale in room"
-                >
-                  View in room →
-                </button>
               </span>
             </div>
             <div className="painting-detail__spec-item">
@@ -842,12 +814,7 @@ export default function Painting() {
         </section>
       )}
 
-      {/* Interactive Wall Scale Simulator Modal */}
-      <WallSimulator
-        painting={painting}
-        isOpen={wallSimulatorOpen}
-        onClose={() => setWallSimulatorOpen(false)}
-      />
+      {/* Inspection Lightbox Modal rendered via Portal below */}
     </main>
   )
 }
