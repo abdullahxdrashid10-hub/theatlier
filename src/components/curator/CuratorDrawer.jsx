@@ -11,7 +11,21 @@ export default function CuratorDrawer({ isOpen, onClose }) {
     if (typeof window === 'undefined') return []
     try {
       const saved = localStorage.getItem(LOCAL_STORAGE_KEY)
-      return saved ? JSON.parse(saved) : []
+      if (!saved) return []
+      const parsed = JSON.parse(saved)
+      // Auto-heal legacy messages that lost tokens
+      return parsed.map((m) => {
+        if (m.content && m.content.includes('I recommend exploring  and .')) {
+          return {
+            ...m,
+            content: m.content.replace(
+              'I recommend exploring  and .',
+              'I recommend exploring [artwork:placeholder-gilded-wake] and [artwork:placeholder-bronze-hour].'
+            ),
+          }
+        }
+        return m
+      })
     } catch {
       return []
     }
@@ -136,9 +150,8 @@ export default function CuratorDrawer({ isOpen, onClose }) {
       }
     } catch (err) {
       console.warn('Curator streaming request notice:', err)
-      // High-elegance fallback response when offline or before edge key is configured
       const fallbackResponse =
-        "Welcome to the Atelier archives. SK's work investigates the tactile interplay of light and heavy palette knife impasto on Belgian linen.\n\nHere are two defining original works from the collection:\n[artwork:ephemeral-horizon]\n[artwork:gilded-wake]\n\nEach canvas is one-of-one and accompanied by an artist-signed Certificate of Authenticity. Would you like to explore room scale simulation or inquire about an original commission?"
+        "Welcome to the Atelier archives. SK's work investigates the tactile interplay of light and heavy palette knife impasto on canvas.\n\nHere are two defining original works from the collection:\n[artwork:placeholder-gilded-wake]\n[artwork:placeholder-bronze-hour]\n\nEach canvas is one-of-one and accompanied by an artist-signed Certificate of Authenticity. Would you like to explore room scale simulation or inquire about an original commission?"
 
       setMessages((prev) =>
         prev.map((msg) =>
@@ -295,6 +308,12 @@ export default function CuratorDrawer({ isOpen, onClose }) {
                 key={msg.id}
                 className={`curator-msg curator-msg--${msg.role}`}
               >
+                {msg.role === 'assistant' && (
+                  <div className="curator-msg__sender" aria-hidden="true">
+                    <span className="curator-msg__sender-crest">SK</span>
+                    <span className="curator-msg__sender-name">The Atelier Curator</span>
+                  </div>
+                )}
                 <div className="curator-msg__bubble">
                   {msg.role === 'assistant'
                     ? renderMessageContent(msg.content)

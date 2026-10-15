@@ -61,19 +61,19 @@ export default async function handler(req) {
 
         if (lower.includes('statement') || lower.includes('living') || lower.includes('lounge')) {
           reply =
-            'For a commanding living space, statement scale and structural balance are paramount. I recommend exploring [artwork:ephemeral-horizon] and [artwork:gilded-wake]. Both canvases command attention with multi-layered palette knife reliefs that dynamically catch ambient natural light.'
+            'For a commanding living space, statement scale and structural balance are paramount. I recommend exploring [artwork:placeholder-gilded-wake] and [artwork:placeholder-bronze-hour]. Both canvases command attention with multi-layered palette knife reliefs that dynamically catch ambient natural light.'
         } else if (lower.includes('technique') || lower.includes('impasto') || lower.includes('knife')) {
           reply =
-            'SK works exclusively with heavy-body oil pigments applied via Italian palette knives onto custom-stretched Belgian linen. Rather than flat brushwork, each canvas is built sculpturally with deep peaks and chiaroscuro valleys that create a living relief on the wall.'
+            'SK works by hand using artist-grade acrylics and mixed media applied via Italian palette knives and fine brushes onto carefully chosen canvases. Rather than flat brushwork, each canvas is sculpted with deep textural ridges and dimensional calligraphy that create a living relief on your wall.'
         } else if (lower.includes('gold') || lower.includes('bronze') || lower.includes('warm')) {
           reply =
-            'Warm bronze and gold tones create extraordinary intimacy in evening light. Consider [artwork:gilded-wake] and [artwork:bronze-hour]. The warm metallic mineral pigments reflect lamp and candlelight with remarkable warmth.'
+            'Warm bronze and gold tones create extraordinary intimacy in ambient light. Consider [artwork:placeholder-gilded-wake] and [artwork:placeholder-bronze-hour]. The warm metallic mineral pigments reflect lamp and candlelight with remarkable depth.'
         } else if (lower.includes('price') || lower.includes('budget') || lower.includes('200,000') || lower.includes('under')) {
           reply =
-            'Several remarkable original pieces in the collection are available under PKR 200,000, including [artwork:whispering-stone] and [artwork:terracotta-silence]. Each is a one-of-one original accompanied by a signed Certificate of Authenticity.'
+            'Several remarkable original pieces in the collection are available under PKR 200,000, including [artwork:placeholder-quiet-ridge] and [artwork:placeholder-slow-gold]. Each is a one-of-one original crafted with intentional care and patience.'
         } else {
           reply =
-            'Welcome to The Atelier. Each original canvas in the archives is an investigation into organic geometry and sculptural oil texture. To begin, consider [artwork:ephemeral-horizon] or share details regarding the room you are designing, and I will tailor a personal selection.'
+            'Welcome to The Atelier. Each original canvas in the archives is an investigation into sculptural texture, rich color, and meaningful artistic expression. To begin, consider [artwork:placeholder-ember-field] or share details regarding the room you are designing, and I will tailor a personal selection.'
         }
 
         const encoder = new TextEncoder()
