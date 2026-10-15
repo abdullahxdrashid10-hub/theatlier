@@ -3,11 +3,20 @@ import { Link } from 'react-router-dom'
 import { formatPKR } from '../utils/formatPKR'
 import '../styles/painting-card.css'
 
-// Exquisite high-resolution mockups for featured artworks
+// Exquisite high-resolution mockups for studio artworks
 const MOCK_PREVIEWS = {
   'placeholder-ember-field': '/placeholders/mock-ember-field.jpg',
+  'placeholder-slow-gold': '/placeholders/mock-slow-gold.jpg',
   'placeholder-bronze-hour': '/placeholders/mock-bronze-hour.jpg',
+  'placeholder-night-ledger': '/placeholders/mock-night-ledger.jpg',
+  'placeholder-quiet-ridge': '/placeholders/mock-quiet-ridge.jpg',
+  'placeholder-champagne-drift': '/placeholders/mock-champagne-drift.jpg',
+  'placeholder-low-light': '/placeholders/mock-low-light.jpg',
+  'placeholder-umber-study': '/placeholders/mock-umber-study.jpg',
   'placeholder-gilded-wake': '/placeholders/mock-gilded-wake.jpg',
+  'placeholder-soft-iron': '/placeholders/mock-soft-iron.jpg',
+  'placeholder-last-embers': '/placeholders/mock-last-embers.jpg',
+  'placeholder-copper-tide': '/placeholders/mock-copper-tide.jpg',
 }
 
 export default function PaintingCard({ painting, variant = 'default', className = '' }) {
