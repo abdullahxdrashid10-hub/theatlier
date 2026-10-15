@@ -77,6 +77,8 @@ export default function Painting() {
     setIsZooming(false)
   }
 
+  const [reloadKey, setReloadKey] = useState(0)
+
   // Fetch painting by slug and related works
   useEffect(() => {
     let active = true
@@ -110,7 +112,13 @@ export default function Painting() {
     return () => {
       active = false
     }
-  }, [slug])
+  }, [slug, reloadKey])
+
+  const handleRetry = () => {
+    setLoading(true)
+    setError(null)
+    setReloadKey((k) => k + 1)
+  }
 
   // GSAP Entrance Reveal Animation
   useEffect(() => {
@@ -261,8 +269,8 @@ export default function Painting() {
   const handleAcquire = () => {
     if (!painting) return
 
-    // Strictly enforce: Sold works cannot be added to the cart
-    if (painting.status === 'sold') {
+    // Strictly enforce: Sold or Reserved works cannot be added to the cart
+    if (painting.status === 'sold' || painting.status === 'reserved') {
       return
     }
 
@@ -312,8 +320,29 @@ export default function Painting() {
     )
   }
 
-  // Error / Not Found State
-  if (error || !painting) {
+  // Error State
+  if (error) {
+    return (
+      <main className="painting-detail">
+        <title>Catalog Unavailable — The Atelier by SK</title>
+        <div className="painting-detail__error" role="alert">
+          <h1 className="painting-detail__error-title">Unable to Load Artwork</h1>
+          <p>{error}</p>
+          <div style={{ display: 'flex', gap: 'var(--space-4)', justifyContent: 'center', marginTop: 'var(--space-5)' }}>
+            <button type="button" className="btn btn--gilded" onClick={handleRetry}>
+              Retry Connection
+            </button>
+            <Link to="/shop" className="btn btn--minimal">
+              Explore Collection <span className="btn__arrow">→</span>
+            </Link>
+          </div>
+        </div>
+      </main>
+    )
+  }
+
+  // Not Found State
+  if (!painting) {
     return (
       <main className="painting-detail">
         <title>Artwork Not Found — The Atelier by SK</title>
@@ -328,7 +357,8 @@ export default function Painting() {
     )
   }
 
-  const isSold = painting.status === 'sold'
+  const isSold = String(painting.status || '').toLowerCase() === 'sold'
+  const isReserved = String(painting.status || '').toLowerCase() === 'reserved'
   const aspectRatio = painting.widthCm && painting.heightCm
     ? `${painting.widthCm} / ${painting.heightCm}`
     : '4 / 3'
@@ -394,10 +424,15 @@ export default function Painting() {
                 aria-hidden="true"
               />
 
-              {/* Sold Watermark Indicator on Frame */}
+              {/* Sold/Reserved Watermark Indicator on Frame */}
               {isSold && (
                 <div className="painting-detail__sold-watermark">
                   <span>SOLD</span>
+                </div>
+              )}
+              {isReserved && (
+                <div className="painting-detail__sold-watermark">
+                  <span>RESERVED</span>
                 </div>
               )}
 
@@ -470,11 +505,15 @@ export default function Painting() {
           <div className="painting-detail__header-top">
             <span className="painting-detail__eyebrow">Original Artwork · One of One · {painting.year}</span>
             <div
-              className={`painting-detail__badge ${isSold ? 'painting-detail__badge--sold' : 'painting-detail__badge--available'}`}
+              className={`painting-detail__badge ${
+                isSold || isReserved
+                  ? 'painting-detail__badge--sold'
+                  : 'painting-detail__badge--available'
+              }`}
               role="status"
             >
               <span className="painting-detail__badge-dot" aria-hidden="true" />
-              <span>{isSold ? 'SOLD' : 'Available for Acquisition'}</span>
+              <span>{isSold ? 'SOLD' : isReserved ? 'RESERVED' : 'Available for Acquisition'}</span>
             </div>
           </div>
 
@@ -490,6 +529,15 @@ export default function Painting() {
                 </span>
                 <span className="painting-detail__price-note">
                   This piece has found its home.
+                </span>
+              </>
+            ) : isReserved ? (
+              <>
+                <span className="painting-detail__price painting-detail__price--sold">
+                  {formatPKR(painting.price)}
+                </span>
+                <span className="painting-detail__price-note">
+                  This piece has an active reservation.
                 </span>
               </>
             ) : (
@@ -538,19 +586,19 @@ export default function Painting() {
             )}
           </div>
 
-          {/* Action Box: Acquisition or Sold Handling */}
+          {/* Action Box: Acquisition or Sold/Reserved Handling */}
           <div className="painting-detail__action-box">
-            {isSold ? (
+            {isSold || isReserved ? (
               <>
-                {/* Strictly disabled button when artwork is sold */}
+                {/* Strictly disabled button when artwork is sold or reserved */}
                 <button
                   type="button"
                   disabled
                   className="btn btn--framed painting-detail__cta painting-detail__cta--sold"
                   aria-disabled="true"
-                  title="This artwork has been sold and cannot be added to the cart"
+                  title={isSold ? "This artwork has been sold and cannot be added to the cart" : "This artwork is reserved and cannot be added to the cart"}
                 >
-                  SOLD
+                  {isSold ? 'SOLD' : 'RESERVED'}
                 </button>
                 <div className="painting-detail__secondary-actions">
                   <a

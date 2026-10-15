@@ -385,9 +385,17 @@ textarea.checkout-field__control {
   text-decoration: line-through;
 }
 
-.checkout-summary__item--sold .checkout-summary__thumb img {
+.checkout-summary__item--sold .checkout-summary__thumb img,
+.checkout-summary__item--reserved .checkout-summary__thumb img {
   opacity: 0.5;
   filter: grayscale(35%);
+}
+
+.checkout-summary__price-change-note {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--champagne);
+  display: block;
 }
 
 .checkout-summary__total {

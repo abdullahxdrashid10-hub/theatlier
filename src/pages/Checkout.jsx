@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
-import { getAllPaintings, submitOrder } from '../data/api'
+import { getPaintingsByIds, submitOrder } from '../data/api'
 import { clearCart, getCartItems, subscribeToCart } from '../utils/cartStorage'
 import { formatPKR } from '../utils/formatPKR'
 import { formatPKPhone, normalisePKPhone } from '../utils/phone'
@@ -68,7 +68,7 @@ function Field({ id, label, optional, hint, error, multiline, ...inputProps }) {
 export default function Checkout() {
   const navigate = useNavigate()
   const [items, setItems] = useState(() => getCartItems())
-  const [catalog, setCatalog] = useState({})
+  const [dbItemsMap, setDbItemsMap] = useState({})
   const [values, setValues] = useState({
     name: '',
     phone: '',
@@ -86,46 +86,65 @@ export default function Checkout() {
 
   useEffect(() => subscribeToCart((updated) => setItems(updated)), [])
 
+  // Refetch cart's paintings with getPaintingsByIds as source of truth
   useEffect(() => {
+    const ids = items.map((i) => i.id).filter(Boolean)
+    if (ids.length === 0) return
     let active = true
-    getAllPaintings()
-      .then((paintings) => {
+    getPaintingsByIds(ids)
+      .then((records) => {
         if (!active) return
         const map = {}
-        paintings.forEach((p) => {
-          map[p.id] = p
-          map[p.slug] = p
+        records.forEach((p) => {
+          if (p.id) map[p.id] = p
+          if (p.slug) map[p.slug] = p
         })
-        setCatalog(map)
+        setDbItemsMap(map)
       })
-      .catch((err) => console.error('Failed to sync catalog status:', err))
+      .catch((err) => console.error('Failed to sync checkout paintings with DB:', err))
     return () => {
       active = false
     }
-  }, [])
+  }, [items])
 
   // Move focus to the error message whenever a submit error appears
   useEffect(() => {
     if (submitError) errorRef.current?.focus()
   }, [submitError])
 
-  const isItemSold = useCallback(
-    (item) => {
-      const fresh = catalog[item.id] || catalog[item.slug]
-      return fresh ? fresh.status === 'sold' : item.status === 'sold'
-    },
-    [catalog]
+  const getItemRecord = useCallback(
+    (item) => dbItemsMap[item.id] || dbItemsMap[item.slug] || {},
+    [dbItemsMap]
   )
 
-  const { soldItems, availableItems, totalPKR } = useMemo(() => {
-    const sold = items.filter(isItemSold)
-    const available = items.filter((item) => !isItemSold(item))
+  const isItemUnavailable = useCallback(
+    (item) => {
+      const db = getItemRecord(item)
+      const status = String(db.status || item.status || 'available').toLowerCase()
+      return status === 'sold' || status === 'reserved'
+    },
+    [getItemRecord]
+  )
+
+  const getItemPrice = useCallback(
+    (item) => {
+      const db = getItemRecord(item)
+      if (typeof db.price === 'number') return db.price
+      if (typeof item.price === 'number') return item.price
+      return 0
+    },
+    [getItemRecord]
+  )
+
+  const { unavailableItems, availableItems, totalPKR } = useMemo(() => {
+    const unavailable = items.filter(isItemUnavailable)
+    const available = items.filter((item) => !isItemUnavailable(item))
     return {
-      soldItems: sold,
+      unavailableItems: unavailable,
       availableItems: available,
-      totalPKR: available.reduce((sum, item) => sum + (item.price || 0), 0),
+      totalPKR: available.reduce((sum, item) => sum + getItemPrice(item), 0),
     }
-  }, [items, isItemSold])
+  }, [items, isItemUnavailable, getItemPrice])
 
   const setField = (name) => (e) => {
     const { value } = e.target
@@ -165,35 +184,46 @@ export default function Checkout() {
 
     try {
       // Re-check availability against the data layer right before submitting
-      const fresh = await getAllPaintings()
+      const current = getCartItems()
+      const ids = current.map((i) => i.id).filter(Boolean)
+      const fresh = await getPaintingsByIds(ids)
       const freshMap = {}
       fresh.forEach((p) => {
-        freshMap[p.id] = p
-        freshMap[p.slug] = p
+        if (p.id) freshMap[p.id] = p
+        if (p.slug) freshMap[p.slug] = p
       })
-      setCatalog(freshMap)
+      setDbItemsMap(freshMap)
 
-      const current = getCartItems()
-      const nowSold = current.filter((item) => {
+      const badItems = current.filter((item) => {
         const match = freshMap[item.id] || freshMap[item.slug]
-        return match ? match.status === 'sold' : item.status === 'sold'
+        const st = String(match?.status || item.status || 'available').toLowerCase()
+        return st === 'sold' || st === 'reserved'
       })
-      if (nowSold.length > 0) {
-        setSubmitError({ kind: 'sold', titles: nowSold.map((item) => item.title) })
+      if (badItems.length > 0) {
+        setSubmitError({
+          kind: 'unavailable',
+          titles: badItems.map(
+            (item) => freshMap[item.id]?.title || item.title || 'Artwork'
+          ),
+        })
         setSubmitting(false)
         return
       }
 
-      const orderItems = current.map((item) => ({
-        id: item.id,
-        slug: item.slug,
-        title: item.title,
-        medium: item.medium,
-        widthCm: item.widthCm,
-        heightCm: item.heightCm,
-        price: item.price,
-        image: item.images?.[0] || null,
-      }))
+      // Build authoritative order items from the database
+      const orderItems = current.map((item) => {
+        const db = freshMap[item.id] || freshMap[item.slug] || item
+        return {
+          id: db.id || item.id,
+          slug: db.slug || item.slug,
+          title: db.title || item.title,
+          medium: db.medium || item.medium,
+          widthCm: db.widthCm || item.widthCm,
+          heightCm: db.heightCm || item.heightCm,
+          price: typeof db.price === 'number' ? db.price : item.price,
+          image: db.images?.[0] || item.images?.[0] || null,
+        }
+      })
       const total = orderItems.reduce((sum, item) => sum + (item.price || 0), 0)
 
       const { orderId } = await submitOrder({
@@ -237,7 +267,7 @@ export default function Checkout() {
 
       <div className="checkout-layout">
         <form className="checkout-form" onSubmit={handleSubmit} noValidate aria-label="Checkout">
-          {(soldItems.length > 0 || submitError) && (
+          {(unavailableItems.length > 0 || submitError) && (
             <div
               ref={errorRef}
               tabIndex={-1}
@@ -252,11 +282,11 @@ export default function Checkout() {
                 </p>
               ) : (
                 <p>
-                  {(submitError?.titles || soldItems.map((item) => item.title)).join(', ')}{' '}
-                  {(submitError?.titles || soldItems).length === 1 ? 'has' : 'have'} found a home and
-                  can no longer be ordered. Please{' '}
+                  {(submitError?.titles || unavailableItems.map((item) => getItemRecord(item).title || item.title)).join(', ')}{' '}
+                  {(submitError?.titles || unavailableItems).length === 1 ? 'is' : 'are'} currently unavailable (sold or reserved) and
+                  cannot be ordered. Please{' '}
                   <Link to="/cart" className="checkout-alert__link">
-                    remove it from your cart
+                    remove from your cart
                   </Link>{' '}
                   to continue.
                 </p>
@@ -376,7 +406,7 @@ export default function Checkout() {
           <button
             type="submit"
             className="btn btn--gilded checkout-form__submit"
-            disabled={submitting}
+            disabled={submitting || unavailableItems.length > 0 || availableItems.length === 0}
             aria-busy={submitting}
           >
             {submitting ? (
@@ -384,6 +414,8 @@ export default function Checkout() {
                 <span className="checkout-spinner" aria-hidden="true" />
                 <span>PLACING ORDER…</span>
               </>
+            ) : unavailableItems.length > 0 ? (
+              <span>REMOVE UNAVAILABLE ITEMS TO ORDER</span>
             ) : (
               <>
                 <span>PLACE ORDER</span>
@@ -398,15 +430,31 @@ export default function Checkout() {
 
           <ul className="checkout-summary__list" role="list">
             {items.map((item) => {
-              const sold = isItemSold(item)
+              const db = getItemRecord(item)
+              const status = String(db.status || item.status || 'available').toLowerCase()
+              const isSold = status === 'sold'
+              const isReserved = status === 'reserved'
+              const isUnavailable = isSold || isReserved
+              const title = db.title || item.title || 'Untitled Work'
+              const medium = db.medium || item.medium || 'Original Artwork'
+              const widthCm = db.widthCm || item.widthCm || ''
+              const heightCm = db.heightCm || item.heightCm || ''
+              const imageSrc =
+                db.images?.[0] || item.images?.[0] || '/placeholders/placeholder-01.svg'
+              const price = getItemPrice(item)
+              const priceChanged =
+                typeof item.addedPrice === 'number' &&
+                typeof db.price === 'number' &&
+                item.addedPrice !== db.price
+
               return (
                 <li
                   key={item.id || item.slug}
-                  className={`checkout-summary__item ${sold ? 'checkout-summary__item--sold' : ''}`}
+                  className={`checkout-summary__item ${isSold ? 'checkout-summary__item--sold' : ''} ${isReserved ? 'checkout-summary__item--reserved' : ''}`}
                 >
                   <span className="checkout-summary__thumb">
                     <img
-                      src={item.images?.[0] || '/placeholders/placeholder-01.svg'}
+                      src={imageSrc}
                       alt=""
                       width="64"
                       height="48"
@@ -414,16 +462,26 @@ export default function Checkout() {
                     />
                   </span>
                   <span className="checkout-summary__info">
-                    <span className="checkout-summary__name">{item.title}</span>
+                    <span className="checkout-summary__name">{title}</span>
                     <span className="checkout-summary__meta">
-                      {item.medium} — {item.widthCm} × {item.heightCm} cm
+                      {medium} {widthCm && heightCm ? `— ${widthCm} × ${heightCm} cm` : ''}
                     </span>
-                    {sold && <span className="checkout-summary__sold">SOLD · Excluded from total</span>}
+                    {isSold && (
+                      <span className="checkout-summary__sold">SOLD · Excluded from total</span>
+                    )}
+                    {isReserved && (
+                      <span className="checkout-summary__sold">RESERVED · Excluded from total</span>
+                    )}
+                    {priceChanged && (
+                      <span className="checkout-summary__price-change-note">
+                        Price updated from {formatPKR(item.addedPrice)}
+                      </span>
+                    )}
                   </span>
                   <span
-                    className={`checkout-summary__price ${sold ? 'checkout-summary__price--sold' : ''}`}
+                    className={`checkout-summary__price ${isUnavailable ? 'checkout-summary__price--sold' : ''}`}
                   >
-                    {formatPKR(item.price)}
+                    {formatPKR(price)}
                   </span>
                 </li>
               )

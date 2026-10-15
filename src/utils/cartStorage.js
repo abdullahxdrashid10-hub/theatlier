@@ -24,12 +24,13 @@ export function getCartItems() {
 export function addToCart(painting) {
   if (!painting) return { success: false, reason: 'invalid' }
 
-  // Strictly enforce that sold works cannot be added to the cart
-  if (painting.status === 'sold') {
+  // Strictly enforce that sold or reserved works cannot be added to the cart
+  const status = String(painting.status || '').toLowerCase()
+  if (status === 'sold' || status === 'reserved') {
     return {
       success: false,
-      reason: 'sold',
-      message: 'This piece has found its home.',
+      reason: status,
+      message: status === 'sold' ? 'This piece has found its home.' : 'This piece is currently reserved.',
     }
   }
 
@@ -43,7 +44,15 @@ export function addToCart(painting) {
     }
   }
 
-  const updated = [...current, painting]
+  // Cart storage keeps only slugs and ids, not trusted prices.
+  // addedPrice is saved purely as an untrusted snapshot to detect price changes on re-fetch.
+  const cartItem = {
+    id: painting.id,
+    slug: painting.slug,
+    addedPrice: typeof painting.price === 'number' ? painting.price : undefined,
+  }
+
+  const updated = [...current, cartItem]
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
     window.dispatchEvent(new CustomEvent(EVENT_KEY, { detail: { items: updated } }))

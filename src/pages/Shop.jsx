@@ -54,27 +54,38 @@ export default function Shop() {
   const isSwitching = useRef(false)
   const isInitialMount = useRef(true)
 
-  // Counts per category
+  // Counts per category: available, reserved, sold
   const counts = useMemo(() => {
     let available = 0
+    let reserved = 0
     let sold = 0
     paintings.forEach((p) => {
-      if (p.status === 'sold') sold++
-      else available++
+      const s = String(p.status || '').toLowerCase()
+      if (s === 'sold') sold++
+      else if (s === 'reserved') reserved++
+      else if (s === 'available') available++
     })
-    return { all: paintings.length, available, sold }
+    return { all: paintings.length, available, reserved, sold }
   }, [paintings])
 
-  // Filter & sort: Available first, then sold
+  // Filter & sort: Available first, then reserved, then sold
   const displayedPaintings = useMemo(() => {
     let list = [...paintings]
     if (filter === 'available') {
-      list = list.filter((p) => p.status === 'available')
+      list = list.filter((p) => String(p.status || '').toLowerCase() === 'available')
+    } else if (filter === 'reserved') {
+      list = list.filter((p) => String(p.status || '').toLowerCase() === 'reserved')
     } else if (filter === 'sold') {
-      list = list.filter((p) => p.status === 'sold')
+      list = list.filter((p) => String(p.status || '').toLowerCase() === 'sold')
     } else {
-      // 'all': sort available first, then sold
-      list.sort((a, b) => (a.status === 'available' ? 0 : 1) - (b.status === 'available' ? 0 : 1))
+      // 'all': sort available first, then reserved, then sold
+      const rank = (status) => {
+        const s = String(status || '').toLowerCase()
+        if (s === 'available') return 0
+        if (s === 'reserved') return 1
+        return 2
+      }
+      list.sort((a, b) => rank(a.status) - rank(b.status))
     }
     return list
   }, [paintings, filter])
@@ -210,6 +221,15 @@ export default function Shop() {
             onClick={() => handleFilterChange('available')}
           >
             Available <span className="gallery-toggle-btn__count">({counts.available})</span>
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={filter === 'reserved'}
+            className={`gallery-toggle-btn ${filter === 'reserved' ? 'gallery-toggle-btn--active' : ''}`}
+            onClick={() => handleFilterChange('reserved')}
+          >
+            Reserved <span className="gallery-toggle-btn__count">({counts.reserved})</span>
           </button>
           <button
             type="button"

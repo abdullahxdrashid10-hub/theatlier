@@ -93,22 +93,22 @@
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .painting-card:not(.painting-card--sold):hover {
+  .painting-card:not(.painting-card--sold):not(.painting-card--reserved):hover {
     transform: translateY(-4px);
   }
 
-  .painting-card:not(.painting-card--sold):hover .painting-card__frame {
+  .painting-card:not(.painting-card--sold):not(.painting-card--reserved):hover .painting-card__frame {
     border-color: rgba(208, 169, 113, 0.45);
     box-shadow:
       0 22px 48px -12px rgba(0, 0, 0, 0.82),
       0 0 28px rgba(208, 169, 113, 0.12);
   }
 
-  .painting-card:not(.painting-card--sold):hover .painting-card__image {
+  .painting-card:not(.painting-card--sold):not(.painting-card--reserved):hover .painting-card__image {
     transform: scale(1.018);
   }
 
-  .painting-card:not(.painting-card--sold):hover .painting-card__image-wrap::after {
+  .painting-card:not(.painting-card--sold):not(.painting-card--reserved):hover .painting-card__image-wrap::after {
     transform: translateX(100%);
   }
 }
@@ -141,7 +141,7 @@
   transition: color 0.3s ease;
 }
 
-.painting-card:not(.painting-card--sold):hover .painting-card__title {
+.painting-card:not(.painting-card--sold):not(.painting-card--reserved):hover .painting-card__title {
   color: var(--champagne);
 }
 
@@ -170,12 +170,14 @@
   white-space: nowrap;
 }
 
-/* Sold state */
-.painting-card--sold {
+/* Sold and Reserved states */
+.painting-card--sold,
+.painting-card--reserved {
   cursor: default;
 }
 
-.painting-card--sold .painting-card__image {
+.painting-card--sold .painting-card__image,
+.painting-card--reserved .painting-card__image {
   opacity: 0.48;
   filter: grayscale(35%) brightness(0.9);
 }

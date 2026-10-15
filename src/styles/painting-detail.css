@@ -420,12 +420,14 @@
   animation: badgeDotPulse 3.2s ease-in-out infinite;
 }
 
-.painting-detail__badge--sold {
+.painting-detail__badge--sold,
+.painting-detail__badge--reserved {
   border-color: rgba(135, 109, 79, 0.4);
   color: var(--taupe);
 }
 
-.painting-detail__badge--sold .painting-detail__badge-dot {
+.painting-detail__badge--sold .painting-detail__badge-dot,
+.painting-detail__badge--reserved .painting-detail__badge-dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;

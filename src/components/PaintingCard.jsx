@@ -64,6 +64,8 @@ export default function PaintingCard({ painting, variant = 'default', className 
   if (!painting) return null
 
   const isSold = painting.status === 'sold'
+  const isReserved = painting.status === 'reserved'
+  const isUnavailable = isSold || isReserved
   const aspectRatio = painting.widthCm && painting.heightCm
     ? `${painting.widthCm} / ${painting.heightCm}`
     : '4 / 3'
@@ -72,15 +74,15 @@ export default function PaintingCard({ painting, variant = 'default', className 
 
   return (
     <article
-      className={`painting-card ${isSold ? 'painting-card--sold' : ''} ${variant === 'editorial' ? 'painting-card--editorial' : ''} ${className}`}
+      className={`painting-card ${isSold ? 'painting-card--sold' : ''} ${isReserved ? 'painting-card--reserved' : ''} ${variant === 'editorial' ? 'painting-card--editorial' : ''} ${className}`}
     >
       <Link
         to={`/painting/${painting.slug}`}
         className="painting-card__link"
-        aria-label={`${painting.title}, ${painting.medium}, ${painting.widthCm} by ${painting.heightCm} centimeters${isSold ? ', Sold' : `, ${formatPKR(painting.price)}`}`}
-        onPointerEnter={!isSold ? handlePointerEnter : undefined}
-        onPointerMove={!isSold ? handlePointerMove : undefined}
-        onPointerLeave={!isSold ? handlePointerLeave : undefined}
+        aria-label={`${painting.title}, ${painting.medium}, ${painting.widthCm} by ${painting.heightCm} centimeters${isSold ? ', Sold' : isReserved ? ', Reserved' : `, ${formatPKR(painting.price)}`}`}
+        onPointerEnter={!isUnavailable ? handlePointerEnter : undefined}
+        onPointerMove={!isUnavailable ? handlePointerMove : undefined}
+        onPointerLeave={!isUnavailable ? handlePointerLeave : undefined}
       >
         <div ref={frameRef} className="painting-card__frame">
           <div
@@ -111,6 +113,11 @@ export default function PaintingCard({ painting, variant = 'default', className 
               <div className="painting-card__sold-tag">
                 <span className="painting-card__sold-line" aria-hidden="true" />
                 <span>SOLD</span>
+              </div>
+            ) : isReserved ? (
+              <div className="painting-card__sold-tag painting-card__reserved-tag">
+                <span className="painting-card__sold-line" aria-hidden="true" />
+                <span>RESERVED</span>
               </div>
             ) : (
               <span className="painting-card__price">{formatPKR(painting.price)}</span>

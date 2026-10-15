@@ -264,9 +264,22 @@
   transform: scale(1.04);
 }
 
-.cart-item--sold .cart-item__image {
+.cart-item--sold .cart-item__image,
+.cart-item--reserved .cart-item__image {
   opacity: 0.5;
   filter: grayscale(35%);
+}
+
+.cart-item__price-change-note {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  color: var(--champagne);
+  background: rgba(200, 169, 126, 0.1);
+  border: 1px solid rgba(200, 169, 126, 0.25);
+  padding: 2px 8px;
+  border-radius: 2px;
+  display: inline-block;
+  margin-top: 4px;
 }
 
 .cart-item__content {

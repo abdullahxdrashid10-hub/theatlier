@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import PaintingCard from '../components/PaintingCard'
-import { getAllPaintings } from '../data/api'
+import { getAllPaintings, getPaintingsByIds } from '../data/api'
 import { addToCart, getCartItems, removeFromCart, subscribeToCart } from '../utils/cartStorage'
 import { formatPKR } from '../utils/formatPKR'
 import { buildWhatsAppEnquiry } from '../config/site'
@@ -48,6 +48,7 @@ function useAnimatedNumber(target, duration = 520) {
 export default function Cart() {
   const [items, setItems] = useState(() => getCartItems())
   const [catalog, setCatalog] = useState([])
+  const [dbItemsMap, setDbItemsMap] = useState({})
   const [removingKeys, setRemovingKeys] = useState([])
   const [undoItem, setUndoItem] = useState(null)
   const undoTimer = useRef(null)
@@ -58,7 +59,28 @@ export default function Cart() {
     return unsubscribe
   }, [])
 
-  // Latest data-layer catalog (sold status + recommendations)
+  // Refetch cart's paintings with getPaintingsByIds as source of truth
+  useEffect(() => {
+    const ids = items.map((i) => i.id).filter(Boolean)
+    if (ids.length === 0) return
+    let active = true
+    getPaintingsByIds(ids)
+      .then((records) => {
+        if (!active) return
+        const map = {}
+        records.forEach((p) => {
+          if (p.id) map[p.id] = p
+          if (p.slug) map[p.slug] = p
+        })
+        setDbItemsMap(map)
+      })
+      .catch((err) => console.error('Failed to sync cart paintings by ID:', err))
+    return () => {
+      active = false
+    }
+  }, [items])
+
+  // Latest data-layer catalog (for recommendations)
   useEffect(() => {
     let active = true
     getAllPaintings()
@@ -73,32 +95,41 @@ export default function Cart() {
 
   useEffect(() => () => clearTimeout(undoTimer.current), [])
 
-  const catalogMap = useMemo(() => {
-    const map = {}
-    catalog.forEach((p) => {
-      map[p.id] = p
-      map[p.slug] = p
-    })
-    return map
-  }, [catalog])
-
-  const isItemSold = useCallback(
+  const getItemRecord = useCallback(
     (item) => {
-      const fresh = catalogMap[item.id] || catalogMap[item.slug]
-      return fresh ? fresh.status === 'sold' : item.status === 'sold'
+      return dbItemsMap[item.id] || dbItemsMap[item.slug] || {}
     },
-    [catalogMap]
+    [dbItemsMap]
   )
 
-  const { availableItems, availableCount, soldCount, totalPKR } = useMemo(() => {
-    const available = items.filter((item) => !isItemSold(item))
+  const isItemUnavailable = useCallback(
+    (item) => {
+      const db = getItemRecord(item)
+      const status = String(db.status || item.status || 'available').toLowerCase()
+      return status === 'sold' || status === 'reserved'
+    },
+    [getItemRecord]
+  )
+
+  const getItemPrice = useCallback(
+    (item) => {
+      const db = getItemRecord(item)
+      if (typeof db.price === 'number') return db.price
+      if (typeof item.price === 'number') return item.price
+      return 0
+    },
+    [getItemRecord]
+  )
+
+  const { availableItems, availableCount, unavailableCount, totalPKR } = useMemo(() => {
+    const available = items.filter((item) => !isItemUnavailable(item))
     return {
       availableItems: available,
       availableCount: available.length,
-      soldCount: items.length - available.length,
-      totalPKR: available.reduce((sum, item) => sum + (item.price || 0), 0),
+      unavailableCount: items.length - available.length,
+      totalPKR: available.reduce((sum, item) => sum + getItemPrice(item), 0),
     }
-  }, [items, isItemSold])
+  }, [items, isItemUnavailable, getItemPrice])
 
   const animatedTotal = useAnimatedNumber(totalPKR)
 
@@ -207,21 +238,37 @@ export default function Cart() {
             <ul className="cart-list" role="list">
               {items.map((item, index) => {
                 const key = item.id || item.slug
-                const sold = isItemSold(item)
+                const db = getItemRecord(item)
+                const status = String(db.status || item.status || 'available').toLowerCase()
+                const isSold = status === 'sold'
+                const isReserved = status === 'reserved'
+                const isUnavailable = isSold || isReserved
                 const removing = removingKeys.includes(key)
-                const imageSrc = item.images?.[0] || '/placeholders/placeholder-01.svg'
+                const currentPrice = getItemPrice(item)
+                const priceChanged =
+                  typeof item.addedPrice === 'number' &&
+                  typeof db.price === 'number' &&
+                  item.addedPrice !== db.price
+
+                const title = db.title || item.title || 'Untitled Work'
+                const slug = db.slug || item.slug || ''
+                const medium = db.medium || item.medium || 'Original Artwork'
+                const widthCm = db.widthCm || item.widthCm || ''
+                const heightCm = db.heightCm || item.heightCm || ''
+                const imageSrc =
+                  db.images?.[0] || item.images?.[0] || '/placeholders/placeholder-01.svg'
 
                 return (
                   <li
                     key={key}
-                    className={`cart-item ${sold ? 'cart-item--sold' : ''} ${removing ? 'cart-item--removing' : ''}`}
+                    className={`cart-item ${isSold ? 'cart-item--sold' : ''} ${isReserved ? 'cart-item--reserved' : ''} ${removing ? 'cart-item--removing' : ''}`}
                     style={{ '--i': index }}
                   >
                     <div className="cart-item__inner">
                       <Link
-                        to={`/painting/${item.slug}`}
+                        to={`/painting/${slug}`}
                         className="cart-item__frame"
-                        aria-label={`View ${item.title}`}
+                        aria-label={`View ${title}`}
                       >
                         <span className="cart-item__image-wrap">
                           <img
@@ -237,15 +284,15 @@ export default function Cart() {
 
                       <div className="cart-item__content">
                         <div className="cart-item__header">
-                          <Link to={`/painting/${item.slug}`} className="cart-item__title">
-                            {item.title}
+                          <Link to={`/painting/${slug}`} className="cart-item__title">
+                            {title}
                           </Link>
                           <p className="cart-item__meta">
-                            {item.medium} — {item.widthCm} × {item.heightCm} cm
+                            {medium} {widthCm && heightCm ? `— ${widthCm} × ${heightCm} cm` : ''}
                           </p>
                         </div>
 
-                        {sold && (
+                        {isSold && (
                           <div className="cart-item__sold-note" role="status">
                             <span className="cart-item__sold-badge">SOLD · Excluded from total</span>
                             <p className="cart-item__sold-text">This piece has found its home.</p>
@@ -255,18 +302,35 @@ export default function Cart() {
                           </div>
                         )}
 
+                        {isReserved && (
+                          <div className="cart-item__sold-note" role="status">
+                            <span className="cart-item__sold-badge">RESERVED · Excluded from total</span>
+                            <p className="cart-item__sold-text">This piece has an active reservation.</p>
+                            <Link to={similarWorksLink} className="cart-item__sold-link">
+                              Browse similar works →
+                            </Link>
+                          </div>
+                        )}
+
                         <div className="cart-item__bottom">
-                          <span
-                            className={`cart-item__price ${sold ? 'cart-item__price--sold' : ''}`}
-                          >
-                            {formatPKR(item.price)}
-                          </span>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                            <span
+                              className={`cart-item__price ${isUnavailable ? 'cart-item__price--sold' : ''}`}
+                            >
+                              {formatPKR(currentPrice)}
+                            </span>
+                            {priceChanged && (
+                              <span className="cart-item__price-change-note">
+                                Price updated: was {formatPKR(item.addedPrice)}
+                              </span>
+                            )}
+                          </div>
 
                           <button
                             type="button"
                             className="cart-item__remove-btn"
                             onClick={() => handleRemove(item)}
-                            aria-label={`Remove ${item.title} from acquisition list`}
+                            aria-label={`Remove ${title} from acquisition list`}
                           >
                             Remove
                           </button>
@@ -282,11 +346,11 @@ export default function Cart() {
           <aside className="cart-summary" aria-label="Acquisition Summary">
             <h2 className="cart-summary__title">Summary</h2>
 
-            {soldCount > 0 && (
+            {unavailableCount > 0 && (
               <p className="cart-summary__sold-note" role="alert">
-                {soldCount === 1
-                  ? 'One artwork in your cart is sold and has been excluded from the total.'
-                  : `${soldCount} artworks in your cart are sold and have been excluded from the total.`}
+                {unavailableCount === 1
+                  ? 'One artwork in your cart is sold or reserved and has been excluded from the total. Please remove it before proceeding.'
+                  : `${unavailableCount} artworks in your cart are sold or reserved and have been excluded from the total. Please remove them before proceeding.`}
               </p>
             )}
 
@@ -309,7 +373,7 @@ export default function Cart() {
             </div>
 
             <div className="cart-summary__actions">
-              {availableCount > 0 ? (
+              {availableCount > 0 && unavailableCount === 0 ? (
                 <Link to="/checkout" className="btn btn--gilded cart-summary__checkout-btn">
                   <span>PROCEED TO CHECKOUT</span>
                   <span className="btn__arrow" aria-hidden="true">→</span>
@@ -320,8 +384,9 @@ export default function Cart() {
                   disabled
                   className="btn btn--gilded cart-summary__checkout-btn btn--disabled"
                   aria-disabled="true"
+                  title={unavailableCount > 0 ? 'Remove unavailable works to proceed' : undefined}
                 >
-                  <span>PROCEED TO CHECKOUT</span>
+                  <span>{unavailableCount > 0 ? 'REMOVE UNAVAILABLE WORKS' : 'PROCEED TO CHECKOUT'}</span>
                 </button>
               )}
 
