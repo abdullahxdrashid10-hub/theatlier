@@ -194,91 +194,104 @@ export default function Shop() {
   }, [loading, displayedPaintings])
 
   return (
-    <main className="shop">
-      <title>Shop — The Atelier by SK</title>
+    <main className="shop-page">
+      <title>The Collection — The Atelier by SK</title>
 
-      <header ref={headerRef} className="shop__header">
-        <span className="shop__eyebrow">The Collection</span>
-        <h1 className="shop__title">Shop</h1>
-        <p className="shop__subtitle">Original paintings, each one of one.</p>
+      {/* Atmospheric Shop Hero Banner with the authentic Impasto artwork background */}
+      <header ref={headerRef} className="shop-hero" aria-label="Shop Collection Introduction">
+        <div className="shop-hero__backdrop" aria-hidden="true">
+          <div className="shop-hero__bg-art" />
+          <div className="shop-hero__scrim" />
+        </div>
 
-        {/* Filter Row: Segmented Gallery Toggles */}
-        <div className="gallery-toggles" role="tablist" aria-label="Filter collection by availability">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={filter === 'all'}
-            className={`gallery-toggle-btn ${filter === 'all' ? 'gallery-toggle-btn--active' : ''}`}
-            onClick={() => handleFilterChange('all')}
-          >
-            All <span className="gallery-toggle-btn__count">({counts.all})</span>
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={filter === 'available'}
-            className={`gallery-toggle-btn ${filter === 'available' ? 'gallery-toggle-btn--active' : ''}`}
-            onClick={() => handleFilterChange('available')}
-          >
-            Available <span className="gallery-toggle-btn__count">({counts.available})</span>
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={filter === 'reserved'}
-            className={`gallery-toggle-btn ${filter === 'reserved' ? 'gallery-toggle-btn--active' : ''}`}
-            onClick={() => handleFilterChange('reserved')}
-          >
-            Reserved <span className="gallery-toggle-btn__count">({counts.reserved})</span>
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={filter === 'sold'}
-            className={`gallery-toggle-btn ${filter === 'sold' ? 'gallery-toggle-btn--active' : ''}`}
-            onClick={() => handleFilterChange('sold')}
-          >
-            Sold <span className="gallery-toggle-btn__count">({counts.sold})</span>
-          </button>
+        <div className="shop-hero__inner">
+          <span className="shop-hero__eyebrow">The Atelier by SK · Complete Archive</span>
+          <h1 className="shop-hero__title">The Collection</h1>
+          <div className="shop-hero__hairline" aria-hidden="true" />
+          <p className="shop-hero__subtitle">
+            Original one-of-one paintings sculpted by hand with heavy palette-knife impasto and dimensional calligraphy.
+          </p>
+
+          {/* Filter Row: Segmented Gallery Toggles */}
+          <div className="gallery-toggles" role="tablist" aria-label="Filter collection by availability">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={filter === 'all'}
+              className={`gallery-toggle-btn ${filter === 'all' ? 'gallery-toggle-btn--active' : ''}`}
+              onClick={() => handleFilterChange('all')}
+            >
+              All <span className="gallery-toggle-btn__count">({counts.all})</span>
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={filter === 'available'}
+              className={`gallery-toggle-btn ${filter === 'available' ? 'gallery-toggle-btn--active' : ''}`}
+              onClick={() => handleFilterChange('available')}
+            >
+              Available <span className="gallery-toggle-btn__count">({counts.available})</span>
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={filter === 'reserved'}
+              className={`gallery-toggle-btn ${filter === 'reserved' ? 'gallery-toggle-btn--active' : ''}`}
+              onClick={() => handleFilterChange('reserved')}
+            >
+              Reserved <span className="gallery-toggle-btn__count">({counts.reserved})</span>
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={filter === 'sold'}
+              className={`gallery-toggle-btn ${filter === 'sold' ? 'gallery-toggle-btn--active' : ''}`}
+              onClick={() => handleFilterChange('sold')}
+            >
+              Sold <span className="gallery-toggle-btn__count">({counts.sold})</span>
+            </button>
+          </div>
         </div>
       </header>
 
-      {/* Grid, Loading, or Error */}
-      {loading && (
-        <div className="shop__loading" role="status" aria-live="polite">
-          <div className="shop__spinner" aria-hidden="true" />
-          <p>Loading collection...</p>
-        </div>
-      )}
+      <div className="shop-catalog-wrap">
+        {/* Grid, Loading, or Error */}
+        {loading && (
+          <div className="shop__loading" role="status" aria-live="polite">
+            <div className="shop__spinner" aria-hidden="true" />
+            <p>Loading collection...</p>
+          </div>
+        )}
 
-      {error && !loading && (
-        <div className="shop__error" role="alert">
-          <p>Unable to load the collection at this time.</p>
-          <button type="button" className="shop__retry-btn" onClick={handleRetry}>
-            Retry
-          </button>
-        </div>
-      )}
+        {error && !loading && (
+          <div className="shop__error" role="alert">
+            <p>Unable to load the collection at this time.</p>
+            <button type="button" className="shop__retry-btn" onClick={handleRetry}>
+              Retry
+            </button>
+          </div>
+        )}
 
-      {!loading && !error && displayedPaintings.length === 0 && (
-        <div className="shop__empty">
-          <p>No paintings found matching this filter.</p>
-        </div>
-      )}
+        {!loading && !error && displayedPaintings.length === 0 && (
+          <div className="shop__empty">
+            <p>No paintings found matching this filter.</p>
+          </div>
+        )}
 
-      {!loading && !error && displayedPaintings.length > 0 && (
-        <div ref={gridRef} className="shop__grid">
-          {displayedPaintings.map((painting, index) => (
-            <div
-              key={painting.id}
-              ref={(el) => (itemsRef.current[index] = el)}
-              className="shop__grid-item"
-            >
-              <PaintingCard painting={painting} />
-            </div>
-          ))}
-        </div>
-      )}
+        {!loading && !error && displayedPaintings.length > 0 && (
+          <div ref={gridRef} className="shop__grid">
+            {displayedPaintings.map((painting, index) => (
+              <div
+                key={painting.id}
+                ref={(el) => (itemsRef.current[index] = el)}
+                className="shop__grid-item"
+              >
+                <PaintingCard painting={painting} />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </main>
   )
 }
