@@ -85,16 +85,55 @@ src/
 │   ├── AboutMaterialityGrid.jsx   # 4-pillar archival materials showcase
 │   └── AboutSalonCTA.jsx          # Concierge consultation & collection CTA
 └── styles/
-    └── about.css                  # Gallery Noir token-based styling
+    └── about.css                  # Pure Vanilla CSS (Gallery Noir design tokens)
 ```
 
 ---
 
-## 4. Implementation Checklist
+## 4. Technical Safeguards & Architectural Invariants
 
-- [ ] Create `src/styles/about.css` with responsive fluid typography, micro-interactions, and gold accents.
-- [ ] Build `AboutHero.jsx`, `AboutPhilosophy.jsx`, `AboutArtisan.jsx`, `AboutMaterialityGrid.jsx`, and `AboutSalonCTA.jsx`.
-- [ ] Assemble `src/pages/About.jsx` with proper semantic heading hierarchy and meta tags for SEO.
-- [ ] Implement smooth GSAP scroll reveals with `prefers-reduced-motion` compliance.
-- [ ] Validate across mobile, tablet, and ultra-wide desktop viewports.
-- [ ] Run `npm run lint` and `npm run build` verification.
+### 4.1. Pure Vanilla CSS & Design Tokens (Strictly No Tailwind)
+- **Constraint:** Zero Tailwind CSS or utility framework abstractions.
+- **Implementation:** `src/styles/about.css` is built entirely in semantic, structured Vanilla CSS leveraging existing CSS Custom Properties:
+  - Surfaces: `var(--bg)` (`#0c0b09`), `var(--surface)` (`#151410`), `var(--surface-sunken)`
+  - Accents: `var(--gold)` (`#D0A971`), `var(--taupe)` (`#876D4F`), `var(--champagne)` (`#EDE8DF`), `var(--text)`
+  - Spacing & Typography: `var(--space-*)`, `var(--text-*)`, `var(--font-heading)`, `var(--font-body)`
+- **Responsive Fluidity:** Use standard `clamp()` and media queries without external utility classes.
+
+### 4.2. Asset Dependency & Fallback Architecture
+- **Constraint:** Production must compile and render flawlessly even before photography is provisioned in `/public/`.
+- **Implementation:**
+  - Build self-contained SVG studio texture artwork and CSS impasto canvas gradients directly into the component layer.
+  - Image components use graceful `onError` fallback handlers and predefined luxury placeholders (e.g. `/placeholders/placeholder-01.svg` or embedded SVG impasto relief textures) so no broken `<img>` nodes or 404 console errors appear.
+
+### 4.3. GSAP Scope Isolation & Cleanup Safety
+- **Constraint:** Zero global DOM queries (e.g., `gsap.to(".tile")`) to prevent hydration mismatches, memory leaks, or unmount crashes.
+- **Implementation:**
+  - Scope all animations to a component container `useRef`:
+    ```javascript
+    const containerRef = useRef(null)
+    useEffect(() => {
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      if (prefersReducedMotion) return
+
+      const ctx = gsap.context(() => {
+        // Scoped animations
+      }, containerRef)
+
+      return () => ctx.revert()
+    }, [])
+    ```
+  - Strictly clean up via `ctx.revert()` upon unmount.
+
+---
+
+## 5. Implementation Checklist
+
+- [ ] Create `src/styles/about.css` in pure Vanilla CSS using established Gallery Noir design tokens.
+- [ ] Build `AboutHero.jsx` with embedded atmospheric canvas gradient and fallback texturing.
+- [ ] Build `AboutPhilosophy.jsx` with asymmetric 60/40 editorial layout and quote card.
+- [ ] Build `AboutArtisan.jsx` with artist portrait fallback loader and studio storytelling.
+- [ ] Build `AboutMaterialityGrid.jsx` highlighting the 4 archival craftsmanship pillars.
+- [ ] Build `AboutSalonCTA.jsx` integrating with The Atelier Curator concierge & private advisory.
+- [ ] Assemble `src/pages/About.jsx` with scoped `gsap.context()` animations and `ctx.revert()` cleanup.
+- [ ] Run `npm run lint` and `npm run build` verification to confirm clean compilation.
