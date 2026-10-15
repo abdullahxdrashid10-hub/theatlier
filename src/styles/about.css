@@ -12,6 +12,42 @@
 }
 
 /* --------------------------------------------------------------------------
+   Editorial Background Watermark Typography
+   -------------------------------------------------------------------------- */
+.about-watermark {
+  position: absolute;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+  font-family: var(--font-heading);
+  font-weight: 300;
+  color: rgba(208, 169, 113, 0.035);
+  text-transform: uppercase;
+  white-space: nowrap;
+  line-height: 0.8;
+  letter-spacing: 0.16em;
+}
+
+.about-watermark--1 {
+  top: 14%;
+  right: -5%;
+  font-size: clamp(6rem, 16vw, 17rem);
+}
+
+.about-watermark--2 {
+  top: 46%;
+  left: -8%;
+  font-size: clamp(6.5rem, 18vw, 19rem);
+}
+
+.about-watermark--3 {
+  top: 78%;
+  right: -4%;
+  font-size: clamp(6rem, 15vw, 16rem);
+}
+
+
+/* --------------------------------------------------------------------------
    Section 1: The Sanctuary Hero
    -------------------------------------------------------------------------- */
 .about-hero {
@@ -99,6 +135,96 @@
   line-height: var(--leading-relaxed);
   color: var(--champagne);
   max-width: 760px;
+  margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Section 1.5: The Studio Ledger & Disciplines of Provenance
+   -------------------------------------------------------------------------- */
+.about-ledger {
+  position: relative;
+  z-index: 1;
+  padding: var(--space-8) var(--gutter);
+  background: linear-gradient(180deg, rgba(16, 14, 11, 0.98) 0%, rgba(22, 20, 16, 0.9) 100%);
+  border-bottom: 1px solid rgba(208, 169, 113, 0.15);
+}
+
+.about-ledger__inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+
+.about-ledger__header {
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto var(--space-6);
+}
+
+.about-ledger__title {
+  font-family: var(--font-heading);
+  font-size: clamp(1.5rem, 1.2rem + 1vw, 2.1rem);
+  font-weight: 300;
+  color: var(--text);
+  margin: var(--space-1) 0 0;
+}
+
+.about-ledger__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-5);
+}
+
+@media (min-width: 640px) {
+  .about-ledger__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .about-ledger__grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.about-ledger__item {
+  padding: var(--space-6);
+  background: rgba(26, 24, 19, 0.65);
+  border: 1px solid rgba(208, 169, 113, 0.2);
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  transition: transform 0.3s var(--ease), border-color 0.3s var(--ease), box-shadow 0.3s var(--ease);
+}
+
+.about-ledger__item:hover {
+  transform: translateY(-3px);
+  border-color: var(--gold);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45), 0 0 16px rgba(208, 169, 113, 0.1);
+}
+
+.about-ledger__num {
+  font-family: var(--font-heading);
+  font-size: clamp(1.8rem, 1.4rem + 1vw, 2.3rem);
+  color: var(--gold);
+  line-height: 1.1;
+  font-weight: 300;
+}
+
+.about-ledger__label {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  color: var(--champagne);
+  font-weight: 500;
+}
+
+.about-ledger__detail {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  color: var(--taupe);
+  line-height: var(--leading-relaxed);
   margin: 0;
 }
 
@@ -215,13 +341,340 @@
 }
 
 /* --------------------------------------------------------------------------
-   Section 3: The Artisan & The Sanctuary
+   Section 2.5: The Dual Harmony: Brush & Palette Knife
+   -------------------------------------------------------------------------- */
+.about-duel {
+  padding: var(--space-10) var(--gutter);
+  max-width: var(--max-width);
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.about-duel__inner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+}
+
+.about-duel__header {
+  text-align: center;
+  max-width: 760px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.about-duel__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
+.about-duel__tab {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-6);
+  background: rgba(22, 20, 16, 0.7);
+  border: 1px solid rgba(208, 169, 113, 0.22);
+  border-radius: 9999px;
+  cursor: pointer;
+  color: var(--taupe);
+  transition: all 0.3s var(--ease);
+}
+
+.about-duel__tab:hover {
+  color: var(--text);
+  border-color: rgba(208, 169, 113, 0.5);
+  background: rgba(30, 27, 21, 0.85);
+}
+
+.about-duel__tab--active {
+  background: rgba(208, 169, 113, 0.12);
+  border-color: var(--gold);
+  color: var(--gold);
+  box-shadow: 0 0 24px rgba(208, 169, 113, 0.18);
+}
+
+.about-duel__tab-num {
+  font-family: var(--font-heading);
+  font-size: var(--text-sm);
+  color: var(--gold);
+}
+
+.about-duel__tab-title {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.about-duel__display {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-8);
+  align-items: center;
+  background: rgba(18, 17, 13, 0.85);
+  border: 1px solid rgba(208, 169, 113, 0.25);
+  border-radius: var(--radius-sm);
+  padding: var(--space-6);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+}
+
+@media (min-width: 960px) {
+  .about-duel__display {
+    grid-template-columns: 1.15fr 0.85fr;
+    padding: var(--space-8);
+  }
+}
+
+.about-duel__canvas {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  min-height: 320px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid rgba(208, 169, 113, 0.3);
+  background: #11100d;
+  cursor: crosshair;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.about-duel__canvas-light {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    circle 340px at var(--light-x, 50%) var(--light-y, 50%),
+    rgba(255, 230, 180, 0.26) 0%,
+    rgba(208, 169, 113, 0.08) 45%,
+    transparent 100%
+  );
+  mix-blend-mode: screen;
+}
+
+.about-duel__canvas-texture {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.about-duel__texture-art {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Palette Knife simulated 3D ridges */
+.about-duel__knife-ridge {
+  position: absolute;
+  background: linear-gradient(135deg, rgba(208, 169, 113, 0.4) 0%, rgba(30, 26, 20, 0.9) 100%);
+  border-top: 1px solid rgba(255, 240, 210, 0.5);
+  border-bottom: 2px solid rgba(0, 0, 0, 0.8);
+  border-radius: 4px;
+  box-shadow: 0 14px 24px rgba(0, 0, 0, 0.7);
+}
+
+.ridge-1 {
+  width: 70%;
+  height: 28px;
+  top: 30%;
+  left: 15%;
+  transform: rotate(-4deg);
+}
+
+.ridge-2 {
+  width: 60%;
+  height: 34px;
+  top: 48%;
+  left: 25%;
+  transform: rotate(3deg);
+}
+
+.ridge-3 {
+  width: 65%;
+  height: 24px;
+  top: 66%;
+  left: 18%;
+  transform: rotate(-2deg);
+}
+
+.ridge-bg {
+  width: 80%;
+  height: 120px;
+  opacity: 0.35;
+}
+
+.about-duel__knife-crest {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--gold);
+  filter: blur(2px);
+  box-shadow: 0 0 16px var(--gold);
+}
+
+/* Brushwork dynamic fluid path */
+.about-duel__brush-svg {
+  width: 85%;
+  height: 85%;
+  filter: drop-shadow(0 6px 16px rgba(208, 169, 113, 0.35));
+}
+
+/* Synthesis 3D embossed sacred script */
+.about-duel__script-relief {
+  display: flex;
+  gap: var(--space-6);
+  font-size: clamp(3.5rem, 3rem + 3vw, 5.5rem);
+  font-family: var(--font-heading);
+  color: var(--gold);
+  text-shadow:
+    2px 2px 0px rgba(35, 28, 18, 0.95),
+    4px 6px 16px rgba(0, 0, 0, 0.85),
+    -1px -1px 2px rgba(255, 240, 200, 0.65);
+}
+
+.about-duel__script-char {
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+
+.about-duel__canvas:hover .about-duel__script-char {
+  transform: translateY(-2px);
+}
+
+.about-duel__canvas-footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(180deg, transparent, rgba(10, 9, 8, 0.92) 65%);
+}
+
+.about-duel__canvas-badge {
+  font-family: var(--font-body);
+  font-size: 11px;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--gold);
+  background: rgba(208, 169, 113, 0.14);
+  padding: 3px 12px;
+  border-radius: 9999px;
+  border: 1px solid rgba(208, 169, 113, 0.35);
+}
+
+.about-duel__canvas-hint {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--taupe);
+  font-style: italic;
+}
+
+/* Technique Content */
+.about-duel__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.about-duel__content-title {
+  font-family: var(--font-heading);
+  font-size: clamp(1.6rem, 1.3rem + 0.8vw, 2.2rem);
+  font-weight: 300;
+  color: var(--text);
+  margin: 0;
+}
+
+.about-duel__content-subtitle {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: var(--space-1);
+  display: block;
+}
+
+.about-duel__specs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: var(--space-4) 0;
+  padding: var(--space-4) 0;
+  border-top: 1px solid rgba(208, 169, 113, 0.15);
+  border-bottom: 1px solid rgba(208, 169, 113, 0.15);
+}
+
+.about-duel__spec-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-4);
+  font-size: var(--text-xs);
+}
+
+.about-duel__spec-label {
+  color: var(--taupe);
+  font-family: var(--font-body);
+}
+
+.about-duel__spec-value {
+  color: var(--champagne);
+  font-weight: 400;
+  text-align: right;
+}
+
+.about-duel__quote {
+  font-family: var(--font-heading);
+  font-style: italic;
+  font-size: var(--text-sm);
+  line-height: var(--leading-relaxed);
+  color: var(--champagne);
+  border-left: 2px solid var(--gold);
+  padding-left: var(--space-4);
+  margin: var(--space-2) 0 0;
+}
+
+.about-duel__quote cite {
+  display: block;
+  font-family: var(--font-body);
+  font-style: normal;
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-top: var(--space-2);
+}
+
+/* --------------------------------------------------------------------------
+   Section 3: The Artisan & The Sanctuary (Asymmetric 3-Frame Montage)
    -------------------------------------------------------------------------- */
 .about-artisan {
-  padding: var(--space-10) var(--gutter);
+  padding: var(--space-11) var(--gutter);
   background: rgba(18, 17, 13, 0.65);
   border-top: 1px solid rgba(208, 169, 113, 0.12);
   border-bottom: 1px solid rgba(208, 169, 113, 0.12);
+  position: relative;
+  z-index: 1;
 }
 
 .about-artisan__inner {
@@ -229,50 +682,134 @@
   margin: 0 auto;
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--space-8);
+  gap: var(--space-9);
   align-items: center;
 }
 
-@media (min-width: 900px) {
+@media (min-width: 960px) {
   .about-artisan__inner {
-    grid-template-columns: 0.9fr 1.1fr;
-    gap: var(--space-9);
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: var(--space-10);
   }
 }
 
-.about-artisan__portrait-wrap {
+.about-artisan__montage {
   position: relative;
-  aspect-ratio: 4 / 5;
+  width: 100%;
+  min-height: 480px;
+}
+
+.about-artisan__frame {
+  position: absolute;
   border-radius: var(--radius-sm);
   overflow: hidden;
   border: 1px solid rgba(208, 169, 113, 0.3);
-  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.65);
   background: #151410;
+  transition: transform 0.4s var(--ease), border-color 0.4s var(--ease), box-shadow 0.4s var(--ease);
 }
 
-.about-artisan__portrait {
+.about-artisan__frame:hover {
+  transform: translateY(-4px) scale(1.02);
+  border-color: var(--gold);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75), 0 0 20px rgba(208, 169, 113, 0.15);
+}
+
+.about-artisan__frame--main {
+  width: 76%;
+  height: 400px;
+  top: 20px;
+  left: 0;
+  z-index: 1;
+}
+
+.about-artisan__frame--accent-top {
+  width: 48%;
+  height: 190px;
+  top: 0;
+  right: 0;
+  z-index: 2;
+}
+
+.about-artisan__frame--accent-bottom {
+  width: 52%;
+  height: 200px;
+  bottom: 0;
+  right: -10px;
+  z-index: 3;
+}
+
+.about-artisan__img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: grayscale(20%) contrast(1.08);
+  filter: grayscale(18%) contrast(1.08);
   display: block;
   transition: transform 0.6s var(--ease);
 }
 
-.about-artisan__portrait-wrap:hover .about-artisan__portrait {
-  transform: scale(1.02);
+.about-artisan__frame:hover .about-artisan__img {
+  transform: scale(1.04);
 }
 
-.about-artisan__portrait-caption {
+.about-artisan__fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--space-4);
+  background: radial-gradient(circle at 40% 40%, #252019 0%, #151410 100%);
+  color: var(--gold);
+  font-family: var(--font-heading);
+}
+
+.about-artisan__fallback--main .about-artisan__fallback-title {
+  font-size: var(--text-lg);
+  letter-spacing: 0.04em;
+}
+
+.about-artisan__fallback--main .about-artisan__fallback-sub {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  color: var(--taupe);
+  margin-top: 4px;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+}
+
+.about-artisan__fallback--accent {
+  font-size: var(--text-sm);
+  color: var(--champagne);
+}
+
+.about-artisan__caption {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  padding: var(--space-4) var(--space-5);
-  background: linear-gradient(180deg, transparent, rgba(12, 11, 9, 0.92) 85%);
+  padding: var(--space-3) var(--space-4);
+  background: linear-gradient(180deg, transparent, rgba(12, 11, 9, 0.94) 80%);
   font-family: var(--font-body);
   font-size: var(--text-xs);
   letter-spacing: var(--tracking-wide);
+  color: var(--champagne);
+}
+
+.about-artisan__micro-tag {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  background: rgba(12, 11, 9, 0.88);
+  border: 1px solid rgba(208, 169, 113, 0.3);
+  border-radius: 9999px;
+  padding: 2px 10px;
+  font-family: var(--font-body);
+  font-size: 10px;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
   color: var(--champagne);
 }
 
@@ -281,6 +818,50 @@
   flex-direction: column;
   gap: var(--space-4);
 }
+
+.about-artisan__cta-wrap {
+  margin-top: var(--space-4);
+}
+
+/* Luxury Curator Consultation Pill */
+.about-curator-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-5);
+  background: rgba(26, 23, 18, 0.85);
+  border: 1px solid rgba(208, 169, 113, 0.35);
+  border-radius: 9999px;
+  color: var(--champagne);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  cursor: pointer;
+  transition: all 0.3s var(--ease);
+}
+
+.about-curator-pill:hover {
+  background: rgba(208, 169, 113, 0.16);
+  border-color: var(--gold);
+  color: var(--gold);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(208, 169, 113, 0.22);
+}
+
+.about-curator-pill__icon {
+  color: var(--gold);
+  font-size: 13px;
+}
+
+.about-curator-pill__arrow {
+  color: var(--gold);
+  transition: transform 0.2s var(--ease);
+}
+
+.about-curator-pill:hover .about-curator-pill__arrow {
+  transform: translateX(4px);
+}
+
 
 /* --------------------------------------------------------------------------
    Section 4: The Materiality Dossier (4-Pillar Grid)
@@ -452,6 +1033,23 @@
   gap: var(--space-3);
 }
 
+.about-dialogue__seal {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid var(--gold);
+  background: radial-gradient(circle, rgba(208, 169, 113, 0.22) 0%, rgba(20, 18, 14, 0.95) 85%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading);
+  font-size: var(--text-base);
+  letter-spacing: 0.05em;
+  color: var(--gold);
+  box-shadow: 0 0 20px rgba(208, 169, 113, 0.25);
+  margin-bottom: var(--space-2);
+}
+
 .about-dialogue__list {
   display: flex;
   flex-direction: column;
@@ -473,7 +1071,7 @@
 .about-dialogue__item--open {
   border-color: var(--gold);
   background: rgba(26, 24, 19, 0.95);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4), 0 0 16px rgba(208, 169, 113, 0.08);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4), 0 0 20px rgba(208, 169, 113, 0.12);
 }
 
 .about-dialogue__trigger {
@@ -545,6 +1143,40 @@
   padding-left: var(--space-4);
 }
 
+.about-dialogue__author-tag {
+  margin-top: var(--space-3);
+  font-family: var(--font-heading);
+  font-style: italic;
+  font-size: var(--text-xs);
+  color: var(--gold);
+  text-align: right;
+  letter-spacing: 0.02em;
+}
+
+.about-dialogue__connectors {
+  margin-top: var(--space-9);
+  padding-top: var(--space-7);
+  border-top: 1px solid rgba(208, 169, 113, 0.15);
+  text-align: center;
+}
+
+.about-dialogue__connectors-label {
+  display: block;
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  color: var(--taupe);
+  margin-bottom: var(--space-4);
+}
+
+.about-dialogue__connectors-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-4);
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -555,4 +1187,5 @@
     transform: translateY(0);
   }
 }
+
 

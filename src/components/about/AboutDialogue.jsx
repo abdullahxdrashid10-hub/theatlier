@@ -44,12 +44,15 @@ export default function AboutDialogue() {
     <section className="about-dialogue" aria-labelledby="dialogue-title">
       <div className="about-dialogue__inner">
         <header className="about-dialogue__header">
-          <span className="about-section-label">Conversations With The Artist</span>
+          <div className="about-dialogue__seal" aria-hidden="true">
+            <span>SK</span>
+          </div>
+          <span className="about-section-label">The Studio Journal & Inquiries</span>
           <h2 id="dialogue-title" className="about-section-title">
-            The Studio Inquiries
+            Conversations With The Artist
           </h2>
           <p className="about-copy">
-            An intimate dialogue on creative impulse, sculptural texture, and the emotional resonance of handmade art.
+            An intimate dialogue on creative impulse, sculptural impasto, and the emotional resonance of authentic handmade art.
           </p>
         </header>
 
@@ -77,11 +80,52 @@ export default function AboutDialogue() {
                 {isOpen && (
                   <div className="about-dialogue__answer-wrap">
                     <p className="about-dialogue__answer">{item.a}</p>
+                    <div className="about-dialogue__author-tag">
+                      <span>— Zuha (SK) · Studio Archive</span>
+                    </div>
                   </div>
                 )}
               </div>
             )
           })}
+        </div>
+
+        {/* Curator Consultation Connectors */}
+        <div className="about-dialogue__connectors">
+          <span className="about-dialogue__connectors-label">Further Inquiries</span>
+          <div className="about-dialogue__connectors-grid">
+            <button
+              type="button"
+              className="about-curator-pill"
+              onClick={() =>
+                window.dispatchEvent(
+                  new CustomEvent('atelier:open-curator', {
+                    detail: { prompt: 'Can I commission a custom textured calligraphy piece with a specific sacred ayah?' },
+                  })
+                )
+              }
+            >
+              <span className="about-curator-pill__icon" aria-hidden="true">✦</span>
+              <span>Commission Custom Sacred Calligraphy</span>
+              <span className="about-curator-pill__arrow" aria-hidden="true">→</span>
+            </button>
+
+            <button
+              type="button"
+              className="about-curator-pill"
+              onClick={() =>
+                window.dispatchEvent(
+                  new CustomEvent('atelier:open-curator', {
+                    detail: { prompt: 'What artworks are currently available or in progress at the studio?' },
+                  })
+                )
+              }
+            >
+              <span className="about-curator-pill__icon" aria-hidden="true">✦</span>
+              <span>View Available Works in Progress</span>
+              <span className="about-curator-pill__arrow" aria-hidden="true">→</span>
+            </button>
+          </div>
         </div>
       </div>
     </section>

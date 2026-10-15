@@ -2,7 +2,9 @@ import { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import AboutHero from '../components/about/AboutHero'
+import AboutLedger from '../components/about/AboutLedger'
 import AboutPhilosophy from '../components/about/AboutPhilosophy'
+import AboutTechniqueDuel from '../components/about/AboutTechniqueDuel'
 import AboutArtisan from '../components/about/AboutArtisan'
 import AboutDialogue from '../components/about/AboutDialogue'
 import AboutMaterialityGrid from '../components/about/AboutMaterialityGrid'
@@ -19,7 +21,21 @@ export default function About() {
     if (prefersReducedMotion) return
 
     const ctx = gsap.context(() => {
-      // Gentle reveal for narrative sections
+      // Ledger reveal
+      gsap.from('.about-ledger__item', {
+        y: 20,
+        opacity: 0,
+        duration: 0.65,
+        stagger: 0.1,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: '.about-ledger',
+          start: 'top 88%',
+          once: true,
+        },
+      })
+
+      // Philosophy reveal
       gsap.from('.about-philosophy__layout', {
         y: 28,
         opacity: 0,
@@ -32,18 +48,34 @@ export default function About() {
         },
       })
 
-      gsap.from('.about-artisan__inner', {
-        y: 28,
+      // Duel showcase reveal
+      gsap.from('.about-duel__display', {
+        y: 32,
         opacity: 0,
-        duration: 0.8,
+        duration: 0.85,
         ease: 'power2.out',
         scrollTrigger: {
-          trigger: '.about-artisan',
+          trigger: '.about-duel',
           start: 'top 85%',
           once: true,
         },
       })
 
+      // Artisan montage reveal
+      gsap.from('.about-artisan__frame', {
+        y: 30,
+        opacity: 0,
+        duration: 0.75,
+        stagger: 0.15,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: '.about-artisan__montage',
+          start: 'top 85%',
+          once: true,
+        },
+      })
+
+      // Dialogue reveal
       gsap.from('.about-dialogue__inner', {
         y: 28,
         opacity: 0,
@@ -56,6 +88,7 @@ export default function About() {
         },
       })
 
+      // Pillars reveal
       gsap.from('.about-pillar', {
         y: 24,
         opacity: 0,
@@ -69,6 +102,7 @@ export default function About() {
         },
       })
 
+      // Salon CTA reveal
       gsap.from('.about-salon__inner', {
         y: 24,
         opacity: 0,
@@ -88,8 +122,22 @@ export default function About() {
   return (
     <main ref={pageRef} className="about-page">
       <title>The Atelier & Artist SK — Studio Provenance</title>
+
+      {/* Atmospheric Editorial Ghost Watermarks */}
+      <div className="about-watermark about-watermark--1" aria-hidden="true">
+        L’ATELIER
+      </div>
+      <div className="about-watermark about-watermark--2" aria-hidden="true">
+        IMPASTO
+      </div>
+      <div className="about-watermark about-watermark--3" aria-hidden="true">
+        PROVENANCE
+      </div>
+
       <AboutHero />
+      <AboutLedger />
       <AboutPhilosophy />
+      <AboutTechniqueDuel />
       <AboutArtisan />
       <AboutDialogue />
       <AboutMaterialityGrid />

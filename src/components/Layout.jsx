@@ -1,4 +1,4 @@
-import { useLayoutEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import Nav from './Nav'
 import Footer from './Footer'
@@ -18,6 +18,13 @@ export default function Layout() {
   useLayoutEffect(() => {
     scrollToTop()
   }, [pathname])
+
+  // Support global custom event to trigger curator from anywhere
+  useEffect(() => {
+    const handleOpen = () => setCuratorOpen(true)
+    window.addEventListener('atelier:open-curator', handleOpen)
+    return () => window.removeEventListener('atelier:open-curator', handleOpen)
+  }, [])
 
   return (
     <div className="app">
