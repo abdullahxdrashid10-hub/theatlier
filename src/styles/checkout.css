@@ -43,6 +43,25 @@
   background: linear-gradient(90deg, var(--gold), transparent);
 }
 
+.checkout-page__intl-note {
+  margin-top: var(--space-4);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--taupe);
+  line-height: var(--leading-body);
+}
+
+.checkout-page__intl-link {
+  color: var(--gold);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color var(--duration-fast) var(--ease);
+}
+
+.checkout-page__intl-link:hover {
+  color: var(--champagne);
+}
+
 /* Layout: single column on phones, form + sticky summary on desktop */
 .checkout-layout {
   display: grid;

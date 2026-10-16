@@ -1,8 +1,21 @@
 import { Link } from 'react-router-dom'
 import { NAV_LINKS } from '../data/navLinks'
-import { CONTACT_LINE, isTodoValue } from '../config/site'
+import {
+  PHONE,
+  EMAIL,
+  INSTAGRAM_HANDLE,
+  isTodoValue,
+  buildTelHref,
+  buildMailtoHref,
+  buildInstagramUrl,
+} from '../config/site'
 
 export default function Footer() {
+  const hasPhone = !isTodoValue(PHONE)
+  const hasEmail = !isTodoValue(EMAIL)
+  const hasInstagram = !isTodoValue(INSTAGRAM_HANDLE)
+  const hasContact = hasPhone || hasEmail || hasInstagram
+
   return (
     <footer className="footer">
       <div className="footer__inner">
@@ -26,10 +39,37 @@ export default function Footer() {
           </ul>
         </nav>
 
-        {!isTodoValue(CONTACT_LINE) && (
+        {hasContact && (
           <div>
             <h2 className="footer__heading">Contact</h2>
-            <p className="footer__contact">{CONTACT_LINE}</p>
+            <ul className="footer__links">
+              {hasPhone && (
+                <li>
+                  <a href={buildTelHref()} className="footer__link">
+                    {PHONE}
+                  </a>
+                </li>
+              )}
+              {hasEmail && (
+                <li>
+                  <a href={buildMailtoHref()} className="footer__link">
+                    {EMAIL}
+                  </a>
+                </li>
+              )}
+              {hasInstagram && (
+                <li>
+                  <a
+                    href={buildInstagramUrl()}
+                    className="footer__link"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    @{String(INSTAGRAM_HANDLE).replace(/^@/, '')}
+                  </a>
+                </li>
+              )}
+            </ul>
           </div>
         )}
 

@@ -6,6 +6,7 @@ import { formatPKR } from '../utils/formatPKR'
 import { formatPKPhone, normalisePKPhone } from '../utils/phone'
 import { saveOrderSummary } from '../utils/orderSession'
 import siteCopy from '../config/siteCopy'
+import { buildWhatsAppMessage } from '../config/site'
 import '../styles/checkout.css'
 
 const FIELD_ORDER = ['name', 'phone', 'email', 'city', 'address']
@@ -263,6 +264,17 @@ export default function Checkout() {
         <span className="checkout-page__eyebrow">The Atelier · Checkout</span>
         <h1 className="checkout-page__title">Checkout</h1>
         <span className="checkout-page__rule" aria-hidden="true" />
+        <p className="checkout-page__intl-note">
+          Ordering from outside Pakistan?{' '}
+          <a
+            href={buildWhatsAppMessage({ message: 'Hello, I am ordering from outside Pakistan and would like to enquire about acquiring artwork.' }).href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="checkout-page__intl-link"
+          >
+            Enquire on WhatsApp.
+          </a>
+        </p>
       </header>
 
       <div className="checkout-layout">

@@ -4,6 +4,15 @@
  * must be confirmed by the client (SK) before being displayed on the storefront.
  */
 
+// Client public Instagram bio notes
+export const showCommissionNote = true
+export const commissionNote = 'Commissions by enquiry. Message us on WhatsApp or Instagram.'
+export const commissionNoteText = 'Commissions by enquiry. Message us on WhatsApp or Instagram.'
+
+export const showWorldwideShippingNote = true
+export const worldwideShippingNote = 'Shipping worldwide.'
+export const worldwideShippingNoteText = 'Shipping worldwide.'
+
 // TODO CLIENT: confirm with SK
 export const showFramingShippingNote = false
 
@@ -61,6 +70,12 @@ export const bankTransferNote = false
 export const bankTransferNoteText = 'TODO_CLIENT_BANK_TRANSFER_NOTE'
 
 export const siteCopy = {
+  showCommissionNote,
+  commissionNote,
+  commissionNoteText,
+  showWorldwideShippingNote,
+  worldwideShippingNote,
+  worldwideShippingNoteText,
   bankTransferNote,
   bankTransferNoteText,
   showFramingShippingNote,
