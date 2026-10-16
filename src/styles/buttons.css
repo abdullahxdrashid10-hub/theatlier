@@ -15,15 +15,14 @@
   text-decoration: none;
   cursor: pointer;
   position: relative;
-  overflow: hidden;
-  border-radius: 2px;
+  overflow: hidden;  border-radius: 36px 6px 36px 6px;
   border: 1px solid transparent;
   transition:
-    transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 0.4s ease,
-    background-color 0.4s ease,
-    border-color 0.4s ease,
-    color 0.3s ease;
+    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.45s ease,
+    background-color 0.45s ease,
+    border-color 0.45s ease,
+    color 0.35s ease;
 }
 
 .btn:focus-visible {
@@ -34,7 +33,7 @@
 .btn__arrow {
   color: inherit;
   display: inline-block;
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), color 0.3s ease;
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), color 0.35s ease;
 }
 
 /* --------------------------------------------------------------------------
@@ -42,13 +41,13 @@
    Used for high-priority primary actions (e.g. "Explore the Collection")
    -------------------------------------------------------------------------- */
 .btn--gilded {
-  background: var(--gold);
-  color: var(--bg);
+  background: linear-gradient(135deg, rgba(208, 169, 113, 0.95) 0%, rgba(180, 145, 95, 0.95) 100%);
+  color: #12100c;
   font-weight: 500;
-  padding: calc(var(--space-3) + 2px) calc(var(--space-6) + 8px);
+  padding: calc(var(--space-3) + 3px) calc(var(--space-6) + 12px);
   border-radius: 36px 6px 36px 6px;
-  border-color: rgba(228, 196, 143, 0.4);
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(242, 222, 191, 0.45);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55), 0 0 16px rgba(208, 169, 113, 0.2);
 }
 
 .btn--gilded::before {
@@ -58,6 +57,7 @@
   left: 0;
   width: 100%;
   height: 100%;
+  border-radius: inherit;
   background: linear-gradient(
     115deg,
     transparent 15%,
@@ -71,12 +71,13 @@
 
 @media (hover: hover) and (pointer: fine) {
   .btn--gilded:hover {
-    background: var(--champagne);
+    background: linear-gradient(135deg, #e4c48f 0%, #d0a971 100%);
+    color: #0c0b09;
     transform: translateY(-3px);
-    border-radius: 38px 8px 38px 8px;
+    border-radius: 36px 6px 36px 6px;
     box-shadow:
-      0 16px 36px -8px rgba(0, 0, 0, 0.78),
-      0 0 26px rgba(208, 169, 113, 0.35);
+      0 16px 36px -8px rgba(0, 0, 0, 0.85),
+      0 0 26px rgba(208, 169, 113, 0.4);
   }
 
   .btn--gilded:hover::before {
@@ -97,20 +98,22 @@
    Used for secondary editorial actions (e.g. "View All Works", "Details")
    -------------------------------------------------------------------------- */
 .btn--framed {
-  background: var(--surface);
+  background: rgba(30, 28, 23, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   color: var(--text);
-  padding: calc(var(--space-3) + 2px) calc(var(--space-6) + 8px);
+  padding: calc(var(--space-3) + 3px) calc(var(--space-6) + 12px);
   border-radius: 36px 6px 36px 6px;
-  border-color: var(--line);
-  box-shadow: 0 4px 22px rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(208, 169, 113, 0.45);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65);
 }
 
 .btn--framed::before {
   content: '';
   position: absolute;
   bottom: 0;
-  left: 12%;
-  right: 12%;
+  left: 14%;
+  right: 14%;
   height: 1.5px;
   background: var(--gold);
   transform: scaleX(0);
@@ -125,7 +128,7 @@
   border-radius: inherit;
   background: linear-gradient(
     135deg,
-    rgba(208, 169, 113, 0.12) 0%,
+    rgba(208, 169, 113, 0.14) 0%,
     transparent 65%
   );
   opacity: 0;
@@ -135,13 +138,14 @@
 
 @media (hover: hover) and (pointer: fine) {
   .btn--framed:hover {
-    border-color: rgba(208, 169, 113, 0.65);
+    border-color: rgba(208, 169, 113, 0.85);
+    background: rgba(36, 33, 27, 0.95);
     color: var(--champagne);
     transform: translateY(-3px);
-    border-radius: 38px 8px 38px 8px;
+    border-radius: 36px 6px 36px 6px;
     box-shadow:
       0 16px 36px -8px rgba(0, 0, 0, 0.85),
-      0 0 22px rgba(208, 169, 113, 0.18);
+      0 0 24px rgba(208, 169, 113, 0.22);
   }
 
   .btn--framed:hover::before {
@@ -161,8 +165,6 @@
 .btn--framed:active {
   transform: translateY(-1px) scale(0.98);
 }
-
-
 
 /* --------------------------------------------------------------------------
    MOCK 3: The Whispering Line (Minimalist Gallery Link with Sliding Underline)
@@ -204,76 +206,98 @@
 }
 
 /* --------------------------------------------------------------------------
-   FILTER TOGGLES: Segmented Gallery Pill Switch
-   Used in Shop and Collection filters (All / Available / Sold)
+   FILTER TOGGLES: Signature Sculpted Palette Knife Arch
+   Matches Hero CTA exactly: 36px 6px 36px 6px silhouette, smoky glass, gold hairline
    -------------------------------------------------------------------------- */
 .gallery-toggles {
   display: inline-flex;
   align-items: center;
-  background: rgba(30, 28, 23, 0.9);
-  border: 1px solid var(--line);
-  padding: 3px;
-  border-radius: 4px;
-  gap: 3px;
-  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.5);
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  background: transparent;
+  border: none;
+  padding: 0;
+  box-shadow: none;
 }
 
 .gallery-toggle-btn {
-  position: relative;
-  padding: var(--space-2) var(--space-5);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  background: rgba(30, 28, 23, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(208, 169, 113, 0.45);
+  border-radius: 36px 6px 36px 6px;
+  color: var(--taupe);
+  padding: calc(var(--space-2) + 3px) calc(var(--space-5) + 4px);
   font-family: var(--font-body);
   font-size: var(--text-xs);
   letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
-  color: var(--taupe);
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 2px;
   cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65);
   transition:
-    color 0.3s ease,
-    background-color 0.3s ease,
-    border-color 0.3s ease,
-    box-shadow 0.3s ease;
+    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.45s ease,
+    background-color 0.45s ease,
+    color 0.45s ease,
+    box-shadow 0.45s ease;
   white-space: nowrap;
+  position: relative;
 }
 
 .gallery-toggle-btn:focus-visible {
   outline: 2px solid var(--gold);
-  outline-offset: 2px;
+  outline-offset: 3px;
 }
 
 .gallery-toggle-btn__count {
-  font-size: 0.8em;
-  opacity: 0.75;
-  margin-left: 3px;
+  font-size: 0.85em;
+  opacity: 0.8;
+  margin-left: 2px;
   font-variant-numeric: tabular-nums;
   letter-spacing: 0;
+  color: inherit;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .gallery-toggle-btn:hover {
+    transform: translateY(-2px);
+    border-color: rgba(208, 169, 113, 0.85);
+    background: rgba(36, 33, 27, 0.95);
     color: var(--champagne);
+    box-shadow:
+      0 14px 32px -6px rgba(0, 0, 0, 0.85),
+      0 0 20px rgba(208, 169, 113, 0.22);
   }
 }
 
 .gallery-toggle-btn--active {
-  color: var(--text);
+  border-color: rgba(208, 169, 113, 0.95);
+  background: rgba(45, 38, 29, 0.95);
+  color: var(--champagne);
   font-weight: 500;
-  background: rgba(75, 61, 44, 0.5);
-  border-color: rgba(208, 169, 113, 0.4);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  box-shadow:
+    0 12px 30px -6px rgba(0, 0, 0, 0.85),
+    0 0 24px rgba(208, 169, 113, 0.35);
 }
 
 .gallery-toggle-btn--active::after {
   content: '';
   position: absolute;
-  bottom: 3px;
-  left: 25%;
-  right: 25%;
-  height: 1px;
+  bottom: 4px;
+  left: 22%;
+  right: 22%;
+  height: 1.5px;
   background: var(--gold);
-  box-shadow: 0 0 6px rgba(208, 169, 113, 0.7);
+  box-shadow: 0 0 8px rgba(208, 169, 113, 0.8);
+  border-radius: 1px;
+}
+
+.gallery-toggle-btn:active {
+  transform: translateY(-1px) scale(0.98);
 }
 
 /* Reduced motion support */

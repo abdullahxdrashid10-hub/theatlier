@@ -156,7 +156,7 @@
   padding: 0 var(--space-4);
   background: rgba(208, 169, 113, 0.15);
   border: 1px solid var(--gold);
-  border-radius: 2px;
+  border-radius: 28px 6px 28px 6px;
   color: var(--gold);
   font-family: var(--font-body);
   font-size: var(--text-xs);
@@ -297,7 +297,7 @@
   font-weight: 500;
   letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
-  border-radius: 2px;
+  border-radius: 36px 6px 36px 6px;
   transition: all var(--duration-fast) var(--ease);
   display: inline-flex;
   align-items: center;
