@@ -73,7 +73,12 @@ export default function Footer() {
           </div>
         )}
 
-        <p className="footer__legal">&copy; The Atelier by SK</p>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--space-3)', flexWrap: 'wrap', width: '100%', gridColumn: '1 / -1', paddingTop: 'var(--space-4)', borderTop: '1px solid var(--line)' }}>
+          <p className="footer__legal" style={{ margin: 0 }}>&copy; The Atelier by SK</p>
+          <Link to="/admin" className="footer__link" style={{ opacity: 0.45, fontSize: '11px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+            Studio Portal
+          </Link>
+        </div>
       </div>
     </footer>
   )
