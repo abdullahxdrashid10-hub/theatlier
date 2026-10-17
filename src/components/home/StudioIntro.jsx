@@ -23,6 +23,7 @@ export default function StudioIntro() {
           duration: 0.75,
           stagger: 0.14,
           ease: 'power2.out',
+          clearProps: 'opacity,transform',
           scrollTrigger: {
             trigger: sectionRef.current,
             start: 'top 82%',

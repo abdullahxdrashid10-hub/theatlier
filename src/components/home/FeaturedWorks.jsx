@@ -60,6 +60,7 @@ export default function FeaturedWorks() {
           opacity: 0,
           duration: 0.7,
           ease: 'power2.out',
+          clearProps: 'opacity,transform',
           scrollTrigger: {
             trigger: headerRef.current,
             start: 'top 88%',
@@ -77,6 +78,7 @@ export default function FeaturedWorks() {
           duration: 0.7,
           delay: (index % 2) * 0.15,
           ease: 'power2.out',
+          clearProps: 'opacity,transform',
           scrollTrigger: {
             trigger: el,
             start: 'top 85%',

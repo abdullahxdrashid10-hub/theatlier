@@ -3,6 +3,8 @@
  * without prop-drilling. When Lenis is disabled (reduced motion) these fall back
  * to native scrolling.
  */
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+
 let lenis = null
 
 export function setLenis(instance) {
@@ -15,6 +17,9 @@ export function scrollToTop() {
   } else {
     window.scrollTo(0, 0)
   }
+  requestAnimationFrame(() => {
+    ScrollTrigger.refresh()
+  })
 }
 
 /** Freeze / unfreeze page scroll (used by the mobile menu). */

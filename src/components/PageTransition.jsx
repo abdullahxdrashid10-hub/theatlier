@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useLocation } from 'react-router-dom'
 import { gsap } from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import '../styles/transitions.css'
 
 export default function PageTransition({ children }) {
@@ -38,9 +39,18 @@ export default function PageTransition({ children }) {
     if (contentRef.current) {
       tl.fromTo(
         contentRef.current,
-        { opacity: 0, y: 16 },
-        { opacity: 1, y: 0, duration: 0.55, ease: 'power2.out', clearProps: 'transform' },
-        0.08,
+        { opacity: 0, y: 8 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.4,
+          ease: 'power2.out',
+          clearProps: 'all',
+          onComplete: () => {
+            ScrollTrigger.refresh()
+          },
+        },
+        0.06,
       )
     }
 
