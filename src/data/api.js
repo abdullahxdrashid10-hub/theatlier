@@ -78,7 +78,7 @@ let catalogCacheTimestamp = 0
 const CACHE_TTL_MS = 30 * 1000 // 30 seconds
 const VISIBILITY_THRESHOLD_MS = 60 * 1000 // 60 seconds
 
-export const LOCAL_STORAGE_CATALOG_KEY = 'the_atelier_catalog_store'
+export const LOCAL_STORAGE_CATALOG_KEY = 'the_atelier_catalog_store_v2'
 export const LOCAL_STORAGE_ORDERS_KEY = 'the_atelier_orders_store'
 
 export function getLocalCatalog() {
@@ -90,6 +90,11 @@ export function getLocalCatalog() {
       return mockPaintings
     }
     const parsed = JSON.parse(raw)
+    // If user's stored catalog still has legacy 12 placeholder items, upgrade to the real artworks
+    if (Array.isArray(parsed) && parsed.some((p) => p.title?.includes('Placeholder 01') || p.slug?.includes('placeholder-'))) {
+      localStorage.setItem(LOCAL_STORAGE_CATALOG_KEY, JSON.stringify(mockPaintings))
+      return mockPaintings
+    }
     return Array.isArray(parsed) && parsed.length > 0 ? parsed : mockPaintings
   } catch {
     return mockPaintings
