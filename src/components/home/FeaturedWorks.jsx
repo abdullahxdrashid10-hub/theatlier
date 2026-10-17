@@ -94,8 +94,13 @@ export default function FeaturedWorks() {
           ease: 'power2.out',
           scrollTrigger: {
             trigger: footerRef.current,
-            start: 'top 92%',
+            start: 'top 95%',
             once: true,
+          },
+          onComplete: () => {
+            if (footerRef.current) {
+              gsap.set(footerRef.current, { clearProps: 'opacity,transform' })
+            }
           },
         })
       }
@@ -189,24 +194,26 @@ export default function FeaturedWorks() {
             </div>
 
             {/* Row 2: Smaller left (p2), Large right (p3) - alternating! */}
-            <div className="featured-works__row featured-works__row--2">
-              {p2 && (
-                <div
-                  ref={(el) => (cardsRef.current[2] = el)}
-                  className="featured-works__col featured-works__col--left"
-                >
-                  <PaintingCard painting={p2} />
-                </div>
-              )}
-              {p3 && (
-                <div
-                  ref={(el) => (cardsRef.current[3] = el)}
-                  className="featured-works__col featured-works__col--right"
-                >
-                  <PaintingCard painting={p3} variant="editorial" />
-                </div>
-              )}
-            </div>
+            {(p2 || p3) && (
+              <div className="featured-works__row featured-works__row--2">
+                {p2 && (
+                  <div
+                    ref={(el) => (cardsRef.current[2] = el)}
+                    className="featured-works__col featured-works__col--left"
+                  >
+                    <PaintingCard painting={p2} />
+                  </div>
+                )}
+                {p3 && (
+                  <div
+                    ref={(el) => (cardsRef.current[3] = el)}
+                    className="featured-works__col featured-works__col--right"
+                  >
+                    <PaintingCard painting={p3} variant="editorial" />
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         ) : null}
 

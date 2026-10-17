@@ -4,29 +4,45 @@ import {
   PHONE,
   EMAIL,
   INSTAGRAM_HANDLE,
+  WHATSAPP_NUMBER,
   isTodoValue,
   buildTelHref,
   buildMailtoHref,
   buildInstagramUrl,
+  buildWhatsAppMessage,
 } from '../config/site'
+import {
+  showCommissionNote,
+  commissionNote,
+  showWorldwideShippingNote,
+  worldwideShippingNote,
+} from '../config/siteCopy'
 
 export default function Footer() {
   const hasPhone = !isTodoValue(PHONE)
   const hasEmail = !isTodoValue(EMAIL)
   const hasInstagram = !isTodoValue(INSTAGRAM_HANDLE)
-  const hasContact = hasPhone || hasEmail || hasInstagram
+  const hasWhatsApp = !isTodoValue(WHATSAPP_NUMBER)
+  const hasContact = hasPhone || hasEmail || hasInstagram || hasWhatsApp
 
   return (
-    <footer className="footer">
+    <footer className="footer" role="contentinfo">
       <div className="footer__inner">
         <div className="footer__brand">
           <Link to="/" className="wordmark" aria-label="The Atelier by SK — home">
             THE ATELIER BY SK
           </Link>
           <p className="footer__tagline">Art lives here</p>
+          {(showCommissionNote || showWorldwideShippingNote) && (
+            <p className="footer__note">
+              {showCommissionNote && commissionNote}
+              {showCommissionNote && showWorldwideShippingNote && ' · '}
+              {showWorldwideShippingNote && worldwideShippingNote}
+            </p>
+          )}
         </div>
 
-        <nav aria-label="Footer">
+        <nav aria-label="Footer Navigation">
           <h2 className="footer__heading">Explore</h2>
           <ul className="footer__links">
             {NAV_LINKS.map((link) => (
@@ -41,8 +57,21 @@ export default function Footer() {
 
         {hasContact && (
           <div>
-            <h2 className="footer__heading">Contact</h2>
+            <h2 className="footer__heading">Studio Inquiries</h2>
             <ul className="footer__links">
+              {hasWhatsApp && (
+                <li>
+                  <a
+                    href={buildWhatsAppMessage().href}
+                    className="footer__link"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <span>WhatsApp Direct</span>
+                    <span className="footer__link-badge">Direct Chat</span>
+                  </a>
+                </li>
+              )}
               {hasPhone && (
                 <li>
                   <a href={buildTelHref()} className="footer__link">
@@ -73,13 +102,16 @@ export default function Footer() {
           </div>
         )}
 
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--space-3)', flexWrap: 'wrap', width: '100%', gridColumn: '1 / -1', paddingTop: 'var(--space-4)', borderTop: '1px solid var(--line)' }}>
-          <p className="footer__legal" style={{ margin: 0 }}>&copy; The Atelier by SK</p>
-          <Link to="/admin" className="footer__link" style={{ opacity: 0.45, fontSize: '11px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-            Studio Portal
+        <div className="footer__bottom">
+          <p className="footer__legal">
+            &copy; {new Date().getFullYear()} The Atelier by SK. All rights reserved.
+          </p>
+          <Link to="/admin" className="footer__portal-link">
+            Studio Portal &rarr;
           </Link>
         </div>
       </div>
     </footer>
   )
 }
+
