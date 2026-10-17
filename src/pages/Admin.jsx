@@ -161,9 +161,13 @@ export default function Admin() {
     }
 
     setSaving(true)
+    const existingAdditional = editingItem?.images ? editingItem.images.slice(2) : []
     const images = [formData.imageUrl.trim()]
     if (formData.perspectiveUrl.trim()) {
       images.push(formData.perspectiveUrl.trim())
+    }
+    if (existingAdditional.length > 0) {
+      images.push(...existingAdditional)
     }
 
     const payload = {
@@ -688,7 +692,7 @@ export default function Admin() {
               </button>
             </header>
 
-            <form onSubmit={handleSaveArtwork} className="admin-modal__body">
+            <form onSubmit={handleSaveArtwork} className="admin-modal__body" noValidate>
               {/* Image URL & Live Preview */}
               <div className="admin-preview-row">
                 <div className="admin-preview-box">
@@ -706,17 +710,17 @@ export default function Admin() {
                 </div>
 
                 <div className="admin-field">
-                  <label className="admin-field__label">Primary Image URL *</label>
+                  <label className="admin-field__label">Primary Image URL or Path *</label>
                   <input
-                    type="url"
-                    placeholder="https://example.com/artwork-photo.jpg"
+                    type="text"
+                    placeholder="e.g. /artworks/photo.jpg or https://..."
                     value={formData.imageUrl}
                     onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
                     className="admin-field__control"
                     required
                   />
                   <span style={{ fontSize: '11px', color: 'var(--taupe)' }}>
-                    Paste a direct image link (e.g. from Cloudinary, Supabase Storage, Imgur, or direct URL).
+                    Paste a direct image link (e.g. from Supabase Storage, Imgur, or direct URL/relative path).
                   </span>
                 </div>
               </div>
@@ -725,8 +729,8 @@ export default function Admin() {
               <div className="admin-field">
                 <label className="admin-field__label">Secondary Detail / Perspective Image URL (Optional)</label>
                 <input
-                  type="url"
-                  placeholder="https://example.com/artwork-detail.jpg"
+                  type="text"
+                  placeholder="e.g. /artworks/detail.jpg or https://..."
                   value={formData.perspectiveUrl}
                   onChange={(e) => setFormData({ ...formData, perspectiveUrl: e.target.value })}
                   className="admin-field__control"
