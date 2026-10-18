@@ -1,42 +1,57 @@
 /**
  * Cart storage layer for The Atelier by SK.
- * Persists one-of-a-kind original paintings to localStorage.
+ * Strictly stores ONLY an array of painting UUIDs in sessionStorage.
+ * Never stores catalog records, prices, titles, or customer details.
  *
  * Rules:
  * 1. Each artwork is an original 1-of-1: no duplicates allowed.
- * 2. Sold works CANNOT be added to the cart under any circumstance.
+ * 2. Sold or reserved works cannot be added to the cart.
+ * 3. The cart stores painting UUIDs only.
  */
 
-const STORAGE_KEY = 'atelier_cart_items'
+const STORAGE_KEY = 'atelier_cart_uuids'
 const EVENT_KEY = 'atelier:cart-change'
 
-export function getCartItems() {
+export function getCartUuids() {
   if (typeof window === 'undefined') return []
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? JSON.parse(raw) : []
+    const raw = sessionStorage.getItem(STORAGE_KEY)
+    if (!raw) return []
+    const parsed = JSON.parse(raw)
+    return Array.isArray(parsed) ? parsed : []
   } catch (err) {
-    console.error('Failed to read cart from localStorage:', err)
+    console.error('Failed to read cart UUIDs from session storage:', err)
     return []
   }
 }
 
-export function addToCart(painting) {
-  if (!painting) return { success: false, reason: 'invalid' }
+/**
+ * Returns cart items as [{ id: uuid }].
+ */
+export function getCartItems() {
+  return getCartUuids().map((id) => ({ id }))
+}
 
-  // Strictly enforce that sold or reserved works cannot be added to the cart
-  const status = String(painting.status || '').toLowerCase()
-  if (status === 'sold' || status === 'reserved') {
-    return {
-      success: false,
-      reason: status,
-      message: status === 'sold' ? 'This piece has found its home.' : 'This piece is currently reserved.',
+export function addToCart(paintingOrId) {
+  if (!paintingOrId) return { success: false, reason: 'invalid' }
+
+  const id = typeof paintingOrId === 'string' ? paintingOrId : paintingOrId.id
+  if (!id) return { success: false, reason: 'invalid' }
+
+  // Strictly enforce that sold or reserved works cannot be added
+  if (typeof paintingOrId === 'object' && paintingOrId !== null) {
+    const status = String(paintingOrId.status || '').toLowerCase()
+    if (status === 'sold' || status === 'reserved') {
+      return {
+        success: false,
+        reason: status,
+        message: status === 'sold' ? 'This piece has found its home.' : 'This piece is currently reserved.',
+      }
     }
   }
 
-  const current = getCartItems()
-  const exists = current.some((item) => item.id === painting.id || item.slug === painting.slug)
-  if (exists) {
+  const currentUuids = getCartUuids()
+  if (currentUuids.includes(id)) {
     return {
       success: false,
       reason: 'duplicate',
@@ -44,47 +59,40 @@ export function addToCart(painting) {
     }
   }
 
-  // Cart storage keeps only slugs and ids, not trusted prices.
-  // addedPrice is saved purely as an untrusted snapshot to detect price changes on re-fetch.
-  const cartItem = {
-    id: painting.id,
-    slug: painting.slug,
-    addedPrice: typeof painting.price === 'number' ? painting.price : undefined,
-  }
-
-  const updated = [...current, cartItem]
+  const updated = [...currentUuids, id]
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
-    window.dispatchEvent(new CustomEvent(EVENT_KEY, { detail: { items: updated } }))
-    return { success: true, items: updated }
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
+    const formatted = updated.map((itemUuid) => ({ id: itemUuid }))
+    window.dispatchEvent(new CustomEvent(EVENT_KEY, { detail: { items: formatted } }))
+    return { success: true, items: formatted }
   } catch (err) {
-    console.error('Failed to save to cart:', err)
+    console.error('Failed to save to cart storage:', err)
     return { success: false, reason: 'storage_error', message: 'Could not update acquisition list.' }
   }
 }
 
-export function removeFromCart(paintingIdOrSlug) {
-  const current = getCartItems()
-  const updated = current.filter(
-    (item) => item.id !== paintingIdOrSlug && item.slug !== paintingIdOrSlug
-  )
+export function removeFromCart(paintingId) {
+  const current = getCartUuids()
+  const updated = current.filter((id) => id !== paintingId)
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
-    window.dispatchEvent(new CustomEvent(EVENT_KEY, { detail: { items: updated } }))
-    return updated
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
+    const formatted = updated.map((id) => ({ id }))
+    window.dispatchEvent(new CustomEvent(EVENT_KEY, { detail: { items: formatted } }))
+    return formatted
   } catch (err) {
-    console.error('Failed to remove from cart:', err)
-    return current
+    console.error('Failed to remove from cart storage:', err)
+    return current.map((id) => ({ id }))
   }
 }
 
 export function isInCart(paintingId) {
-  const current = getCartItems()
-  return current.some((item) => item.id === paintingId)
+  if (!paintingId) return false
+  const current = getCartUuids()
+  return current.includes(paintingId)
 }
 
 export function getCartCount() {
-  return getCartItems().length
+  return getCartUuids().length
 }
 
 export function subscribeToCart(callback) {
@@ -102,10 +110,9 @@ export function subscribeToCart(callback) {
 
 export function clearCart() {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify([]))
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify([]))
     window.dispatchEvent(new CustomEvent(EVENT_KEY, { detail: { items: [] } }))
   } catch (err) {
-    console.error('Failed to clear cart:', err)
+    console.error('Failed to clear cart storage:', err)
   }
 }
-

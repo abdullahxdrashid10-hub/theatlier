@@ -97,7 +97,8 @@ export default function Cart() {
 
   const getItemRecord = useCallback(
     (item) => {
-      return dbItemsMap[item.id] || dbItemsMap[item.slug] || {}
+      const id = item?.id || item
+      return dbItemsMap[id] || {}
     },
     [dbItemsMap]
   )
@@ -105,7 +106,8 @@ export default function Cart() {
   const isItemUnavailable = useCallback(
     (item) => {
       const db = getItemRecord(item)
-      const status = String(db.status || item.status || 'available').toLowerCase()
+      if (!db.id) return false
+      const status = String(db.status || 'available').toLowerCase()
       return status === 'sold' || status === 'reserved'
     },
     [getItemRecord]
@@ -115,7 +117,6 @@ export default function Cart() {
     (item) => {
       const db = getItemRecord(item)
       if (typeof db.price === 'number') return db.price
-      if (typeof item.price === 'number') return item.price
       return 0
     },
     [getItemRecord]
@@ -148,7 +149,7 @@ export default function Cart() {
 
   const handleUndo = () => {
     if (!undoItem) return
-    addToCart(undoItem)
+    addToCart(undoItem.id || undoItem)
     setUndoItem(null)
     clearTimeout(undoTimer.current)
   }
@@ -250,13 +251,12 @@ export default function Cart() {
                   typeof db.price === 'number' &&
                   item.addedPrice !== db.price
 
-                const title = db.title || item.title || 'Untitled Work'
-                const slug = db.slug || item.slug || ''
-                const medium = db.medium || item.medium || 'Original Artwork'
-                const widthCm = db.widthCm || item.widthCm || ''
-                const heightCm = db.heightCm || item.heightCm || ''
-                const imageSrc =
-                  db.images?.[0] || item.images?.[0] || '/placeholders/placeholder-01.svg'
+                const title = db.title || 'Untitled Work'
+                const slug = db.slug || ''
+                const medium = db.medium || 'Original Artwork'
+                const widthCm = db.widthCm || ''
+                const heightCm = db.heightCm || ''
+                const imageSrc = db.images?.[0] || ''
 
                 return (
                   <li

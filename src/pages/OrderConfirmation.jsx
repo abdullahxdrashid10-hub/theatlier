@@ -8,65 +8,69 @@ import '../styles/checkout.css'
 const PAYMENT_LABELS = {
   cod: 'Cash on delivery',
   bank: 'Bank transfer',
+  bank_transfer: 'Bank transfer',
 }
 
 export default function OrderConfirmation() {
   const [order] = useState(() => readOrderSummary())
 
-  if (!order || !order.orderId) return <Navigate to="/shop" replace />
+  const reference = order?.reference || order?.orderId
+  if (!order || !reference) return <Navigate to="/shop" replace />
+
+  const total = typeof order.total === 'number' ? order.total : order.totalPKR || 0
+  const method = order.method || order.paymentMethod || 'cod'
+  const items = order.items || []
 
   return (
     <main className="checkout-page">
       <title>Order Confirmation — The Atelier by SK</title>
 
       <header className="checkout-page__header">
-        <span className="checkout-page__eyebrow">The Atelier · Thank you</span>
-        <h1 className="checkout-page__title">Order Confirmation</h1>
+        <span className="checkout-page__eyebrow">The Atelier</span>
+        <h1 className="checkout-page__title">Order Received</h1>
         <span className="checkout-page__rule" aria-hidden="true" />
       </header>
 
       <div className="confirm-layout">
         <section className="confirm-card" aria-label="Order details">
+          <p className="confirm-card__lead">Your order has been received.</p>
+
           <div className="confirm-card__id-block">
             <span className="confirm-card__id-label">Order reference</span>
-            <strong className="confirm-card__id">{order.orderId}</strong>
+            <strong className="confirm-card__id">{reference}</strong>
           </div>
 
-          <ul className="checkout-summary__list" role="list">
-            {order.items.map((item) => (
-              <li key={item.id || item.slug} className="checkout-summary__item">
-                <span className="checkout-summary__thumb">
-                  <img
-                    src={item.image || '/placeholders/placeholder-01.svg'}
-                    alt=""
-                    width="64"
-                    height="48"
-                    loading="lazy"
-                  />
-                </span>
-                <span className="checkout-summary__info">
-                  <span className="checkout-summary__name">{item.title}</span>
-                  <span className="checkout-summary__meta">
-                    {item.medium} — {item.widthCm} × {item.heightCm} cm
-                  </span>
-                </span>
-                <span className="checkout-summary__price">{formatPKR(item.price)}</span>
-              </li>
-            ))}
-          </ul>
+          {items.length > 0 && (
+            <ul className="checkout-summary__list" role="list">
+              {items.map((item, index) => {
+                const title = typeof item === 'string' ? item : item.title || 'Artwork'
+                const price = typeof item === 'object' && item !== null ? item.price_pkr ?? item.price : null
+                return (
+                  <li key={item.painting_id || item.id || index} className="checkout-summary__item">
+                    <span className="checkout-summary__info">
+                      <span className="checkout-summary__name">{title}</span>
+                    </span>
+                    {typeof price === 'number' && (
+                      <span className="checkout-summary__price">{formatPKR(price)}</span>
+                    )}
+                  </li>
+                )
+              })}
+            </ul>
+          )}
 
           <dl className="confirm-card__lines">
             <div className="confirm-card__line">
               <dt>Payment method</dt>
-              <dd>{PAYMENT_LABELS[order.paymentMethod] || order.paymentMethod}</dd>
+              <dd>{PAYMENT_LABELS[method] || method}</dd>
             </div>
             <div className="confirm-card__line confirm-card__line--total">
               <dt>Total</dt>
-              <dd className="confirm-card__total">{formatPKR(order.totalPKR)}</dd>
+              <dd className="confirm-card__total">{formatPKR(total)}</dd>
             </div>
           </dl>
 
-          {order.paymentMethod === 'bank' && siteCopy.bankTransferNote && (
+          {(method === 'bank' || method === 'bank_transfer') && siteCopy.bankTransferNote && (
             <p className="checkout-pay__note">{siteCopy.bankTransferNoteText}</p>
           )}
 

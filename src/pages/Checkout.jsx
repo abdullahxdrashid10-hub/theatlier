@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
-import { getPaintingsByIds, submitOrder } from '../data/api'
+import { getAllPaintings, getPaintingsByIds, submitOrder } from '../data/api'
 import { clearCart, getCartItems, subscribeToCart } from '../utils/cartStorage'
 import { formatPKR } from '../utils/formatPKR'
 import { formatPKPhone, normalisePKPhone } from '../utils/phone'
@@ -29,7 +29,7 @@ function validate(values) {
     errors.email = 'This email address does not look right.'
   }
   if (values.city.trim().length < 2) errors.city = 'Please enter your city.'
-  if (values.address.trim().length < 8) errors.address = 'Please enter your full address.'
+  if (values.address.trim().length < 5) errors.address = 'Please enter your full address.'
   return errors
 }
 
@@ -89,20 +89,23 @@ export default function Checkout() {
 
   // Refetch cart's paintings with getPaintingsByIds as source of truth
   useEffect(() => {
+    let active = true
     const ids = items.map((i) => i.id).filter(Boolean)
     if (ids.length === 0) return
-    let active = true
+
     getPaintingsByIds(ids)
       .then((records) => {
         if (!active) return
         const map = {}
         records.forEach((p) => {
           if (p.id) map[p.id] = p
-          if (p.slug) map[p.slug] = p
         })
         setDbItemsMap(map)
       })
-      .catch((err) => console.error('Failed to sync checkout paintings with DB:', err))
+      .catch((err) => {
+        console.error('Failed to sync checkout paintings with DB:', err)
+      })
+
     return () => {
       active = false
     }
@@ -114,14 +117,15 @@ export default function Checkout() {
   }, [submitError])
 
   const getItemRecord = useCallback(
-    (item) => dbItemsMap[item.id] || dbItemsMap[item.slug] || {},
+    (item) => dbItemsMap[item.id] || {},
     [dbItemsMap]
   )
 
   const isItemUnavailable = useCallback(
     (item) => {
       const db = getItemRecord(item)
-      const status = String(db.status || item.status || 'available').toLowerCase()
+      if (!db.id) return false
+      const status = String(db.status || 'available').toLowerCase()
       return status === 'sold' || status === 'reserved'
     },
     [getItemRecord]
@@ -130,9 +134,7 @@ export default function Checkout() {
   const getItemPrice = useCallback(
     (item) => {
       const db = getItemRecord(item)
-      if (typeof db.price === 'number') return db.price
-      if (typeof item.price === 'number') return item.price
-      return 0
+      return typeof db.price === 'number' ? db.price : 0
     },
     [getItemRecord]
   )
@@ -150,7 +152,6 @@ export default function Checkout() {
   const setField = (name) => (e) => {
     const { value } = e.target
     setValues((prev) => ({ ...prev, [name]: value }))
-    // Clear an error as soon as the user starts correcting it
     setErrors((prev) => (prev[name] ? { ...prev, [name]: undefined } : prev))
   }
 
@@ -164,7 +165,6 @@ export default function Checkout() {
     }
     if (!FIELD_ORDER.includes(name)) return
     const fieldError = validate(values)[name]
-    // Only flag a field on blur once the user has typed something, or left a required one empty
     setErrors((prev) => ({ ...prev, [name]: fieldError }))
   }
 
@@ -183,72 +183,128 @@ export default function Checkout() {
     setSubmitError(null)
     setSubmitting(true)
 
+    const current = getCartItems()
+    const ids = current.map((i) => i.id).filter(Boolean)
+
     try {
-      // Re-check availability against the data layer right before submitting
-      const current = getCartItems()
-      const ids = current.map((i) => i.id).filter(Boolean)
-      const fresh = await getPaintingsByIds(ids)
+      const freshRecords = await getPaintingsByIds(ids)
       const freshMap = {}
-      fresh.forEach((p) => {
+      freshRecords.forEach((p) => {
         if (p.id) freshMap[p.id] = p
-        if (p.slug) freshMap[p.slug] = p
       })
       setDbItemsMap(freshMap)
 
       const badItems = current.filter((item) => {
-        const match = freshMap[item.id] || freshMap[item.slug]
-        const st = String(match?.status || item.status || 'available').toLowerCase()
+        const match = freshMap[item.id]
+        if (!match) return false
+        const st = String(match.status || 'available').toLowerCase()
         return st === 'sold' || st === 'reserved'
       })
+
       if (badItems.length > 0) {
         setSubmitError({
           kind: 'unavailable',
-          titles: badItems.map(
-            (item) => freshMap[item.id]?.title || item.title || 'Artwork'
-          ),
+          message: 'One or more items in your cart are no longer available. Please remove them to proceed.',
         })
         setSubmitting(false)
         return
       }
 
-      // Build authoritative order items from the database
-      const orderItems = current.map((item) => {
-        const db = freshMap[item.id] || freshMap[item.slug] || item
-        return {
-          id: db.id || item.id,
-          slug: db.slug || item.slug,
-          title: db.title || item.title,
-          medium: db.medium || item.medium,
-          widthCm: db.widthCm || item.widthCm,
-          heightCm: db.heightCm || item.heightCm,
-          price: typeof db.price === 'number' ? db.price : item.price,
-          image: db.images?.[0] || item.images?.[0] || null,
-        }
-      })
-      const total = orderItems.reduce((sum, item) => sum + (item.price || 0), 0)
+      const normalisedPhone = normalisePKPhone(values.phone)
+      if (!normalisedPhone) {
+        setErrors((prev) => ({
+          ...prev,
+          phone: 'Enter a valid Pakistani mobile number (+923XXXXXXXXX).',
+        }))
+        setSubmitting(false)
+        return
+      }
 
-      const { orderId } = await submitOrder({
+      const result = await submitOrder({
+        items: ids,
         customer: {
           name: values.name.trim(),
-          phone: normalisePKPhone(values.phone),
+          phone: normalisedPhone,
           email: values.email.trim() || null,
           city: values.city.trim(),
           address: values.address.trim(),
           notes: values.notes.trim() || null,
         },
-        paymentMethod: payment,
-        items: orderItems,
-        totalPKR: total,
+        paymentMethod: payment === 'bank' ? 'bank_transfer' : 'cod',
       })
 
-      // Only the order summary (no contact details) is handed to the confirmation page
-      saveOrderSummary({ orderId, items: orderItems, totalPKR: total, paymentMethod: payment })
-      setDone(true)
+      // Store only { reference, items, total, method } in sessionStorage
+      saveOrderSummary({
+        reference: result.reference,
+        items: result.items,
+        total: result.total_pkr,
+        method: payment,
+      })
+
       clearCart()
+      setDone(true)
       navigate('/order-confirmation', { replace: true })
     } catch (err) {
-      console.error('Order submission failed:', err)
-      setSubmitError({ kind: 'generic' })
+      console.error('Order submission error:', err)
+
+      const isNetworkError =
+        (typeof navigator !== 'undefined' && !navigator.onLine) ||
+        err.name === 'AbortError' ||
+        String(err.message || '').toLowerCase().includes('network') ||
+        String(err.message || '').toLowerCase().includes('fetch')
+
+      if (isNetworkError) {
+        setSubmitError({
+          kind: 'network',
+          message:
+            'If you received an order reference, please do not submit again; contact the studio on WhatsApp.',
+        })
+      } else {
+        const code = String(err.code || err.message || '')
+        const detail = String(err.details || '').toLowerCase()
+
+        if (code === 'ATL03' || code.includes('PAINTING_UNAVAILABLE')) {
+          getAllPaintings({ force: true }).catch(() => {})
+          getPaintingsByIds(ids).then((records) => {
+            const map = {}
+            records.forEach((p) => { if (p.id) map[p.id] = p })
+            setDbItemsMap(map)
+          }).catch(() => {})
+          setSubmitError({
+            kind: 'unavailable',
+            message:
+              'An artwork in your cart was just reserved or sold. Please remove it from your selection.',
+          })
+        } else if (
+          code === 'ATL02' ||
+          code.includes('INVALID_CUSTOMER') ||
+          code.includes('INVALID_PAYMENT_METHOD')
+        ) {
+          if (detail && FIELD_ORDER.includes(detail)) {
+            setErrors((prev) => ({
+              ...prev,
+              [detail]: 'Please verify this information before submitting.',
+            }))
+            document.getElementById(`co-${detail}`)?.focus()
+          } else {
+            setSubmitError({
+              kind: 'invalid_customer',
+              message: 'Please review your contact details and try again.',
+            })
+          }
+        } else if (code === 'ATL04' || code.includes('RATE_LIMITED')) {
+          setSubmitError({
+            kind: 'rate_limited',
+            message: 'Please try again shortly.',
+          })
+        } else {
+          setSubmitError({
+            kind: 'generic',
+            message:
+              'We were unable to complete your order. Please try again shortly or contact the studio.',
+          })
+        }
+      }
       setSubmitting(false)
     }
   }
@@ -287,15 +343,12 @@ export default function Checkout() {
               role="status"
               aria-live="polite"
             >
-              {submitError?.kind === 'generic' ? (
-                <p>
-                  We couldn’t place your order just now. Please try again in a moment — nothing has
-                  been submitted.
-                </p>
+              {submitError ? (
+                <p>{submitError.message}</p>
               ) : (
                 <p>
-                  {(submitError?.titles || unavailableItems.map((item) => getItemRecord(item).title || item.title)).join(', ')}{' '}
-                  {(submitError?.titles || unavailableItems).length === 1 ? 'is' : 'are'} currently unavailable (sold or reserved) and
+                  {unavailableItems.map((item) => getItemRecord(item).title || 'An artwork').join(', ')}{' '}
+                  {unavailableItems.length === 1 ? 'is' : 'are'} currently unavailable (sold or reserved) and
                   cannot be ordered. Please{' '}
                   <Link to="/cart" className="checkout-alert__link">
                     remove from your cart
@@ -443,36 +496,33 @@ export default function Checkout() {
           <ul className="checkout-summary__list" role="list">
             {items.map((item) => {
               const db = getItemRecord(item)
-              const status = String(db.status || item.status || 'available').toLowerCase()
+              const status = String(db.status || 'available').toLowerCase()
               const isSold = status === 'sold'
               const isReserved = status === 'reserved'
               const isUnavailable = isSold || isReserved
-              const title = db.title || item.title || 'Untitled Work'
-              const medium = db.medium || item.medium || 'Original Artwork'
-              const widthCm = db.widthCm || item.widthCm || ''
-              const heightCm = db.heightCm || item.heightCm || ''
-              const imageSrc =
-                db.images?.[0] || item.images?.[0] || '/placeholders/placeholder-01.svg'
+              const title = db.title || 'Artwork'
+              const medium = db.medium || 'Original Artwork'
+              const widthCm = db.widthCm || ''
+              const heightCm = db.heightCm || ''
+              const imageSrc = db.images?.[0] || ''
               const price = getItemPrice(item)
-              const priceChanged =
-                typeof item.addedPrice === 'number' &&
-                typeof db.price === 'number' &&
-                item.addedPrice !== db.price
 
               return (
                 <li
-                  key={item.id || item.slug}
+                  key={item.id}
                   className={`checkout-summary__item ${isSold ? 'checkout-summary__item--sold' : ''} ${isReserved ? 'checkout-summary__item--reserved' : ''}`}
                 >
-                  <span className="checkout-summary__thumb">
-                    <img
-                      src={imageSrc}
-                      alt=""
-                      width="64"
-                      height="48"
-                      loading="lazy"
-                    />
-                  </span>
+                  {imageSrc && (
+                    <span className="checkout-summary__thumb">
+                      <img
+                        src={imageSrc}
+                        alt=""
+                        width="64"
+                        height="48"
+                        loading="lazy"
+                      />
+                    </span>
+                  )}
                   <span className="checkout-summary__info">
                     <span className="checkout-summary__name">{title}</span>
                     <span className="checkout-summary__meta">
@@ -483,11 +533,6 @@ export default function Checkout() {
                     )}
                     {isReserved && (
                       <span className="checkout-summary__sold">RESERVED · Excluded from total</span>
-                    )}
-                    {priceChanged && (
-                      <span className="checkout-summary__price-change-note">
-                        Price updated from {formatPKR(item.addedPrice)}
-                      </span>
                     )}
                   </span>
                   <span

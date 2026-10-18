@@ -206,8 +206,54 @@ export async function getPaintingsByIds(ids) {
 }
 
 /**
- * Submits an order (Live integration in Phase 2).
+ * Places an order via the secure Supabase place_order RPC function.
+ * @param {object} order
+ * @param {string[]} order.items - Array of painting UUIDs
+ * @param {object} order.customer - { name, phone, email, city, address, notes }
+ * @param {'cod'|'bank_transfer'} order.paymentMethod - 'cod' | 'bank_transfer'
+ * @returns {Promise<{ order_id: string, reference: string, total_pkr: number, items: Array<{ painting_id: string, title: string, price_pkr: number }> }>}
  */
-export async function submitOrder() {
-  throw new Error('Live checkout integration in progress.')
+export async function submitOrder({ items, customer, paymentMethod }) {
+  if (isMockDataEnabled()) {
+    invalidateCatalogCache()
+    return {
+      order_id: 'mock-order-id',
+      reference: 'ATL-MOCK01',
+      total_pkr: 0,
+      items: (items || []).map((id) => ({
+        painting_id: id,
+        title: 'Mock Artwork',
+        price_pkr: 0,
+      })),
+    }
+  }
+
+  if (!isSupabaseConfigured || !supabase) {
+    throw new CatalogUnavailableError('Unable to connect to the studio ordering system.')
+  }
+
+  const method = paymentMethod === 'bank' ? 'bank_transfer' : paymentMethod
+
+  const { data, error } = await supabase.rpc('place_order', {
+    p_items: items,
+    p_customer: {
+      name: customer.name?.trim() || '',
+      phone: customer.phone?.trim() || '',
+      email: customer.email?.trim() || null,
+      city: customer.city?.trim() || '',
+      address: customer.address?.trim() || '',
+      notes: customer.notes?.trim() || null,
+    },
+    p_payment_method: method,
+  })
+
+  if (error) {
+    const err = new Error(error.message || 'Failed to place order')
+    err.code = error.code
+    err.details = error.details || error.hint || error.message
+    throw err
+  }
+
+  invalidateCatalogCache()
+  return data
 }
