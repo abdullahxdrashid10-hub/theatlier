@@ -11,7 +11,7 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
 /**
  * Separate Supabase client for admin operations.
  * Uses the public anon key only. Never uses service_role.
- * Stores auth session in sessionStorage/localStorage under 'atelier-admin-auth'.
+ * Stores auth session in browser storage under 'atelier-admin-auth'.
  */
 export const adminSupabase = createClient(SUPABASE_URL || '', SUPABASE_ANON_KEY || '', {
   auth: {

@@ -1,7 +1,7 @@
 import { heroEffects } from '../../config/heroEffects'
 
 /**
- * Raw WebGL Museum Lighting & Impasto Shader Renderer (No Libraries)
+ * Raw WebGL Lighting & Texture Shader Renderer (No Libraries)
  *
  * Implements 6 independently switchable effects:
  * 1. SPOTLIGHT: Blinn-Phong, height & normal gradient from luminance, gold leaf specular boost, Lissajous idle drift.
@@ -103,7 +103,7 @@ void main() {
     float NdotH = max(0.0, dot(normal, H));
     float spec = pow(NdotH, 22.0);
 
-    // Selective 24k Gold Leaf Glint Boost (bright warm pixels)
+    // Selective Gold Leaf Glint Boost (bright warm pixels)
     float warmth = max(0.0, albedo.r - albedo.b);
     float gold_flake = smoothstep(0.35, 0.8, albedo.r) * smoothstep(0.08, 0.32, warmth);
 

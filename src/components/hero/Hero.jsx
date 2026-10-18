@@ -53,7 +53,7 @@ export default function Hero() {
           />
         </div>
 
-        {/* Raw WebGL Museum Spotlight & Parallax Shader Canvas */}
+        {/* Raw WebGL Spotlight & Parallax Shader Canvas */}
         <canvas
           ref={canvasRef}
           className="hero__canvas"

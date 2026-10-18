@@ -37,7 +37,7 @@
 }
 
 /* --------------------------------------------------------------------------
-   MOCK 1: The Gilded Shimmer (Artistic Sculpted Palette Arch)
+   MOCK 1: The Gilded Shimmer (Artistic Palette-Inspired Arch)
    Used for high-priority primary actions (e.g. "Explore the Collection")
    -------------------------------------------------------------------------- */
 .btn--gilded {
@@ -94,7 +94,7 @@
 }
 
 /* --------------------------------------------------------------------------
-   MOCK 2: The Framed Atelier (Sculpted Palette Arch with Expanding Gold Hairline)
+   MOCK 2: The Framed Atelier (Palette-Inspired Arch with Expanding Gold Hairline)
    Used for secondary editorial actions (e.g. "View All Works", "Details")
    -------------------------------------------------------------------------- */
 .btn--framed {
@@ -206,7 +206,7 @@
 }
 
 /* --------------------------------------------------------------------------
-   FILTER TOGGLES: Signature Sculpted Palette Knife Arch
+   FILTER TOGGLES: Signature Palette Knife Arch
    Matches Hero CTA exactly: 36px 6px 36px 6px silhouette, smoky glass, gold hairline
    -------------------------------------------------------------------------- */
 .gallery-toggles {
