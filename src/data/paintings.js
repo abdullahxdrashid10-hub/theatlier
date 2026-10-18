@@ -15,7 +15,12 @@ const paintings = [
     heightCm: 120, // CONFIRM WITH CLIENT
     medium: 'Textured calligraphy on canvas',
     year: 2025,
-    images: ['/artworks/al-asr-primary.jpg'],
+    images: [
+      '/artworks/al-asr-primary.jpg',
+      '/artworks/al-asr-detail.jpg',
+      '/artworks/al-asr-angle.jpg',
+      '/artworks/al-asr-room.jpg',
+    ],
     status: 'available',
     featured: true,
   },
@@ -29,7 +34,12 @@ const paintings = [
     heightCm: 120, // CONFIRM WITH CLIENT
     medium: 'Mixed media on canvas',
     year: 2025,
-    images: ['/artworks/gilded-ridge-primary.jpg'],
+    images: [
+      '/artworks/gilded-ridge-primary.jpg',
+      '/artworks/gilded-ridge-detail.jpg',
+      '/artworks/gilded-ridge-angle.jpg',
+      '/artworks/gilded-ridge-room.jpg',
+    ],
     status: 'available',
     featured: true,
   },

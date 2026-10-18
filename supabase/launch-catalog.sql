@@ -68,12 +68,18 @@ on conflict (slug) do update set
   featured = excluded.featured,
   updated_at = now();
 
--- 3. Insert real primary images (sort_order 0)
+-- 3. Insert real images (primary sort_order 0, perspective angles sort_order 1-3)
 insert into public.painting_images (painting_id, url, storage_path, sort_order, alt)
 select p.id, v.url, null, v.sort_order, v.alt
 from (values
   ('al-asr',         '/artworks/al-asr-primary.jpg',       0, 'Al-Asr · Textured calligraphy on canvas'),
-  ('mountain-ridge', '/artworks/gilded-ridge-primary.jpg', 0, 'Mountain Ridge · Mixed media on canvas')
+  ('al-asr',         '/artworks/al-asr-detail.jpg',        1, 'Al-Asr · Macro texture detail'),
+  ('al-asr',         '/artworks/al-asr-angle.jpg',         2, 'Al-Asr · Perspective raking angle'),
+  ('al-asr',         '/artworks/al-asr-room.jpg',          3, 'Al-Asr · Interior scale placement'),
+  ('mountain-ridge', '/artworks/gilded-ridge-primary.jpg', 0, 'Mountain Ridge · Mixed media on canvas'),
+  ('mountain-ridge', '/artworks/gilded-ridge-detail.jpg',  1, 'Mountain Ridge · Impasto palette knife detail'),
+  ('mountain-ridge', '/artworks/gilded-ridge-angle.jpg',   2, 'Mountain Ridge · Perspective raking angle'),
+  ('mountain-ridge', '/artworks/gilded-ridge-room.jpg',    3, 'Mountain Ridge · Interior scale placement')
 ) as v(slug, url, sort_order, alt)
 join public.paintings p on p.slug = v.slug
 where not exists (
