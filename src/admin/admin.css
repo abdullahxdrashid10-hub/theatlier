@@ -337,3 +337,123 @@
   gap: 0.75rem;
   margin-top: 1.5rem;
 }
+
+/* =============================================================================
+   Studio Portal Login View (Atmospheric Gallery Canvas)
+   ============================================================================= */
+
+.admin-login-page {
+  min-height: 100vh;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background-color: #0b0b0d;
+  overflow: hidden;
+}
+
+.admin-login-bg {
+  position: absolute;
+  inset: 0;
+  background-image: url('/hero-impasto.jpg');
+  background-size: cover;
+  background-position: center;
+  filter: brightness(0.24) contrast(1.15) saturate(0.9);
+  transform: scale(1.02);
+  pointer-events: none;
+}
+
+.admin-login-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(11, 11, 13, 0.6) 0%, rgba(11, 11, 13, 0.94) 100%);
+  pointer-events: none;
+}
+
+.admin-login-container {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 440px;
+}
+
+.admin-login-card {
+  background: rgba(18, 18, 22, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(197, 160, 89, 0.28);
+  border-radius: 8px;
+  padding: 2.25rem 2rem;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7), 0 0 40px rgba(197, 160, 89, 0.05);
+}
+
+.admin-login-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.admin-login-logo {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 0.75rem;
+  display: block;
+  border-radius: 50%;
+  border: 1px solid rgba(197, 160, 89, 0.4);
+  padding: 2px;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.5));
+}
+
+.admin-login-brand {
+  font-family: var(--font-title, serif);
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #c5a059;
+  margin-bottom: 0.35rem;
+}
+
+.admin-login-title {
+  font-family: var(--font-title, serif);
+  font-size: 1.75rem;
+  color: #ffffff;
+  margin: 0 0 0.5rem 0;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+.admin-login-subtitle {
+  font-size: 0.85rem;
+  color: #8c8c93;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.admin-login-footer {
+  margin-top: 1.75rem;
+  text-align: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 1.25rem;
+}
+
+.admin-login-return {
+  color: #8c8c93;
+  font-size: 0.85rem;
+  text-decoration: none;
+  transition: color 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.admin-login-return:hover {
+  color: #c5a059;
+}
+
+.admin-login-note {
+  font-size: 0.75rem;
+  color: #636369;
+  margin-top: 0.75rem;
+  line-height: 1.4;
+}
+
