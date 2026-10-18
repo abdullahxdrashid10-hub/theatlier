@@ -3,13 +3,6 @@ import { Link } from 'react-router-dom'
 import { formatPKR } from '../utils/formatPKR'
 import '../styles/painting-card.css'
 
-// Exquisite high-resolution mockups for featured artworks
-const MOCK_PREVIEWS = {
-  'placeholder-ember-field': '/placeholders/mock-ember-field.jpg',
-  'placeholder-bronze-hour': '/placeholders/mock-bronze-hour.jpg',
-  'placeholder-gilded-wake': '/placeholders/mock-gilded-wake.jpg',
-}
-
 export default function PaintingCard({ painting, variant = 'default', className = '' }) {
   const frameRef = useRef(null)
   const rectRef = useRef(null)
@@ -67,7 +60,7 @@ export default function PaintingCard({ painting, variant = 'default', className 
     ? `${painting.widthCm} / ${painting.heightCm}`
     : '4 / 3'
 
-  const primaryImage = MOCK_PREVIEWS[painting.slug] || painting.images?.[0] || '/placeholders/placeholder-01.svg'
+  const primaryImage = painting.images?.[0] || ''
 
   return (
     <article

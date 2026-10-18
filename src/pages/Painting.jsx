@@ -12,12 +12,6 @@ import { buildWhatsAppEnquiry } from '../config/site'
 import WallSimulator from '../components/WallSimulator'
 import '../styles/painting-detail.css'
 
-// Exquisite photographic mockups for featured artworks
-const HIGH_RES_MOCKS = {
-  'placeholder-ember-field': '/placeholders/mock-ember-field.jpg',
-  'placeholder-bronze-hour': '/placeholders/mock-bronze-hour.jpg',
-  'placeholder-gilded-wake': '/placeholders/mock-gilded-wake.jpg',
-}
 
 function ZoomIcon() {
   return (
@@ -172,37 +166,15 @@ export default function Painting() {
 
   // Build the array of image views for this painting (Stacked / Grid view, never slider)
   const views = useMemo(() => {
-    if (!painting) return []
-    const list = []
-
-    const highResMock = HIGH_RES_MOCKS[painting.slug]
-    if (highResMock) {
-      list.push({
-        url: highResMock,
-        label: 'Impasto Canvas',
-        description: 'Exhibition photographic studio view with natural gallery lighting',
-      })
-    }
-
-    if (painting.images && painting.images.length > 0) {
-      list.push({
-        url: painting.images[0],
-        label: highResMock ? 'Full Composition' : 'Main Composition',
-        description: 'Full canvas front elevation',
-      })
-      if (painting.images[1]) {
-        list.push({
-          url: painting.images[1],
-          label: 'Surface Detail',
-          description: 'High-magnification palette-knife relief & brushwork study',
-        })
-      }
-    }
-
-    return list
+    if (!painting || !painting.images) return []
+    return painting.images.map((img, index) => ({
+      url: img,
+      label: index === 0 ? 'Primary View' : `View ${index + 1}`,
+      description: 'Original canvas photograph',
+    }))
   }, [painting])
 
-  const activeImage = views[activeViewIndex]?.url || painting?.images?.[0] || '/placeholders/placeholder-01.svg'
+  const activeImage = views[activeViewIndex]?.url || painting?.images?.[0] || ''
 
   const handleSelectView = (index) => {
     if (index === activeViewIndex) return

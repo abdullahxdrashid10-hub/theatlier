@@ -6,7 +6,6 @@ export const WHATSAPP_NUMBER = '+923002105846'
 export const PHONE = '+92 300 2105846'
 export const EMAIL = 'theatelierbysk@gmail.com'
 export const INSTAGRAM_HANDLE = 'the.atelier.by.sk'
-export const ADMIN_PASSCODE = import.meta.env.VITE_ADMIN_PASSCODE || 'atelier2026'
 
 /** True when a configured value is still a TODO placeholder. */
 export const isTodoValue = (value) => !value || String(value).includes('TODO')

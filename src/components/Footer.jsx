@@ -106,9 +106,6 @@ export default function Footer() {
           <p className="footer__legal">
             &copy; {new Date().getFullYear()} The Atelier by SK. All rights reserved.
           </p>
-          <Link to="/admin" className="footer__portal-link">
-            Studio Portal &rarr;
-          </Link>
         </div>
       </div>
     </footer>

@@ -26,42 +26,40 @@ export const showShippingAccordion = false
 export const showMaterialsClaims = false
 
 // TODO CLIENT: confirm with SK
-export const framingShippingNote = 'Inclusive of bespoke museum framing & shipping'
+export const framingShippingNote = 'Original painting on canvas · Shipping worldwide'
 
 // TODO CLIENT: confirm with SK
-export const authenticitySpec = 'Signed verso by artist'
+export const authenticitySpec = 'Handmade original'
 
 // TODO CLIENT: confirm with SK
 export const materialsClaims =
-  'Layered with heavy palette-knife impasto on archival Belgian canvas. The surface features sculptural ridges that capture natural and gallery light differently throughout the day, accentuated by subtle champagne and antique gold mineral pigments.'
+  'Handmade paintings created using acrylic paints on canvas, working with brushes and palette knives.'
 
 // TODO CLIENT: confirm with SK
 export const authenticityDossier = {
-  title: 'Provenance & Certificate of Authenticity',
+  title: 'Original Artwork',
   intro:
-    'Each original artwork from The Atelier is unique and recorded in the studio registry. Upon acquisition, the collector receives:',
+    'Original paintings from The Atelier by SK:',
   items: [
-    'An embossed Certificate of Authenticity individually signed and sealed by the artist.',
-    'Archival catalog reference number and provenance transfer dossier.',
-    'Artist signature and dating inscribed verso on the canvas stretcher.',
+    'Handmade original work on canvas.',
+    'Created with brushes and palette knives.',
   ],
 }
 
 // TODO CLIENT: confirm with SK
 export const shippingDetails = {
-  title: 'White-Glove Shipping & Art Crating',
+  title: 'Shipping & Delivery',
   intro:
-    'Due to the heavy sculptural impasto surface, this painting is prepared with specialised care:',
+    'Every artwork is prepared with care for safe delivery:',
   items: [
-    'Encased in an acid-free barrier wrap and custom timber-reinforced exhibition crate.',
-    'Complimentary insured courier delivery across Pakistan (3–5 business days).',
-    'Worldwide temperature-stable fine art freight options available upon inquiry.',
+    'Carefully packaged for transit.',
+    'Shipping worldwide.',
   ],
 }
 
 // TODO CLIENT: confirm with SK (neutral terms with no factual claims about materials or editions)
 export const studioIntroText =
-  'Every work at The Atelier is sculpted with the palette knife. Rich pigments and textured strokes are applied with intention—creating tactile crests and ridges that catch the shifting daylight of your room. Each piece is singular and original.'
+  'Every work at The Atelier is a hands-on creative process, made with care to bring beauty, character, and individuality into your home. Paintings are created using acrylic paints on canvas, working with brushes and palette knives to bring art and words together in unique, expressive pieces.'
 
 // TODO CLIENT: confirm with SK (flag: show a one-line note under the Bank transfer option)
 export const bankTransferNote = false
