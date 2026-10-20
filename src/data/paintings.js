@@ -1,7 +1,8 @@
 /**
  * Authentic catalog artworks for The Atelier by SK.
  * All 13 authentic original artworks by SK with verified dimensions,
- * pricing, high-resolution architectural staging, and macro detail views.
+ * pricing, high-resolution architectural staging with dimension guide lines,
+ * macro impasto details, raking perspective angles, and clean canvas views.
  */
 const paintings = [
   {
@@ -15,7 +16,7 @@ const paintings = [
     medium: 'Mixed media & textured calligraphy on canvas',
     year: 2025,
     images: [
-      '/artworks/al-asr-room-new.jpg',
+      '/artworks/al-asr-dimension.jpg',
       '/artworks/al-asr-detail.jpg',
       '/artworks/al-asr-angle.jpg',
       '/artworks/al-asr-primary.jpg',
@@ -34,10 +35,10 @@ const paintings = [
     medium: 'Mixed media on canvas',
     year: 2025,
     images: [
-      '/artworks/gilded-ridge-primary.jpg',
+      '/artworks/mountain-ridge-dimension.jpg',
       '/artworks/gilded-ridge-detail.jpg',
       '/artworks/gilded-ridge-angle.jpg',
-      '/artworks/gilded-ridge-room.jpg',
+      '/artworks/gilded-ridge-primary.jpg',
     ],
     status: 'available',
     featured: true,
@@ -53,9 +54,10 @@ const paintings = [
     medium: 'Textured calligraphy & acrylic on canvas',
     year: 2025,
     images: [
-      '/artworks/tajalli-primary.jpg',
+      '/artworks/tajalli-dimension.jpg',
       '/artworks/tajalli-detail.jpg',
       '/artworks/tajalli-angle.jpg',
+      '/artworks/tajalli-primary.jpg',
     ],
     status: 'available',
     featured: true,
@@ -71,9 +73,10 @@ const paintings = [
     medium: 'Diptych on dual canvas, mixed media & gold relief',
     year: 2025,
     images: [
-      '/artworks/nafs-e-rehmat-primary.jpg',
+      '/artworks/nafs-e-rehmat-dimension.jpg',
       '/artworks/nafs-e-rehmat-detail.jpg',
       '/artworks/nafs-e-rehmat-angle.jpg',
+      '/artworks/nafs-e-rehmat-primary.jpg',
     ],
     status: 'available',
     featured: true,
@@ -89,9 +92,10 @@ const paintings = [
     medium: 'Textured acrylic & calligraphy on canvas',
     year: 2025,
     images: [
-      '/artworks/tajdeed-primary.jpg',
+      '/artworks/tajdeed-dimension.jpg',
       '/artworks/tajdeed-detail.jpg',
       '/artworks/tajdeed-angle.jpg',
+      '/artworks/tajdeed-primary.jpg',
     ],
     status: 'available',
     featured: false,
@@ -107,9 +111,10 @@ const paintings = [
     medium: 'Sculptural palette knife impasto on canvas',
     year: 2025,
     images: [
-      '/artworks/ufaq-e-sukoon-primary.jpg',
+      '/artworks/ufaq-e-sukoon-dimension.jpg',
       '/artworks/ufaq-e-sukoon-detail.jpg',
       '/artworks/ufaq-e-sukoon-angle.jpg',
+      '/artworks/ufaq-e-sukoon-primary.jpg',
     ],
     status: 'available',
     featured: false,
@@ -125,9 +130,10 @@ const paintings = [
     medium: 'Acrylic & textured plaster on canvas',
     year: 2025,
     images: [
-      '/artworks/sukoon-e-khak-primary.jpg',
+      '/artworks/sukoon-e-khak-dimension.jpg',
       '/artworks/sukoon-e-khak-detail.jpg',
       '/artworks/sukoon-e-khak-angle.jpg',
+      '/artworks/sukoon-e-khak-primary.jpg',
     ],
     status: 'available',
     featured: false,
@@ -143,9 +149,10 @@ const paintings = [
     medium: 'Textured mixed media & gold leaf on canvas',
     year: 2025,
     images: [
-      '/artworks/iltija-primary.jpg',
+      '/artworks/iltija-dimension.jpg',
       '/artworks/iltija-detail.jpg',
       '/artworks/iltija-angle.jpg',
+      '/artworks/iltija-primary.jpg',
     ],
     status: 'available',
     featured: false,
@@ -161,9 +168,10 @@ const paintings = [
     medium: 'Textured oil & acrylic on canvas',
     year: 2025,
     images: [
-      '/artworks/uns-primary.jpg',
+      '/artworks/uns-dimension.jpg',
       '/artworks/uns-detail.jpg',
       '/artworks/uns-angle.jpg',
+      '/artworks/uns-primary.jpg',
     ],
     status: 'available',
     featured: false,
@@ -179,9 +187,10 @@ const paintings = [
     medium: 'Calligraphy & circular impasto on canvas',
     year: 2025,
     images: [
-      '/artworks/kursi-e-jalal-primary.jpg',
+      '/artworks/kursi-e-jalal-dimension.jpg',
       '/artworks/kursi-e-jalal-detail.jpg',
       '/artworks/kursi-e-jalal-angle.jpg',
+      '/artworks/kursi-e-jalal-primary.jpg',
     ],
     status: 'available',
     featured: true,
@@ -197,9 +206,10 @@ const paintings = [
     medium: 'Sculptural impasto relief on canvas',
     year: 2025,
     images: [
-      '/artworks/nuqoosh-primary.jpg',
+      '/artworks/nuqoosh-dimension.jpg',
       '/artworks/nuqoosh-detail.jpg',
       '/artworks/nuqoosh-angle.jpg',
+      '/artworks/nuqoosh-primary.jpg',
     ],
     status: 'available',
     featured: false,
@@ -215,9 +225,10 @@ const paintings = [
     medium: 'Resin, textured impasto & calligraphy on canvas',
     year: 2025,
     images: [
-      '/artworks/yusra-primary.jpg',
+      '/artworks/yusra-dimension.jpg',
       '/artworks/yusra-detail.jpg',
       '/artworks/yusra-angle.jpg',
+      '/artworks/yusra-primary.jpg',
     ],
     status: 'available',
     featured: false,
@@ -233,7 +244,7 @@ const paintings = [
     medium: 'Mixed media, textured plaster & gold leaf on canvas',
     year: 2025,
     images: [
-      '/artworks/madar-room.jpg',
+      '/artworks/madar-dimension.jpg',
       '/artworks/madar-detail.jpg',
       '/artworks/madar-angle.jpg',
       '/artworks/madar-primary.jpg',

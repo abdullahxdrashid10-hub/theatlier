@@ -56,6 +56,12 @@ export function mapPainting(row) {
     .sort((a, b) => (Number(a.sort_order) || 0) - (Number(b.sort_order) || 0))
     .map((img) => img.url)
 
+  let imagesList = sortedImages.length > 0 ? sortedImages : (row.images || [])
+  if (row.slug) {
+    const dimUrl = `/artworks/${row.slug}-dimension.jpg`
+    imagesList = [dimUrl, ...imagesList.filter((u) => u !== dimUrl)]
+  }
+
   return {
     id: row.id,
     slug: row.slug,
@@ -66,7 +72,7 @@ export function mapPainting(row) {
     heightCm: Number(row.height_cm),
     medium: row.medium || '',
     year: Number(row.year),
-    images: sortedImages.length > 0 ? sortedImages : (row.images || []),
+    images: imagesList,
     status: String(row.status || 'available').toLowerCase(),
     featured: Boolean(row.featured),
   }
