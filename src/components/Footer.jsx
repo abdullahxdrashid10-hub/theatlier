@@ -1,12 +1,10 @@
 import { Link } from 'react-router-dom'
 import { NAV_LINKS } from '../data/navLinks'
 import {
-  PHONE,
   EMAIL,
   INSTAGRAM_HANDLE,
   WHATSAPP_NUMBER,
   isTodoValue,
-  buildTelHref,
   buildMailtoHref,
   buildInstagramUrl,
   buildWhatsAppMessage,
@@ -18,12 +16,18 @@ import {
   worldwideShippingNote,
 } from '../config/siteCopy'
 
+const NAV_EMOJIS = {
+  '/': '🏠',
+  '/shop': '🎨',
+  '/about': '📜',
+  '/contact': '✉️',
+}
+
 export default function Footer() {
-  const hasPhone = !isTodoValue(PHONE)
   const hasEmail = !isTodoValue(EMAIL)
   const hasInstagram = !isTodoValue(INSTAGRAM_HANDLE)
   const hasWhatsApp = !isTodoValue(WHATSAPP_NUMBER)
-  const hasContact = hasPhone || hasEmail || hasInstagram || hasWhatsApp
+  const hasContact = hasEmail || hasInstagram || hasWhatsApp
 
   return (
     <footer className="footer" role="contentinfo">
@@ -48,7 +52,10 @@ export default function Footer() {
             {NAV_LINKS.map((link) => (
               <li key={link.to}>
                 <Link to={link.to} className="footer__link">
-                  {link.label}
+                  <span className="footer__link-emoji" aria-hidden="true">
+                    {NAV_EMOJIS[link.to] || '✦'}
+                  </span>
+                  <span>{link.label}</span>
                 </Link>
               </li>
             ))}
@@ -67,22 +74,17 @@ export default function Footer() {
                     target="_blank"
                     rel="noopener noreferrer"
                   >
+                    <span className="footer__link-emoji" aria-hidden="true">💬</span>
                     <span>WhatsApp Direct</span>
                     <span className="footer__link-badge">Direct Chat</span>
-                  </a>
-                </li>
-              )}
-              {hasPhone && (
-                <li>
-                  <a href={buildTelHref()} className="footer__link">
-                    {PHONE}
                   </a>
                 </li>
               )}
               {hasEmail && (
                 <li>
                   <a href={buildMailtoHref()} className="footer__link">
-                    {EMAIL}
+                    <span className="footer__link-emoji" aria-hidden="true">✉️</span>
+                    <span>{EMAIL}</span>
                   </a>
                 </li>
               )}
@@ -94,7 +96,8 @@ export default function Footer() {
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    @{String(INSTAGRAM_HANDLE).replace(/^@/, '')}
+                    <span className="footer__link-emoji" aria-hidden="true">📷</span>
+                    <span>@{String(INSTAGRAM_HANDLE).replace(/^@/, '')}</span>
                   </a>
                 </li>
               )}
