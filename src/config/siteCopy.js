@@ -61,11 +61,18 @@ export const shippingDetails = {
 export const studioIntroText =
   'Every work at The Atelier is a hands-on creative process, made with care to bring beauty, character, and individuality into your home. Paintings are created using acrylic paints on canvas, working with brushes and palette knives to bring art and words together in unique, expressive pieces.'
 
-// TODO CLIENT: confirm with SK (flag: show a one-line note under the Bank transfer option)
-export const bankTransferNote = false
+// Bank transfer details (Easypaisa)
+export const bankTransferNote = true
+export const bankTransferNoteText =
+  'Transfer the order total to our Easypaisa account and share your payment receipt on WhatsApp with your Order Reference.'
 
-// TODO CLIENT: confirm with SK (the single line shown when bankTransferNote is true; no bank details here)
-export const bankTransferNoteText = 'TODO_CLIENT_BANK_TRANSFER_NOTE'
+export const bankTransferDetails = {
+  service: 'Easypaisa',
+  accountTitle: 'Samia Khalid',
+  accountNumber: '03362297600',
+  instructions:
+    'Transfer via Easypaisa or any bank app / Raast to 03362297600. After placing your order, kindly share the payment screenshot on WhatsApp with your Order Reference.',
+}
 
 export const siteCopy = {
   showCommissionNote,
@@ -76,6 +83,7 @@ export const siteCopy = {
   worldwideShippingNoteText,
   bankTransferNote,
   bankTransferNoteText,
+  bankTransferDetails,
   showFramingShippingNote,
   showAuthenticityDetails,
   showShippingAccordion,

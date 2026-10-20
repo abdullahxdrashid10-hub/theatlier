@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { formatPKR } from '../utils/formatPKR'
 import { readOrderSummary } from '../utils/orderSession'
-import siteCopy from '../config/siteCopy'
+import BankDetailsDropdown from '../components/checkout/BankDetailsDropdown'
 import '../styles/checkout.css'
 
 const PAYMENT_LABELS = {
@@ -70,8 +70,10 @@ export default function OrderConfirmation() {
             </div>
           </dl>
 
-          {(method === 'bank' || method === 'bank_transfer') && siteCopy.bankTransferNote && (
-            <p className="checkout-pay__note">{siteCopy.bankTransferNoteText}</p>
+          {(method === 'bank' || method === 'bank_transfer') && (
+            <div style={{ marginTop: 'var(--space-3)', marginBottom: 'var(--space-3)' }}>
+              <BankDetailsDropdown initialOpen={true} />
+            </div>
           )}
 
           <div className="confirm-card__actions">

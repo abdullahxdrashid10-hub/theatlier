@@ -5,8 +5,8 @@ import { clearCart, getCartItems, subscribeToCart } from '../utils/cartStorage'
 import { formatPKR } from '../utils/formatPKR'
 import { formatPKPhone, normalisePKPhone } from '../utils/phone'
 import { saveOrderSummary } from '../utils/orderSession'
-import siteCopy from '../config/siteCopy'
 import { buildWhatsAppMessage } from '../config/site'
+import BankDetailsDropdown from '../components/checkout/BankDetailsDropdown'
 import '../styles/checkout.css'
 
 const FIELD_ORDER = ['name', 'phone', 'email', 'city', 'address']
@@ -463,8 +463,8 @@ export default function Checkout() {
                 </label>
               ))}
             </div>
-            {payment === 'bank' && siteCopy.bankTransferNote && (
-              <p className="checkout-pay__note">{siteCopy.bankTransferNoteText}</p>
+            {payment === 'bank' && (
+              <BankDetailsDropdown initialOpen={true} />
             )}
           </fieldset>
 

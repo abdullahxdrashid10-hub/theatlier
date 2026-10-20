@@ -281,6 +281,173 @@ textarea.checkout-field__control {
   color: var(--taupe);
 }
 
+/* Bank Transfer Easypaisa Dropdown */
+.checkout-bank-dropdown {
+  margin-top: var(--space-3);
+  background: rgba(18, 16, 15, 0.85);
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  border-radius: 4px;
+  overflow: hidden;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  transition: border-color var(--duration-fast) var(--ease), box-shadow var(--duration-fast) var(--ease);
+}
+
+.checkout-bank-dropdown[open] {
+  border-color: var(--gold);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5), inset 0 0 16px rgba(212, 175, 55, 0.05);
+}
+
+.checkout-bank-dropdown__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+  transition: background-color var(--duration-fast) var(--ease);
+}
+
+.checkout-bank-dropdown__summary::-webkit-details-marker {
+  display: none;
+}
+
+.checkout-bank-dropdown__summary:hover {
+  background: rgba(212, 175, 55, 0.08);
+}
+
+.checkout-bank-dropdown[open] .checkout-bank-dropdown__summary {
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+  background: rgba(212, 175, 55, 0.06);
+}
+
+.checkout-bank-dropdown__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--text);
+  font-weight: 500;
+}
+
+.checkout-bank-dropdown__badge {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 3px;
+  background: #00a651;
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.checkout-bank-dropdown__chevron {
+  font-size: 0.85rem;
+  color: var(--gold);
+  transition: transform var(--duration-fast) var(--ease);
+}
+
+.checkout-bank-dropdown[open] .checkout-bank-dropdown__chevron {
+  transform: rotate(180deg);
+}
+
+.checkout-bank-dropdown__content {
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.checkout-bank-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.checkout-bank-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
+}
+
+.checkout-bank-label {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--taupe);
+}
+
+.checkout-bank-val {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--text);
+  font-weight: 500;
+}
+
+.checkout-bank-num-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.checkout-bank-num {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 1rem;
+  letter-spacing: 0.08em;
+  color: #fff;
+  font-weight: 700;
+}
+
+.checkout-bank-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: 2px;
+  border: 1px solid var(--gold);
+  background: rgba(212, 175, 55, 0.12);
+  color: var(--gold);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease);
+}
+
+.checkout-bank-copy-btn:hover {
+  background: var(--gold);
+  color: #0b0908;
+}
+
+.checkout-bank-copy-btn--copied {
+  background: #00a651 !important;
+  border-color: #00a651 !important;
+  color: #ffffff !important;
+}
+
+.checkout-bank-note {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--taupe);
+}
+
+.checkout-bank-note strong {
+  color: var(--text);
+}
+
 /* Submit */
 .checkout-form__submit {
   width: 100%;
