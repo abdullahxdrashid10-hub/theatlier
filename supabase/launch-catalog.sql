@@ -197,7 +197,8 @@ values
     'available',
     false
   )
-on conflict (slug) do update set
+on conflict (id) do update set
+  slug = excluded.slug,
   title = excluded.title,
   description = excluded.description,
   price_pkr = excluded.price_pkr,
@@ -209,7 +210,12 @@ on conflict (slug) do update set
   featured = excluded.featured,
   updated_at = now();
 
--- 3. Insert real images (primary sort_order 0, detail sort_order 1, angle sort_order 2, room/canvas sort_order 3)
+-- 3. Clean up and insert real images
+delete from public.painting_images
+where painting_id in (
+  select id from public.paintings
+);
+
 insert into public.painting_images (painting_id, url, storage_path, sort_order, alt)
 select p.id, v.url, null, v.sort_order, v.alt
 from (values
