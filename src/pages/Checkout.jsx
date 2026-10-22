@@ -463,6 +463,11 @@ export default function Checkout() {
                 </label>
               ))}
             </div>
+            {payment === 'cod' && (
+              <p className="checkout-pay__note checkout-pay__note--cod">
+                <strong>Advance payment:</strong> 50% of the payment will be done in advance transferring to the given account number on bank transfer to confirm your Cash on Delivery order.
+              </p>
+            )}
             {payment === 'bank' && (
               <BankDetailsDropdown initialOpen={true} />
             )}

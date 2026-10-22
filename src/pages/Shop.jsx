@@ -231,15 +231,6 @@ export default function Shop() {
           >
             Reserved <span className="gallery-toggle-btn__count">({counts.reserved})</span>
           </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={filter === 'sold'}
-            className={`gallery-toggle-btn ${filter === 'sold' ? 'gallery-toggle-btn--active' : ''}`}
-            onClick={() => handleFilterChange('sold')}
-          >
-            Sold <span className="gallery-toggle-btn__count">({counts.sold})</span>
-          </button>
         </div>
       </header>
 

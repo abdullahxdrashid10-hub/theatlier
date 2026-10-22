@@ -178,8 +178,60 @@
 
 .painting-card--sold .painting-card__image,
 .painting-card--reserved .painting-card__image {
-  opacity: 0.48;
-  filter: grayscale(35%) brightness(0.9);
+  opacity: 0.5;
+  filter: grayscale(40%) brightness(0.88);
+}
+
+/* Sold overlay across image */
+.painting-card__sold-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  background: rgba(14, 13, 11, 0.4);
+  backdrop-filter: blur(1.5px);
+  -webkit-backdrop-filter: blur(1.5px);
+  z-index: 3;
+}
+
+.painting-card__sold-strike-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0 var(--space-3);
+  gap: var(--space-2);
+}
+
+.painting-card__sold-strike-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(208, 169, 113, 0.5), rgba(208, 169, 113, 0.75));
+}
+
+.painting-card__sold-strike-wrap .painting-card__sold-strike-line:last-child {
+  background: linear-gradient(90deg, rgba(208, 169, 113, 0.75), rgba(208, 169, 113, 0.5), transparent);
+}
+
+.painting-card__sold-badge {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #f5eedf;
+  padding: 5px 14px;
+  background: rgba(18, 16, 14, 0.9);
+  border: 1px solid rgba(208, 169, 113, 0.45);
+  border-radius: 2px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.65);
+}
+
+.painting-card__sold-badge--reserved {
+  color: #d8c29d;
+  border-color: rgba(216, 194, 157, 0.35);
 }
 
 .painting-card__sold-tag {
@@ -198,6 +250,28 @@
   width: 24px;
   height: 1px;
   background: var(--line);
+}
+
+.painting-card__price-strikethrough {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  text-decoration: line-through;
+  color: var(--taupe);
+  opacity: 0.7;
+}
+
+.painting-card__sold-sep {
+  color: var(--taupe);
+  opacity: 0.6;
+}
+
+.painting-card__sold-label {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--taupe);
+  text-transform: uppercase;
+  font-weight: 500;
 }
 
 /* Editorial / Featured variant */

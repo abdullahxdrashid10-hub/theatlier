@@ -281,6 +281,22 @@ textarea.checkout-field__control {
   color: var(--taupe);
 }
 
+.checkout-pay__note--cod {
+  margin-top: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: rgba(212, 175, 55, 0.06);
+  border: 1px solid rgba(212, 175, 55, 0.28);
+  border-radius: 4px;
+  color: var(--text);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.checkout-pay__note--cod strong {
+  color: var(--gold);
+  letter-spacing: 0.04em;
+}
+
 /* Bank Transfer Easypaisa Dropdown */
 .checkout-bank-dropdown {
   margin-top: var(--space-3);

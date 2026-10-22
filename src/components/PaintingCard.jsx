@@ -88,6 +88,26 @@ export default function PaintingCard({ painting, variant = 'default', className 
               width={painting.widthCm * 10}
               height={painting.heightCm * 10}
             />
+
+            {isSold && (
+              <div className="painting-card__sold-overlay" aria-hidden="true">
+                <div className="painting-card__sold-strike-wrap">
+                  <span className="painting-card__sold-strike-line" />
+                  <span className="painting-card__sold-badge">SOLD</span>
+                  <span className="painting-card__sold-strike-line" />
+                </div>
+              </div>
+            )}
+
+            {isReserved && (
+              <div className="painting-card__sold-overlay" aria-hidden="true">
+                <div className="painting-card__sold-strike-wrap">
+                  <span className="painting-card__sold-strike-line" />
+                  <span className="painting-card__sold-badge painting-card__sold-badge--reserved">RESERVED</span>
+                  <span className="painting-card__sold-strike-line" />
+                </div>
+              </div>
+            )}
           </div>
           <div className="painting-card__sheen" aria-hidden="true" />
         </div>
@@ -101,8 +121,9 @@ export default function PaintingCard({ painting, variant = 'default', className 
           <div className="painting-card__price-row">
             {isSold ? (
               <div className="painting-card__sold-tag">
-                <span className="painting-card__sold-line" aria-hidden="true" />
-                <span>SOLD</span>
+                <span className="painting-card__price-strikethrough">{formatPKR(painting.price)}</span>
+                <span className="painting-card__sold-sep" aria-hidden="true">·</span>
+                <span className="painting-card__sold-label">SOLD</span>
               </div>
             ) : isReserved ? (
               <div className="painting-card__sold-tag painting-card__reserved-tag">

@@ -76,6 +76,15 @@ export default function OrderConfirmation() {
             </div>
           )}
 
+          {method === 'cod' && (
+            <div style={{ marginTop: 'var(--space-3)', marginBottom: 'var(--space-3)' }}>
+              <p className="checkout-pay__note checkout-pay__note--cod" style={{ marginBottom: 'var(--space-2)' }}>
+                <strong>Cash on Delivery (50% Advance Required):</strong> To confirm your order, kindly transfer 50% of your total in advance to the bank / Easypaisa account below:
+              </p>
+              <BankDetailsDropdown initialOpen={true} />
+            </div>
+          )}
+
           <div className="confirm-card__actions">
             <Link to="/shop" className="btn btn--framed">
               <span>Continue exploring</span>
